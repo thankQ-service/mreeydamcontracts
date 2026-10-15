@@ -1338,6 +1338,7 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // 1. Mandatory Environment AppId & Config Binding
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'merrydam-contract-pro';
     let firebaseConfig = {
       apiKey: "AIzaSyDummyKeyForFallback",
@@ -1348,111 +1349,155 @@
       appId: "1:123456789:web:dummy"
     };
 
-    if (typeof __firebase_config !== 'undefined') {
+    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
       try {
         firebaseConfig = JSON.parse(__firebase_config);
       } catch(e) {
-        console.warn("Using default firebase config", e);
+        console.warn("Using environment firebase config fallback", e);
       }
     }
 
-    let app, auth, db, currentUser = null;
-    let cloudActive = false;
+    let app = null;
+    let auth = null;
+    let db = null;
+    let currentUser = null;
+    let unsubscribeFirestore = null;
 
     try {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getFirestore(app);
-
-      const initAuth = async () => {
-        try {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            const cred = await signInWithCustomToken(auth, __initial_auth_token);
-            currentUser = cred.user;
-          } else {
-            const cred = await signInAnonymously(auth);
-            currentUser = cred.user;
-          }
-          cloudActive = true;
-          setupFirestoreRealtimeListener();
-        } catch(err) {
-          console.warn("Auth fallback to local storage", err);
-          cloudActive = false;
-        }
-      };
-      initAuth();
     } catch(err) {
-      console.warn("Firebase inactive. Using local memory state.", err);
-      cloudActive = false;
+      console.error("Firebase Initialization failed:", err);
     }
 
-    function setupFirestoreRealtimeListener() {
-      if (!cloudActive || !db) return;
+    async function startFirebaseAuth() {
+      if (!auth) return;
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          const cred = await signInWithCustomToken(auth, __initial_auth_token);
+          currentUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(auth);
+          currentUser = cred.user;
+        }
+
+        // Authentication Successful -> Start Realtime Snapshot Listener
+        updateSyncBadge(true, "클라우드 실시간 동기화 활성");
+        listenToContractCollection();
+      } catch(err) {
+        console.warn("Firebase Auth error - operating in memory sync mode:", err);
+        updateSyncBadge(false, "오프라인 로컬 모드");
+      }
+    }
+
+    function updateSyncBadge(online, text) {
+      const badge = document.getElementById('syncStatusBadge');
+      if (!badge) return;
+      if (online) {
+        badge.className = "hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>${text}`;
+      } else {
+        badge.className = "hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>${text}`;
+      }
+    }
+
+    function listenToContractCollection() {
+      if (!currentUser || !db) return;
+      if (unsubscribeFirestore) unsubscribeFirestore();
+
+      // STRICT PATH RULE 1: /artifacts/{appId}/public/data/{collectionName}
       const contractsCol = collection(db, 'artifacts', appId, 'public', 'data', 'contracts');
 
-      onSnapshot(contractsCol, (snapshot) => {
-        let hasChanges = false;
+      unsubscribeFirestore = onSnapshot(contractsCol, (snapshot) => {
+        let poolUpdated = false;
+
         snapshot.docChanges().forEach((change) => {
-          const docData = change.doc.data();
+          const remoteData = change.doc.data();
           const docId = change.doc.id;
 
           if (change.type === "added" || change.type === "modified") {
-            window.contractPool[docId] = docData;
-            hasChanges = true;
+            window.contractPool[docId] = remoteData;
+            poolUpdated = true;
+
+            // If the current active contract was modified on another device (e.g. client signed or admin edited)
             if (window.currentContract && window.currentContract.id === docId) {
-              window.currentContract = docData;
+              const previousSign = window.currentContract.clientSigned;
+              window.currentContract = remoteData;
               window.loadContractIntoDOM(window.currentContract);
-              window.showToast(`[${docId}] 실시간 변경사항이 반영되었습니다.`, 'info');
+
+              // Trigger toast when a customer signs from their phone in real time!
+              if (!previousSign && remoteData.clientSigned) {
+                window.showToast(`🎉 [${docId}] 고객이 전자서명을 체결하였습니다!`, 'success');
+              } else {
+                const ind = document.getElementById('savedIndicator');
+                if (ind) {
+                  ind.innerHTML = '<i class="fa-solid fa-arrows-rotate text-emerald-400 mr-1"></i>실시간 원격 동기화 완료';
+                }
+              }
             }
           }
+
           if (change.type === "removed") {
             delete window.contractPool[docId];
-            hasChanges = true;
+            poolUpdated = true;
           }
         });
 
-        if (hasChanges) {
+        if (poolUpdated) {
           window.renderDashboardList();
         }
       }, (error) => {
-        console.error("Firestore onSnapshot error:", error);
+        console.error("Firestore onSnapshot realtime listener error:", error);
+        updateSyncBadge(false, "동기화 재연결 시도중");
       });
     }
 
     window.saveContractToCloud = async function(contract) {
       if (!contract || !contract.id) return;
+
+      // Always update local cache memory immediately for fluid UI
       window.contractPool[contract.id] = contract;
       window.renderDashboardList();
 
-      if (cloudActive && db) {
-        try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'contracts', contract.id);
-          await setDoc(docRef, contract, { merge: true });
-          const ind = document.getElementById('savedIndicator');
-          if (ind) {
-            ind.classList.remove('opacity-0');
-            ind.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> 클라우드 저장 완료';
-          }
-        } catch(e) {
-          console.error("Failed to save to Firestore", e);
+      if (!currentUser || !db) {
+        return;
+      }
+
+      try {
+        // STRICT PATH: /artifacts/{appId}/public/data/contracts/{docId}
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'contracts', contract.id);
+        await setDoc(docRef, contract, { merge: true });
+
+        const ind = document.getElementById('savedIndicator');
+        if (ind) {
+          ind.classList.remove('opacity-0');
+          ind.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-emerald-300 mr-1"></i>클라우드 실시간 동기화 완료';
         }
+      } catch(e) {
+        console.error("Failed to write to Firebase Firestore:", e);
       }
     };
 
     window.deleteContractFromCloud = async function(docId) {
       if (!docId) return;
+
       delete window.contractPool[docId];
       window.renderDashboardList();
 
-      if (cloudActive && db) {
-        try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'contracts', docId);
-          await deleteDoc(docRef);
-        } catch(e) {
-          console.error("Failed to delete from Firestore", e);
-        }
+      if (!currentUser || !db) return;
+
+      try {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'contracts', docId);
+        await deleteDoc(docRef);
+      } catch(e) {
+        console.error("Failed to delete document from Firebase Firestore:", e);
       }
     };
+
+    // Execute authentication on script load
+    startFirebaseAuth();
   </script>
 
   <script>
