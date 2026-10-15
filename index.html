@@ -104,7 +104,7 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .no-print, header, aside, #webInteractiveView, #sigModal, #toast, #dashboardDrawer, #shareConfigModal, #confirmDeleteModal, #adminPassModal, #clientAuthModal {
+      .no-print, header, aside, #adminListView, #webInteractiveView, #sigModal, #toast, #shareConfigModal, #confirmDeleteModal, #adminPassModal, #clientAuthModal, #clientSubmitConfirmModal {
         display: none !important;
       }
       #printOfficialDoc {
@@ -184,9 +184,10 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
+  <!-- Header -->
   <header class="no-print bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-5xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
-      <div class="flex items-center space-x-2.5">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goToAdminDashboard()">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
           <i class="fa-solid fa-file-signature text-base"></i>
         </div>
@@ -204,25 +205,15 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
-        <button id="dashboardToggleBtn" onclick="toggleDashboardDrawer()" class="admin-only px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
-          <i class="fa-solid fa-folder-tree text-amber-400"></i>
-          <span>계약서 관리함</span>
+        <button id="navDashboardBtn" onclick="goToAdminDashboard()" class="admin-only px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+          <i class="fa-solid fa-table-list text-amber-400"></i>
+          <span>계약서 목록 관리</span>
           <span id="contractCountBadge" class="bg-brand-600 text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5">0</span>
         </button>
 
-        <div id="modeToggleContainer" class="admin-only bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs font-medium">
-          <button id="adminModeBtn" onclick="switchMode('admin')" class="px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-sm transition-all flex items-center gap-1 font-bold">
-            <i class="fa-solid fa-pen-ruler text-brand-500"></i>
-            <span>작성자</span>
-          </button>
-          <button id="clientModeBtn" onclick="switchMode('client')" class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 transition-all flex items-center gap-1">
-            <i class="fa-solid fa-user-pen text-emerald-500"></i>
-            <span>고객 뷰</span>
-          </button>
-        </div>
-
-        <button id="headerNewBtn" onclick="createNewContractDraft()" class="admin-only hidden sm:flex px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition items-center gap-1 active:scale-95">
-          <i class="fa-solid fa-plus text-slate-500"></i> 신규
+        <button id="navCreateNewBtn" onclick="createNewContractDraft()" class="admin-only px-3 py-1.5 text-xs font-bold rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+          <i class="fa-solid fa-plus"></i>
+          <span>+ 새 계약서 작성</span>
         </button>
 
         <button id="headerShareBtn" onclick="openShareConfigModal()" class="admin-only px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
@@ -231,9 +222,9 @@
           <span class="sm:hidden">발송</span>
         </button>
 
-        <button onclick="downloadOfficialPdf()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
-          <i class="fa-solid fa-file-pdf"></i>
-          <span>완벽한 PDF 저장</span>
+        <button onclick="downloadOfficialPdf()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-700 hover:bg-slate-800 text-white transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+          <i class="fa-solid fa-file-pdf text-rose-400"></i>
+          <span>PDF 다운로드</span>
         </button>
 
         <button onclick="triggerPrintFriendly()" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all flex items-center gap-1 active:scale-95">
@@ -244,12 +235,12 @@
     </div>
   </header>
 
-  <!-- Top Status Subbar -->
-  <div class="no-print bg-slate-900 text-white text-xs py-2 px-3 sm:px-4 shadow-inner">
-    <div class="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-2">
+  <!-- Top Status Subbar (고객 화면에서는 엔지니어링 문구 숨김) -->
+  <div id="topStatusSubbar" class="no-print bg-slate-900 text-white text-xs py-2 px-3 sm:px-4 shadow-inner">
+    <div class="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-2">
       <div class="flex items-center gap-2">
         <span id="statusPulseDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span id="contractStatusText" class="font-medium text-slate-200 text-[11px] sm:text-xs">현재 상태: 관리자 작성 모드</span>
+        <span id="contractStatusText" class="font-medium text-slate-200 text-[11px] sm:text-xs">현재 상태: 계약서 관리함 대시보드</span>
       </div>
       <div class="text-slate-400 text-[11px] flex items-center gap-3">
         <span id="savedIndicator" class="text-emerald-300 font-medium flex items-center gap-1">
@@ -259,44 +250,90 @@
       </div>
     </div>
   </div>
+  <!-- VIEW 1: 관리자 메인 화면 (계약서 리스트 대시보드) -->
+  <section id="adminListView" class="w-full flex-grow py-5 px-3 sm:px-6 flex justify-center items-start">
+    <div class="w-full max-w-6xl space-y-4">
 
-  <div id="dashboardDrawer" class="no-print fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex justify-end hidden opacity-0 transition-opacity duration-200">
-    <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300">
-      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-        <div>
-          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-            <i class="fa-solid fa-folder-open text-brand-600"></i> 메리담 계약서 보관함
-          </h2>
-          <p class="text-xs text-slate-500 mt-0.5">저장된 전자계약서 전체 목록 (실시간 조회 및 관리)</p>
+      <!-- Summary Stats & Search Bar -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-folder-tree text-brand-600"></i>
+              <span>메리담 계약서 통합 관리함</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">저장된 모든 고객 계약서를 실시간으로 조회, 수정, 서명요청 및 삭제합니다.</p>
+          </div>
+          <button onclick="createNewContractDraft()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95">
+            <i class="fa-solid fa-file-circle-plus"></i> 새 계약서 추가하기
+          </button>
         </div>
-        <button type="button" onclick="toggleDashboardDrawer()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/50">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 text-center">
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <span class="text-[11px] text-slate-500 block">전체 계약</span>
+            <b id="dashStatTotal" class="text-lg font-black text-slate-800">0</b>
+          </div>
+          <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+            <span class="text-[11px] text-emerald-700 block">서명 체결 완료</span>
+            <b id="dashStatSigned" class="text-lg font-black text-emerald-800">0</b>
+          </div>
+          <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+            <span class="text-[11px] text-amber-700 block">서명 대기중</span>
+            <b id="dashStatPending" class="text-lg font-black text-amber-800">0</b>
+          </div>
+          <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-200">
+            <span class="text-[11px] text-blue-700 block">총 계약금액 합계</span>
+            <b id="dashStatAmount" class="text-sm sm:text-base font-black text-brand-700">0원</b>
+          </div>
+        </div>
+
+        <!-- Search Filter -->
+        <div class="mt-4 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+          <input type="text" id="dashSearchInput" oninput="renderDashboardMainTable()" placeholder="고객명, 연락처, 생년월일, 예식장, 계약번호 검색..."
+            class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        </div>
       </div>
 
-      <div class="p-3 border-b border-slate-100 bg-white flex gap-2">
-        <div class="relative flex-grow">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
-          <input type="text" id="contractSearchInput" oninput="renderDashboardList()" placeholder="고객명, 연락처, 생년월일, 예식장 검색..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-500">
+      <!-- Contracts Table / Cards -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-3">문서번호</th>
+                <th class="p-3">의뢰인 성명</th>
+                <th class="p-3">연락처 / 생년월일</th>
+                <th class="p-3">예식일시 / 예식장</th>
+                <th class="p-3">계약 금액</th>
+                <th class="p-3 text-center">진행 상태</th>
+                <th class="p-3 text-right">관리 작업</th>
+              </tr>
+            </thead>
+            <tbody id="dashTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
         </div>
-        <button onclick="createNewContractDraft()" class="px-3 py-1.5 text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white rounded-lg shrink-0 flex items-center gap-1 shadow-sm">
-          <i class="fa-solid fa-plus"></i> 신규
-        </button>
-      </div>
-
-      <div id="drawerContractList" class="flex-grow overflow-y-auto p-4 space-y-2.5 bg-slate-50/50"></div>
-
-      <div class="p-4 border-t border-slate-200 bg-white text-xs text-slate-500 flex justify-between items-center">
-        <span>총 계약 건수: <b id="totalContractCounter" class="text-slate-800">0</b>건</span>
-        <button onclick="createNewContractDraft()" class="text-brand-600 hover:underline font-semibold text-xs flex items-center gap-1">
-          <i class="fa-solid fa-file-circle-plus"></i> 새 계약서 추가
-        </button>
+        <div id="dashEmptyState" class="hidden p-10 text-center text-xs text-slate-400">
+          <i class="fa-regular fa-folder-open text-3xl mb-2 text-slate-300 block"></i>
+          <span>등록된 계약서가 없습니다. [새 계약서 추가하기] 버튼을 눌러 작성해주세요.</span>
+        </div>
       </div>
     </div>
-  </div>
-
-  <main id="webInteractiveView" class="w-full flex-grow py-4 sm:py-8 px-2 sm:px-4 flex justify-center items-start">
+  </section>
+  <!-- VIEW 2: 대화형 계약서 작성 및 고객 서명 뷰 -->
+  <main id="webInteractiveView" class="w-full flex-grow py-4 sm:py-8 px-2 sm:px-4 flex justify-center items-start hidden">
     <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-slate-200/80 p-4 sm:p-8 md:p-10 transition-all">
+
+      <!-- Back to List button for Admin -->
+      <div class="admin-only mb-4 flex items-center justify-between">
+        <button type="button" onclick="goToAdminDashboard()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1 active:scale-95">
+          <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
+        </button>
+        <span class="text-xs text-slate-400 font-mono">Editing Mode: Admin</span>
+      </div>
 
       <!-- Header Title & Serial -->
       <div class="border-b-2 border-slate-800 pb-4 mb-6">
@@ -311,7 +348,7 @@
           </div>
           <div class="text-right shrink-0">
             <span class="text-[10px] block uppercase text-slate-400 font-mono">Contract No.</span>
-            <span id="docContractNo" class="text-xs sm:text-sm font-bold text-slate-700 font-mono">MD-202610-0891</span>
+            <span id="docContractNo" class="text-xs sm:text-sm font-bold text-slate-700 font-mono">-</span>
             <div id="verifiedBadge" class="hidden mt-1 inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-300 rounded text-[10px] font-bold">
               <i class="fa-solid fa-check-double text-emerald-600"></i> 전자체결 완료
             </div>
@@ -390,6 +427,7 @@
         </div>
       </section>
 
+      <!-- SECTION 2: 예식 및 서비스 내용 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>2. 예식 및 서비스 내용</span>
@@ -498,6 +536,7 @@
         </div>
       </section>
 
+      <!-- SECTION 3: 축의금 처리 방식 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>3. 축의금 처리 방식</span>
@@ -550,6 +589,7 @@
         </div>
       </section>
 
+      <!-- SECTION 4: 식권 배부 세부 기준 및 인계 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>4. 식권 배부 세부 기준 및 인계</span>
@@ -714,6 +754,7 @@
         </div>
       </section>
 
+      <!-- SECTION 5: 서비스 요금 및 지급 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>5. 서비스 요금 및 지급</span>
@@ -734,7 +775,7 @@
             </div>
             <div>
               <label class="block text-rose-600 font-bold mb-1">할인 금액 (원)</label>
-              <input type="number" id="feeDiscount" value="20000" step="5000" oninput="calculateTotalFees(); handleFieldChange();" class="admin-editable w-full bg-white border border-rose-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-rose-600 focus:ring-2 focus:ring-rose-500">
+              <input type="number" id="feeDiscount" value="0" step="5000" oninput="calculateTotalFees(); handleFieldChange();" class="admin-editable w-full bg-white border border-rose-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-rose-600 focus:ring-2 focus:ring-rose-500">
             </div>
           </div>
 
@@ -755,7 +796,7 @@
               <span class="text-[11px] text-slate-500">기본요금 + 출장비 + 옵션 - 할인금액 자동 합산</span>
             </div>
             <div id="feeFinalDisplay" class="text-xl sm:text-2xl font-black text-brand-700">
-              금 230,000원
+              금 250,000원
             </div>
           </div>
 
@@ -771,7 +812,7 @@
             </div>
             <div>
               <label class="block text-slate-600 font-medium mb-1">잔금 (원, 자동계산)</label>
-              <input type="number" id="balanceAmount" value="180000" readonly class="w-full bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-brand-700 cursor-not-allowed">
+              <input type="number" id="balanceAmount" value="200000" readonly class="w-full bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-brand-700 cursor-not-allowed">
             </div>
             <div>
               <label class="block text-slate-600 font-medium mb-1">잔금 지급 기한</label>
@@ -786,6 +827,7 @@
         </div>
       </section>
 
+      <!-- SECTION 6: 일정 변경 및 취소·환불 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>6. 일정 변경 및 취소·환불</span>
@@ -812,6 +854,7 @@
         </div>
       </section>
 
+      <!-- SECTION 7: 사고 및 손해배상 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>7. 사고 및 손해배상</span>
@@ -842,6 +885,7 @@
         </div>
       </section>
 
+      <!-- SECTION 8: 개인정보 및 촬영 자료 -->
       <section class="mb-7">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3 border-l-4 border-brand-600 pl-2.5">
           <span>8. 개인정보 및 촬영 자료</span>
@@ -906,13 +950,14 @@
         </div>
       </section>
 
+      <!-- SECTION 9: 계약 체결 및 전자서명 -->
       <section class="mt-8 pt-5 border-t-2 border-slate-900">
         <div class="text-center mb-5">
           <p class="text-xs sm:text-sm font-semibold text-slate-700">
             양 당사자는 본 계약의 서비스 내용, 요금, 축의금 처리, 인계 및 취소·환불 기준을 확인하고 전자서명법 제3조에 의거하여 서명합니다.
           </p>
           <div class="mt-2 text-xs font-bold text-slate-900">
-            계약 체결일자: <span id="contractSignDateText" class="text-brand-700 font-mono text-sm underline underline-offset-4">2026년 10월 15일</span>
+            계약 체결일자: <span id="contractSignDateText" class="text-brand-700 font-mono text-sm underline underline-offset-4">-</span>
           </div>
         </div>
 
@@ -930,8 +975,8 @@
                 </span>
               </div>
               <div class="text-xs text-slate-700 space-y-1 mb-3">
-                <div>성명: <span id="displayClientName" class="font-bold text-slate-900">김민우</span></div>
-                <div>연락처: <span id="displayClientPhone" class="font-medium text-slate-800">010-9988-7766</span></div>
+                <div>성명: <span id="displayClientName" class="font-bold text-slate-900">-</span></div>
+                <div>연락처: <span id="displayClientPhone" class="font-medium text-slate-800">-</span></div>
               </div>
             </div>
 
@@ -981,6 +1026,37 @@
             <div class="text-[10px] text-slate-400 text-center mt-2">사업자 사전 전자서명 확인필 (메리담 대표)</div>
           </div>
         </div>
+
+        <!-- 🌟 하단 액션 버튼 바: 관리자용(저장/생성) & 고객용(최종 계약 체결하기) -->
+        <div class="mt-8 pt-5 border-t border-slate-200">
+          
+          <!-- 관리자 전용 저장/추가 바 -->
+          <div class="admin-only flex flex-col sm:flex-row items-center justify-end gap-3">
+            <button type="button" onclick="goToAdminDashboard()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shadow-xs">
+              취소하고 목록으로
+            </button>
+            <button type="button" onclick="saveAdminContractAndReturn()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>계약서 저장 및 목록 복귀</span>
+            </button>
+            <button type="button" onclick="openShareConfigModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md active:scale-95">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>저장 및 서명링크 발송</span>
+            </button>
+          </div>
+
+          <!-- 고객 전용 최종 계약 완료하기 버튼 -->
+          <div id="clientActionContainer" class="hidden flex flex-col items-center">
+            <button type="button" onclick="triggerClientFinalSubmit()" class="w-full max-w-md py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-base font-black shadow-xl shadow-red-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-signature text-lg"></i>
+              <span>메리담 계약 체결 완료하기</span>
+            </button>
+            <p class="text-[11px] text-slate-500 mt-2">
+              * 위 빨간색 박스 항목들을 확인하신 후 서명 완료 상태에서 버튼을 누르시면 계약이 체결됩니다.
+            </p>
+          </div>
+
+        </div>
       </section>
 
       <!-- Footer Info -->
@@ -990,7 +1066,7 @@
       </footer>
     </div>
   </main>
-
+  <!-- Official Print / PDF Document (2-Page A4 규격) -->
   <div id="printOfficialDoc">
     <!-- PAGE 1: 1~4조 -->
     <div id="a4Page1" class="a4-print-sheet flex flex-col justify-between">
@@ -1003,7 +1079,7 @@
           </div>
           <div class="text-right pb-0.5">
             <span class="text-[7pt] text-slate-400 block font-mono">DOCUMENT NO.</span>
-            <span id="p1DocNo" class="text-[8.5pt] font-extrabold text-slate-800 font-mono">MD-202610-0891</span>
+            <span id="p1DocNo" class="text-[8.5pt] font-extrabold text-slate-800 font-mono">-</span>
             <span class="text-[6pt] text-emerald-700 block font-semibold">[ 1 / 2 페이지 ]</span>
           </div>
         </div>
@@ -1016,38 +1092,38 @@
           <tr><th>사업자등록번호</th><td>764-29-02122</td><th>고객센터 연락처</th><td>010-9300-5770</td></tr>
           <tr><th>사업장 주소</th><td colspan="3">인천광역시 미추홀구 수봉로 48</td></tr>
           <tr><th colspan="4" class="text-left bg-blue-100/70 px-2 py-0.5 text-blue-900 text-[7.5pt]">■ 의뢰인 (예약자 정보)</th></tr>
-          <tr><th>의뢰인 성명</th><td><b id="pClientName" class="text-slate-900">김민우</b></td><th>의뢰인 연락처</th><td><b id="pClientPhone" class="text-slate-900">010-9988-7766</b></td></tr>
-          <tr><th>생년월일</th><td><b id="pClientBirth" class="text-slate-900 font-mono">920514</b></td><th>신랑/신부 성명</th><td><span id="pGroomName">김민우</span> / <span id="pBrideName">이서연</span></td></tr>
+          <tr><th>의뢰인 성명</th><td><b id="pClientName" class="text-slate-900">-</b></td><th>의뢰인 연락처</th><td><b id="pClientPhone" class="text-slate-900">-</b></td></tr>
+          <tr><th>생년월일</th><td><b id="pClientBirth" class="text-slate-900 font-mono">-</b></td><th>신랑/신부 성명</th><td><span id="pGroomName">-</span> / <span id="pBrideName">-</span></td></tr>
         </table>
 
         <div class="doc-section-title">2. 예식 및 서비스 내용</div>
         <table class="doc-table mb-1.5">
           <colgroup><col style="width: 16%;"><col style="width: 34%;"><col style="width: 16%;"><col style="width: 34%;"></colgroup>
-          <tr><th>예식일자 및 시간</th><td><b id="pWeddingDateTime" class="text-slate-900">2026-11-15 12:30</b></td><th>현장 도착 시간</th><td id="pArriveTime">11:00</td></tr>
-          <tr><th>예식장명 및 홀</th><td><b id="pWeddingHall" class="text-slate-900">더채플앳논현 3층 라포레홀</b></td><th>접수종료·인계</th><td id="pFinishTime">14:00</td></tr>
-          <tr><th>예식장 주소</th><td colspan="3" id="pWeddingAddress">서울 강남구 논현로 549</td></tr>
-          <tr><th>서비스 유형</th><td><b id="pServiceType" class="text-brand-700">일반형 2인 1조</b></td><th>담당 측</th><td><b id="pServiceSide" class="text-brand-700">신랑·신부 양측</b></td></tr>
+          <tr><th>예식일자 및 시간</th><td><b id="pWeddingDateTime" class="text-slate-900">-</b></td><th>현장 도착 시간</th><td id="pArriveTime">-</td></tr>
+          <tr><th>예식장명 및 홀</th><td><b id="pWeddingHall" class="text-slate-900">-</b></td><th>접수종료·인계</th><td id="pFinishTime">-</td></tr>
+          <tr><th>예식장 주소</th><td colspan="3" id="pWeddingAddress">-</td></tr>
+          <tr><th>서비스 유형</th><td><b id="pServiceType" class="text-brand-700">-</b></td><th>담당 측</th><td><b id="pServiceSide" class="text-brand-700">-</b></td></tr>
           <tr><th>기본 제공 업무</th><td colspan="3" class="text-[7pt] text-slate-700 leading-tight">하객 안내 및 축의금 접수 / 하객 명부 작성 및 식권 전달 / 축의금 봉투·현금 구분 보관 / 선택 방식 개봉·금액 기록·계수 / 디지털·엑셀 정산 장부 작성 / 화환 및 현장 사진 전송 / 축의금·명부·잔여식권 최종 인계</td></tr>
-          <tr><th>특약 및 요청사항</th><td colspan="3" id="pSpecialNotes" class="font-medium text-slate-800">축의대 봉투 꼼꼼한 넘버링 및 식권 정확한 분배 부탁드립니다.</td></tr>
+          <tr><th>특약 및 요청사항</th><td colspan="3" id="pSpecialNotes" class="font-medium text-slate-800">특약사항 없음</td></tr>
         </table>
 
         <div class="doc-section-title">3. 축의금 처리 방식</div>
         <table class="doc-table mb-1.5">
           <colgroup><col style="width: 18%;"><col style="width: 32%;"><col style="width: 18%;"><col style="width: 32%;"></colgroup>
-          <tr><th>처리 방식</th><td colspan="3"><b id="pMoneyProcess" class="text-slate-900">계수·정산</b></td></tr>
-          <tr><th>반환 승인자</th><td colspan="3" id="pReturnApprover">신랑 모친 (모친) / 010-1234-5678</td></tr>
+          <tr><th>처리 방식</th><td colspan="3"><b id="pMoneyProcess" class="text-slate-900">-</b></td></tr>
+          <tr><th>반환 승인자</th><td colspan="3" id="pReturnApprover">-</td></tr>
           <tr><td colspan="4" class="text-[7pt] bg-slate-50 text-slate-700 p-1 leading-tight">※ 계수·정산 시 2인 대조 원칙을 준수하며, 신랑·신부측 축의금은 분리 관리하고 메리담은 축의금을 임의 사용·공제·반환·반출하지 않습니다.</td></tr>
         </table>
 
         <div class="doc-section-title">4. 식권 배부 세부 기준 및 인계</div>
         <table class="doc-table mb-1">
           <colgroup><col style="width: 22%;"><col style="width: 78%;"></colgroup>
-          <tr><th>계좌이체 하객 식권</th><td id="pTicketTransfer">별도 확인 없이 지급</td></tr>
-          <tr><th>식권 지급 최소 금액</th><td id="pTicketMinAmount">금액과 관계없이 지급</td></tr>
-          <tr><th>식권 추가 요청 기준</th><td id="pTicketExtraRule">요청 수량대로 추가 지급</td></tr>
-          <tr><th>봉투당 최대 식권 수량</th><td id="pTicketMaxNotes">봉투당 최대 2매 지급 (초과 시 지정 담당자 확인)</td></tr>
-          <tr><th>식권 확인 지정 담당자</th><td id="pTicketApproverInfo">신랑 모친 / 010-1234-5678</td></tr>
-          <tr><th class="bg-red-50 text-red-950">축의금 인계자</th><td><b id="pReceiverInfo" class="text-red-900 text-[8.5pt]">김철수 (신랑 부친) / 010-3333-4444</b></td></tr>
+          <tr><th>계좌이체 하객 식권</th><td id="pTicketTransfer">-</td></tr>
+          <tr><th>식권 지급 최소 금액</th><td id="pTicketMinAmount">-</td></tr>
+          <tr><th>식권 추가 요청 기준</th><td id="pTicketExtraRule">-</td></tr>
+          <tr><th>봉투당 최대 식권 수량</th><td id="pTicketMaxNotes">-</td></tr>
+          <tr><th>식권 확인 지정 담당자</th><td id="pTicketApproverInfo">-</td></tr>
+          <tr><th class="bg-red-50 text-red-950">축의금 인계자</th><td><b id="pReceiverInfo" class="text-red-900 text-[8.5pt]">-</b></td></tr>
         </table>
       </div>
 
@@ -1061,15 +1137,15 @@
       <div>
         <div class="border-b-2 border-slate-900 pb-1 mb-1.5 flex justify-between items-end">
           <div><h2 class="text-[12pt] font-black text-slate-900 tracking-tight font-serifDoc">메리담 축의대 대행 서비스 간편계약서 (제2면)</h2></div>
-          <div class="text-right"><span class="text-[7pt] text-slate-400 font-mono" id="p2DocNo">MD-202610-0891</span><span class="text-[6pt] text-emerald-700 block font-semibold">[ 2 / 2 페이지 ]</span></div>
+          <div class="text-right"><span class="text-[7pt] text-slate-400 font-mono" id="p2DocNo">-</span><span class="text-[6pt] text-emerald-700 block font-semibold">[ 2 / 2 페이지 ]</span></div>
         </div>
 
         <div class="doc-section-title">5. 서비스 요금 및 지급</div>
         <table class="doc-table mb-1.5">
           <colgroup><col style="width: 14%;"><col style="width: 21%;"><col style="width: 14%;"><col style="width: 21%;"><col style="width: 14%;"><col style="width: 16%;"></colgroup>
-          <tr><th>기본 요금</th><td id="pFeeBasic">금 250,000원</td><th>출장비</th><td id="pFeeTravel">금 0원</td><th>추가/옵션</th><td id="pFeeExtra">금 0원</td></tr>
-          <tr><th class="text-rose-700">할인 금액</th><td colspan="2" class="text-rose-700 font-bold" id="pFeeDiscount">금 20,000원 (프로모션 적용)</td><th class="bg-blue-100 text-blue-950 font-extrabold">최종 확정 금액</th><td colspan="2" class="bg-blue-50/50"><b id="pFeeTotal" class="text-brand-800 text-[9.5pt] font-black">금 230,000원</b> (VAT포함)</td></tr>
-          <tr><th>계약금</th><td><b id="pDepositAmount">금 50,000원</b></td><th>지급 기한</th><td>체결 후 24시간 이내</td><th>잔 금</th><td><b id="pBalanceAmount">금 180,000원</b> (예식 3일전)</td></tr>
+          <tr><th>기본 요금</th><td id="pFeeBasic">금 0원</td><th>출장비</th><td id="pFeeTravel">금 0원</td><th>추가/옵션</th><td id="pFeeExtra">금 0원</td></tr>
+          <tr><th class="text-rose-700">할인 금액</th><td colspan="2" class="text-rose-700 font-bold" id="pFeeDiscount">금 0원</td><th class="bg-blue-100 text-blue-950 font-extrabold">최종 확정 금액</th><td colspan="2" class="bg-blue-50/50"><b id="pFeeTotal" class="text-brand-800 text-[9.5pt] font-black">금 0원</b> (VAT포함)</td></tr>
+          <tr><th>계약금</th><td><b id="pDepositAmount">금 0원</b></td><th>지급 기한</th><td>체결 후 24시간 이내</td><th>잔 금</th><td><b id="pBalanceAmount">금 0원</b> (예식 3일전)</td></tr>
           <tr><th>입금 계좌</th><td colspan="5"><b class="text-slate-900 font-mono">카카오뱅크 3333-21-9876543 (예금주: 메리담 전형민)</b></td></tr>
         </table>
 
@@ -1098,8 +1174,8 @@
           <div>
             <div class="doc-section-title">8. 개인정보 및 촬영 자료</div>
             <div class="border border-slate-300 p-1.5 text-[6.8pt] text-slate-700 leading-snug h-[50px]">
-              • 개인정보 수집·이용: <b id="pConsentPrivacy" class="text-blue-800">동의</b> (30일 보관 후 파기)<br>
-              • 사진·자료 전송: <b id="pConsentPhotoTransfer" class="text-slate-800">동의</b> / SNS 홍보: <b id="pConsentMarketing" class="text-slate-800">동의</b>
+              • 개인정보 수집·이용: <b id="pConsentPrivacy" class="text-blue-800">미동의</b> (30일 보관 후 파기)<br>
+              • 사진·자료 전송: <b id="pConsentPhotoTransfer" class="text-slate-800">-</b> / SNS 홍보: <b id="pConsentMarketing" class="text-slate-800">-</b>
             </div>
           </div>
         </div>
@@ -1112,13 +1188,13 @@
             <tr>
               <td class="p-2 align-top">
                 <div class="text-[7.5pt] text-slate-800 space-y-0.5 mb-1">
-                  <div>성 명: <b id="pSignClientName" class="text-slate-950 text-[8.5pt]">김민우</b></div>
-                  <div>연락처: <span id="pSignClientPhone" class="font-mono">010-9988-7766</span></div>
-                  <div>체결일시: <span id="pSignDate" class="text-slate-600 font-mono text-[6.8pt]">2026.10.15 14:30 (서명완료)</span></div>
+                  <div>성 명: <b id="pSignClientName" class="text-slate-950 text-[8.5pt]">-</b></div>
+                  <div>연락처: <span id="pSignClientPhone" class="font-mono">-</span></div>
+                  <div>체결일시: <span id="pSignDate" class="text-slate-600 font-mono text-[6.8pt]">서명 대기중</span></div>
                 </div>
                 <div class="h-16 border border-dashed border-slate-300 rounded flex items-center justify-center bg-slate-50/50 relative overflow-hidden">
-                  <img id="pSignClientImg" src="" alt="의뢰인 전자서명" class="max-h-14 max-w-[85%] object-contain">
-                  <span id="pSignPlaceholder" class="text-[7.5pt] text-slate-400 font-bold">[ 서명 완료 시 이미지 렌더링 ]</span>
+                  <img id="pSignClientImg" src="" alt="의뢰인 전자서명" class="max-h-14 max-w-[85%] object-contain hidden">
+                  <span id="pSignPlaceholder" class="text-[7.5pt] text-slate-400 font-bold">[ 서명 대기중 ]</span>
                 </div>
               </td>
               <td class="p-2 align-top">
@@ -1145,12 +1221,11 @@
       <div class="border-t-2 border-slate-800 pt-0.5 text-center mt-1">
         <div class="text-[7.5pt] font-black tracking-widest text-slate-600 font-mono">─── [ 이 하 여 백 / 본 계약서는 총 2장으로 완결됨 ] ───</div>
         <p class="text-[6pt] text-slate-400 mt-0.5">
-          본 문서는 전자문서 및 전자거래 기본법 제4조 및 전자서명법 제3조에 근거한 공식 계약서 원본입니다. (Security Hash: <span id="pAuditHash" class="font-mono">MD-AUTH-77a89e1f</span>)
+          본 문서는 전자문서 및 전자거래 기본법 제4조 및 전자서명법 제3조에 근거한 공식 계약서 원본입니다. (Security Hash: <span id="pAuditHash" class="font-mono">MD-AUTH-PRO</span>)
         </p>
       </div>
     </div>
   </div>
-
   <!-- Admin Pass Modal -->
   <div id="adminPassModal" class="no-print fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 hidden">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center">
@@ -1166,7 +1241,7 @@
     </div>
   </div>
 
-  <!-- Client Auth Modal -->
+  <!-- Client Birthday Gate Modal -->
   <div id="clientAuthModal" class="no-print fixed inset-0 z-50 bg-slate-900/85 backdrop-blur-md flex items-center justify-center p-3 hidden">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center">
       <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mx-auto mb-3 shadow-inner">
@@ -1179,6 +1254,28 @@
         본인 확인 및 계약서 열기
       </button>
       <p class="text-[11px] text-slate-400 mt-3">* 본인 확인 비밀번호는 고객님의 생년월일입니다.</p>
+    </div>
+  </div>
+
+  <!-- Client Final Submit Confirmation Modal -->
+  <div id="clientSubmitConfirmModal" class="no-print fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 hidden">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 text-center">
+      <div class="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl mx-auto mb-3 shadow-inner animate-bounce">
+        <i class="fa-solid fa-file-circle-check"></i>
+      </div>
+      <h3 class="text-base font-black text-slate-900">계약을 최종 체결하시겠습니까?</h3>
+      <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+        선택하신 서비스 유형, 축의금 처리 방식 및 식권 배부 기준을 <b>모두 정확히 확인</b>하셨습니까?<br>
+        [확인 및 체결]을 누르시면 전자서명법에 따라 <b>공식 계약이 즉시 체결</b>됩니다.
+      </p>
+      <div class="grid grid-cols-2 gap-2 mt-5">
+        <button type="button" onclick="closeClientConfirmModal()" class="py-2.5 text-xs font-bold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+          다시 검토하기
+        </button>
+        <button type="button" onclick="executeFinalClientContract()" class="py-2.5 text-xs font-black rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-95 transition flex items-center justify-center gap-1">
+          <i class="fa-solid fa-check"></i> 확인 및 계약 체결
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1238,7 +1335,7 @@
       <h3 class="text-sm font-bold text-slate-900 text-center">계약서를 삭제하시겠습니까?</h3>
       <p class="text-xs text-slate-500 text-center mt-1">
         문서번호: <b id="deleteTargetDocId" class="text-slate-800 font-mono">-</b><br>
-        삭제된 계약서는 영구 제거됩니다.
+        삭제된 계약서는 영구 제거되며 복구되지 않습니다.
       </p>
       <div class="grid grid-cols-2 gap-2 mt-5">
         <button type="button" onclick="closeDeleteModal()" class="py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700">취소</button>
@@ -1289,7 +1386,7 @@
         </button>
         <button type="button" onclick="saveSignature()" class="px-5 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-95 transition flex items-center gap-1.5">
           <i class="fa-solid fa-check"></i>
-          <span>서명 적용 및 체결</span>
+          <span>서명 적용</span>
         </button>
       </div>
     </div>
@@ -1312,13 +1409,11 @@
     });
     document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
   </script>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // 메리담 공식 파이어베이스 프로젝트
     const firebaseConfig = {
       apiKey: "AIzaSyCmLLDqWAtJjk_Z4zRljO-rUUbpaOBWBQQ",
       authDomain: "mreeydamcontracts.firebaseapp.com",
@@ -1332,10 +1427,8 @@
     let app = null;
     let auth = null;
     let db = null;
-    let isFirebaseReady = false;
     let unsubscribeListener = null;
 
-    // 객체 내 undefined 값을 빈 문자열로 정제하는 함수 (Firestore undefined 오류 원천 차단)
     function sanitizeForFirestore(obj) {
       if (!obj || typeof obj !== 'object') return obj;
       const clean = Array.isArray(obj) ? [] : {};
@@ -1356,28 +1449,17 @@
       auth = getAuth(app);
       db = getFirestore(app);
     } catch(err) {
-      console.error("Firebase 초기화 에러:", err);
+      console.error("Firebase init error:", err);
     }
 
     async function initFirebaseEngine() {
       if (!auth || !db) return;
       try {
-        // 익명 인증으로 보안 세션 획득 시도
         await signInAnonymously(auth);
-        isFirebaseReady = true;
-        console.log("✅ Firebase Auth 인증 성공! 실시간 DB 연동 완료");
         updateSyncBadge(true, "클라우드 실시간 동기화 활성");
-        
-        // 실시간 컬렉션 구독 시작
         startRealtimeSync();
-
-        // 초기 계약서가 있다면 동기화
-        if (window.currentContract && window.currentContract.id) {
-          window.saveContractToCloud(window.currentContract);
-        }
       } catch(err) {
-        console.warn("⚠️ Firebase Auth 인증 대기 (규칙 설정에 따라 작동):", err.message);
-        // 익명 인증이 꺼져있더라도 Firestore Rules가 시간 기반 허용인 경우 작동할 수 있도록 리스너 시도
+        console.warn("⚠️ Firebase Auth 안내:", err.message);
         startRealtimeSync();
       }
     }
@@ -1397,19 +1479,12 @@
       }
     }
 
-    // 로컬 스토리지 안전 저장 헬퍼 (클라우드 권한 에러 시 완벽 백업 보장)
-    function saveToLocalStorage(contract) {
-      if (!contract || !contract.id) return;
+    function saveToLocalStorage(pool) {
       try {
-        const pool = JSON.parse(localStorage.getItem('merrydam_contracts_pool') || '{}');
-        pool[contract.id] = contract;
-        localStorage.setItem('merrydam_contracts_pool', JSON.stringify(pool));
-      } catch (e) {
-        console.warn("LocalStorage save skipped:", e);
-      }
+        localStorage.setItem('merrydam_contracts_pool_v2', JSON.stringify(pool));
+      } catch (e) {}
     }
 
-    // 실시간 감시 (고객이 서명하거나 관리자가 수정하면 실시간 동기화)
     function startRealtimeSync() {
       if (!db) return;
       if (unsubscribeListener) unsubscribeListener();
@@ -1417,18 +1492,13 @@
       const contractsCol = collection(db, 'merrydam_contracts');
 
       unsubscribeListener = onSnapshot(contractsCol, (snapshot) => {
-        let hasChanges = false;
-
         snapshot.docChanges().forEach((change) => {
           const docData = change.doc.data();
           const docId = change.doc.id;
 
           if (change.type === "added" || change.type === "modified") {
             window.contractPool[docId] = docData;
-            saveToLocalStorage(docData);
-            hasChanges = true;
 
-            // 현재 보고 있는 계약서가 원격에서 수정/서명되었을 경우 즉각 화면 갱신
             if (window.currentContract && window.currentContract.id === docId) {
               const wasSignedBefore = window.currentContract.clientSigned;
               window.currentContract = docData;
@@ -1436,45 +1506,41 @@
 
               if (!wasSignedBefore && docData.clientSigned) {
                 window.showToast(`🎉 [${docId}] 고객이 전자서명을 체결하였습니다!`, 'success');
-              } else {
-                const ind = document.getElementById('savedIndicator');
-                if (ind) {
-                  ind.innerHTML = '<i class="fa-solid fa-arrows-rotate text-emerald-400 mr-1"></i>실시간 클라우드 동기화 완료';
-                }
               }
             }
           }
 
           if (change.type === "removed") {
             delete window.contractPool[docId];
-            hasChanges = true;
+            if (window.currentContract && window.currentContract.id === docId) {
+              window.currentContract = null;
+            }
           }
         });
 
-        if (hasChanges && typeof window.renderDashboardList === 'function') {
-          window.renderDashboardList();
+        saveToLocalStorage(window.contractPool);
+        if (typeof window.renderDashboardMainTable === 'function') {
+          window.renderDashboardMainTable();
         }
         updateSyncBadge(true, "클라우드 실시간 동기화 활성");
       }, (error) => {
-        console.warn("⚠️ Firestore 권한 상태 안내:", error.message);
+        console.warn("Firestore listener state:", error.message);
         if (error.code === 'permission-denied') {
-          updateSyncBadge(false, "파이어베이스 Rules 확인 필요 (로컬 안전 저장 중)", true);
+          updateSyncBadge(false, "Firestore Rules 확인 필요 (로컬 안전 보관 중)", true);
         } else {
           updateSyncBadge(false, "오프라인 로컬 저장 모드");
         }
       });
     }
 
-    // 전역 클라우드 저장 함수
     window.saveContractToCloud = async function(contract) {
       if (!contract || !contract.id) return;
 
-      // 1. 메모리 및 브라우저 로컬 저장소 즉시 영구 저장 (데이터 유실 100% 방지)
       window.contractPool[contract.id] = contract;
-      saveToLocalStorage(contract);
+      saveToLocalStorage(window.contractPool);
 
-      if (typeof window.renderDashboardList === 'function') {
-        window.renderDashboardList();
+      if (typeof window.renderDashboardMainTable === 'function') {
+        window.renderDashboardMainTable();
       }
 
       if (!db) return;
@@ -1485,41 +1551,23 @@
         await setDoc(docRef, cleanData, { merge: true });
 
         const ind = document.getElementById('savedIndicator');
-        if (ind) {
+        if (ind && window.appMode === 'admin') {
           ind.classList.remove('opacity-0');
-          ind.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-emerald-300 mr-1"></i>파이어베이스 저장 완료';
+          ind.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-emerald-300 mr-1"></i>클라우드 저장 완료';
         }
-        updateSyncBadge(true, "클라우드 실시간 동기화 활성");
       } catch(e) {
-        const ind = document.getElementById('savedIndicator');
-        if (e.code === 'permission-denied') {
-          console.warn("📌 Firebase Rules 권한 설정 필요: Firestore 규칙에 'allow read, write: if request.time < timestamp.date(2031, 10, 31);'을 추가해 주세요.");
-          if (ind) {
-            ind.innerHTML = '<i class="fa-solid fa-circle-exclamation text-amber-400 mr-1"></i>로컬 안전 저장 (Firestore Rules 확인 필요)';
-          }
-          updateSyncBadge(false, "Rules 설정 필요 (로컬 저장 유지)", true);
-        } else {
-          console.error("❌ 파이어베이스 저장 에러:", e);
-          if (ind) {
-            ind.innerHTML = '<i class="fa-solid fa-floppy-disk text-slate-300 mr-1"></i>로컬 저장 완료';
-          }
-        }
+        console.warn("Cloud save notice:", e.message);
       }
     };
 
-    // 전역 클라우드 삭제 함수
     window.deleteContractFromCloud = async function(docId) {
       if (!docId) return;
 
       delete window.contractPool[docId];
-      try {
-        const pool = JSON.parse(localStorage.getItem('merrydam_contracts_pool') || '{}');
-        delete pool[docId];
-        localStorage.setItem('merrydam_contracts_pool', JSON.stringify(pool));
-      } catch(e) {}
+      saveToLocalStorage(window.contractPool);
 
-      if (typeof window.renderDashboardList === 'function') {
-        window.renderDashboardList();
+      if (typeof window.renderDashboardMainTable === 'function') {
+        window.renderDashboardMainTable();
       }
 
       if (!db) return;
@@ -1527,26 +1575,32 @@
       try {
         const docRef = doc(db, 'merrydam_contracts', docId);
         await deleteDoc(docRef);
-        console.log(`🗑️ [${docId}] 파이어베이스 문서 삭제 완료`);
+        console.log(`🗑️ [${docId}] 파이어베이스 문서 영구 삭제 완료`);
       } catch(e) {
-        console.warn("파이어베이스 문서 삭제 알림:", e.message);
+        console.warn("Delete document notice:", e.message);
       }
     };
 
-    // 로컬 스토리지에 기존 저장된 계약서 복원
+    // 로컬 스토리지 데이터 불러오기 (하드코딩 더미 완전 배제)
     try {
-      const savedPool = JSON.parse(localStorage.getItem('merrydam_contracts_pool') || '{}');
-      Object.assign(window.contractPool, savedPool);
-    } catch(e) {}
+      const savedPool = JSON.parse(localStorage.getItem('merrydam_contracts_pool_v2') || '{}');
+      window.contractPool = savedPool;
+    } catch(e) {
+      window.contractPool = {};
+    }
 
-    // 파이어베이스 엔진 기동
     initFirebaseEngine();
   </script>
-
   <script>
     const MASTER_ADMIN_PASS = "wlfkf1818!@";
     let isAdminAuthenticated = false;
     let isClientAuthenticated = false;
+    window.contractPool = window.contractPool || {};
+    window.currentContract = null;
+    window.appMode = 'admin'; // 'admin' or 'client'
+    let currentMainView = 'dashboard'; // 'dashboard' or 'form'
+    let canvas, ctx, isDrawing = false;
+    let pendingDeleteDocId = null;
 
     function createBlankContract(id) {
       const today = new Date();
@@ -1604,22 +1658,9 @@
       };
     }
 
-    function createDefaultContract(id) {
-      return createBlankContract(id);
-    }
-
-    window.contractPool = {};
-    window.currentContract = null;
-    let appMode = 'admin';
-    let canvas, ctx, isDrawing = false;
-    let pendingDeleteDocId = null;
-
     window.onload = function() {
-      initContractDatabase();
       setupPasswordInputsKeydown();
       handleRoutingAndSecurityGates();
-      calculateTotalFees();
-      syncPrintDocument();
       initCanvas();
     };
 
@@ -1638,84 +1679,54 @@
       }
     }
 
-    function initContractDatabase() {
-      const initial1 = createDefaultContract('MD-202610-0891');
-      initial1.clientName = '김민우';
-      initial1.clientPhone = '010-9988-7766';
-      initial1.clientBirth = '920514';
-      initial1.weddingHall = '더채플앳논현 3층 라포레홀';
-      initial1.weddingAddress = '서울 강남구 논현로 549';
-      initial1.serviceType = '일반형 2인 1조';
-      initial1.serviceSide = '신랑·신부 양측';
-      initial1.moneyProcess = '계수·정산';
-      initial1.receiverName = '김철수';
-      initial1.receiverRel = '부친';
-      initial1.receiverPhone = '010-3333-4444';
-      initial1.consentPrivacy = true;
-      initial1.consentPhotoTransfer = '동의';
-
-      const initial2 = createDefaultContract('MD-202610-1042');
-      initial2.clientName = '박지훈';
-      initial2.clientPhone = '010-5555-6666';
-      initial2.clientBirth = '900312';
-      initial2.weddingHall = '엘타워 그레이스홀 6층';
-      initial2.serviceType = '일반형 2인 1조';
-      initial2.serviceSide = '신랑측';
-      initial2.moneyProcess = '계수·정산';
-      initial2.receiverName = '박창호';
-      initial2.receiverRel = '부친';
-      initial2.receiverPhone = '010-8888-9999';
-      initial2.consentPrivacy = true;
-      initial2.consentPhotoTransfer = '동의';
-
-      window.contractPool[initial1.id] = initial1;
-      window.contractPool[initial2.id] = initial2;
-      window.currentContract = initial1;
-    }
-
     function handleRoutingAndSecurityGates() {
       const urlParams = new URLSearchParams(window.location.search);
       const docId = urlParams.get('id');
       const modeParam = urlParams.get('view');
       const dataParam = urlParams.get('data');
 
-      if (dataParam) {
-        try {
-          const imported = JSON.parse(decodeURIComponent(dataParam));
-          if (imported && imported.id) {
-            window.contractPool[imported.id] = imported;
-            window.currentContract = imported;
-            if (window.saveContractToCloud) window.saveContractToCloud(imported);
-          }
-        } catch(e) {
-          console.error("Payload parse error", e);
-        }
-      } else if (docId) {
-        if (window.contractPool[docId]) {
-          window.currentContract = window.contractPool[docId];
-        } else {
-          const fallback = createDefaultContract(docId);
-          window.contractPool[docId] = fallback;
-          window.currentContract = fallback;
-        }
-      }
-
+      // 1. 고객 전용 링크 접속인 경우
       if (modeParam === 'client') {
-        appMode = 'client';
+        window.appMode = 'client';
+        currentMainView = 'form';
+        
+        // 기술적 UI 및 관리자 메뉴 완전 은닉
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-        document.getElementById('adminPassModal').classList.add('hidden');
-        promptClientBirthdayGate();
-      } else {
-        appMode = 'admin';
-        if (!isAdminAuthenticated) {
-          document.getElementById('adminPassModal').classList.remove('hidden');
-          setTimeout(() => document.getElementById('adminPassInput').focus(), 50);
-        } else {
-          renderModeUI();
+        document.getElementById('adminListView').classList.add('hidden');
+        document.getElementById('webInteractiveView').classList.remove('hidden');
+        document.getElementById('clientActionContainer').classList.remove('hidden');
+        document.getElementById('topStatusSubbar').style.display = 'none';
+
+        if (dataParam) {
+          try {
+            const imported = JSON.parse(decodeURIComponent(dataParam));
+            if (imported && imported.id) {
+              window.contractPool[imported.id] = imported;
+              window.currentContract = imported;
+            }
+          } catch(e) {}
+        } else if (docId && window.contractPool[docId]) {
+          window.currentContract = window.contractPool[docId];
         }
+
+        promptClientBirthdayGate();
+        if (window.currentContract) {
+          window.loadContractIntoDOM(window.currentContract);
+        }
+        return;
       }
 
-      loadContractIntoDOM(window.currentContract);
+      // 2. 관리자 메인 페이지 접속인 경우
+      window.appMode = 'admin';
+      document.getElementById('topStatusSubbar').style.display = 'block';
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+
+      if (!isAdminAuthenticated) {
+        document.getElementById('adminPassModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('adminPassInput').focus(), 50);
+      } else {
+        goToAdminDashboard();
+      }
     }
 
     function verifyAdminPassword() {
@@ -1724,8 +1735,7 @@
         isAdminAuthenticated = true;
         document.getElementById('adminPassModal').classList.add('hidden');
         showToast('메리담 관리자 인증 성공', 'success');
-        renderModeUI();
-        renderDashboardList();
+        goToAdminDashboard();
       } else {
         showToast('관리자 비밀번호가 일치하지 않습니다.', 'error');
         document.getElementById('adminPassInput').value = '';
@@ -1736,7 +1746,6 @@
       const c = window.currentContract;
       if (!c || !c.clientBirth) {
         isClientAuthenticated = true;
-        renderModeUI();
         return;
       }
       document.getElementById('clientAuthModal').classList.remove('hidden');
@@ -1756,13 +1765,159 @@
         isClientAuthenticated = true;
         document.getElementById('clientAuthModal').classList.add('hidden');
         showToast('본인 확인이 완료되었습니다. 빨간색 표시를 확인해 주세요.', 'success');
-        renderModeUI();
       } else {
         showToast('생년월일이 일치하지 않습니다. 다시 확인해주세요.', 'error');
         document.getElementById('clientAuthInput').value = '';
       }
     }
 
+    // 관리자 메인 대시보드 화면 전환
+    window.goToAdminDashboard = function() {
+      if (window.appMode === 'client') return;
+      currentMainView = 'dashboard';
+      document.getElementById('adminListView').classList.remove('hidden');
+      document.getElementById('webInteractiveView').classList.add('hidden');
+      document.getElementById('contractStatusText').textContent = '현재 상태: 계약서 목록 관리 대시보드';
+      renderDashboardMainTable();
+    };
+
+    // 계약서 작성 화면 전환
+    window.openContractFormView = function(contract) {
+      currentMainView = 'form';
+      window.currentContract = contract;
+      document.getElementById('adminListView').classList.add('hidden');
+      document.getElementById('webInteractiveView').classList.remove('hidden');
+      window.loadContractIntoDOM(contract);
+      document.getElementById('contractStatusText').textContent = `현재 상태: [${contract.id}] 계약서 편집 모드`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.createNewContractDraft = function() {
+      const newContract = createBlankContract();
+      window.contractPool[newContract.id] = newContract;
+      if (window.saveContractToCloud) {
+        window.saveContractToCloud(newContract);
+      }
+      openContractFormView(newContract);
+      showToast(`새 계약서 [${newContract.id}] 신규 작성을 시작합니다.`, 'success');
+    };
+
+    window.saveAdminContractAndReturn = function() {
+      handleFieldChange();
+      if (window.saveContractToCloud && window.currentContract) {
+        window.saveContractToCloud(window.currentContract);
+      }
+      showToast(`[${window.currentContract.id}] 계약서가 성공적으로 저장되었습니다.`, 'success');
+      goToAdminDashboard();
+    };
+
+    // 대시보드 메인 리스트 렌더링
+    window.renderDashboardMainTable = function() {
+      const tbody = document.getElementById('dashTableBody');
+      const emptyState = document.getElementById('dashEmptyState');
+      if (!tbody) return;
+
+      const query = (document.getElementById('dashSearchInput')?.value || '').toLowerCase().trim();
+      const keys = Object.keys(window.contractPool).sort().reverse();
+
+      // 통계 계산
+      let totalCount = keys.length;
+      let signedCount = 0;
+      let pendingCount = 0;
+      let totalAmount = 0;
+
+      keys.forEach(k => {
+        const item = window.contractPool[k];
+        if (item.clientSigned) signedCount++;
+        else pendingCount++;
+        totalAmount += (item.feeTotal || 0);
+      });
+
+      document.getElementById('dashStatTotal').textContent = totalCount;
+      document.getElementById('dashStatSigned').textContent = signedCount;
+      document.getElementById('dashStatPending').textContent = pendingCount;
+      document.getElementById('dashStatAmount').textContent = totalAmount.toLocaleString() + '원';
+      document.getElementById('contractCountBadge').textContent = totalCount;
+
+      let html = '';
+      let visibleCount = 0;
+
+      keys.forEach(k => {
+        const item = window.contractPool[k];
+        const match = !query || 
+          (item.clientName && item.clientName.toLowerCase().includes(query)) ||
+          (item.clientPhone && item.clientPhone.includes(query)) ||
+          (item.clientBirth && item.clientBirth.includes(query)) ||
+          (item.weddingHall && item.weddingHall.toLowerCase().includes(query)) ||
+          item.id.toLowerCase().includes(query);
+
+        if (!match) return;
+        visibleCount++;
+
+        const isSigned = !!item.clientSigned;
+        const statusBadge = isSigned 
+          ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-check-double text-emerald-600"></i> 서명체결</span>'
+          : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-clock text-amber-600"></i> 서명대기</span>';
+
+        html += `
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+            <td class="p-3 font-mono font-bold text-slate-900 cursor-pointer text-xs" onclick="openContractFormById('${item.id}')">
+              ${item.id}
+            </td>
+            <td class="p-3 font-bold text-slate-800 cursor-pointer" onclick="openContractFormById('${item.id}')">
+              ${item.clientName || '<span class="text-slate-400">성명 미입력</span>'}
+            </td>
+            <td class="p-3 text-[11px] text-slate-600">
+              <div>${item.clientPhone || '-'}</div>
+              <div class="text-slate-400 font-mono">생년: ${item.clientBirth || '미기재'}</div>
+            </td>
+            <td class="p-3 text-[11px] text-slate-600">
+              <div class="font-semibold text-slate-800">${item.weddingHall || '예식장 미입력'}</div>
+              <div class="text-slate-400">${item.weddingDate || '-'} ${item.weddingTime || ''}</div>
+            </td>
+            <td class="p-3 font-bold text-brand-700 text-xs">
+              금 ${(item.feeTotal || 0).toLocaleString()}원
+            </td>
+            <td class="p-3 text-center">
+              ${statusBadge}
+            </td>
+            <td class="p-3 text-right">
+              <div class="inline-flex items-center gap-1">
+                <button type="button" onclick="openContractFormById('${item.id}')" title="계약서 편집" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px]">
+                  <i class="fa-solid fa-pen-to-square"></i> 열기
+                </button>
+                <button type="button" onclick="openShareForContract('${item.id}')" title="서명 링크 복사" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-[11px] border border-emerald-200">
+                  <i class="fa-solid fa-share-nodes"></i>
+                </button>
+                <button type="button" onclick="openDeleteModal('${item.id}', event)" title="계약서 삭제" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition ml-1">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    };
+
+    window.openContractFormById = function(id) {
+      if (window.contractPool[id]) {
+        openContractFormView(window.contractPool[id]);
+      }
+    };
+
+    window.openShareForContract = function(id) {
+      if (window.contractPool[id]) {
+        window.currentContract = window.contractPool[id];
+        openShareConfigModal();
+      }
+    };
     function setRadioVal(name, val) {
       if (!name) return;
       const radios = document.querySelectorAll(`input[name="${name}"]`);
@@ -1922,7 +2077,19 @@
       renderSignatureState(c);
       calculateTotalFees();
       syncPrintDocument();
-      renderModeUI();
+
+      const adminEditableInputs = document.querySelectorAll('.admin-editable');
+      if (window.appMode === 'admin') {
+        adminEditableInputs.forEach(el => {
+          el.removeAttribute('readonly');
+          el.classList.remove('cursor-not-allowed', 'bg-slate-100');
+        });
+      } else {
+        adminEditableInputs.forEach(el => {
+          el.setAttribute('readonly', 'true');
+          el.classList.add('cursor-not-allowed', 'bg-slate-100');
+        });
+      }
     };
 
     window.setOneTouchVal = function(id, text) {
@@ -1968,7 +2135,7 @@
       window.currentContract.groomName = getVal('groomName');
       window.currentContract.brideName = getVal('brideName');
       
-      if (appMode === 'admin') {
+      if (window.appMode === 'admin') {
         window.currentContract.weddingDate = getVal('weddingDate');
         window.currentContract.weddingTime = getVal('weddingTime');
         window.currentContract.weddingHall = getVal('weddingHall');
@@ -2025,8 +2192,6 @@
 
       syncPrintDocument();
 
-      const ind = document.getElementById('savedIndicator');
-      if (ind) ind.innerHTML = '<i class="fa-solid fa-rotate animate-spin mr-1"></i>저장중...';
       clearTimeout(window.saveTimer);
       window.saveTimer = setTimeout(() => {
         if (window.saveContractToCloud) {
@@ -2093,6 +2258,7 @@
       const pImg = document.getElementById('pSignClientImg');
       const pPlace = document.getElementById('pSignPlaceholder');
       const pSignDate = document.getElementById('pSignDate');
+      const signDateText = document.getElementById('contractSignDateText');
 
       if (c.clientSigned && c.clientSignDataUrl) {
         if (pImg) {
@@ -2101,6 +2267,7 @@
         }
         if (pPlace) pPlace.classList.add('hidden');
         if (pSignDate) pSignDate.textContent = `${c.clientSignDate} (전자서명 체결완료)`;
+        if (signDateText) signDateText.textContent = c.clientSignDate;
       } else {
         if (pImg) {
           pImg.src = '';
@@ -2108,9 +2275,151 @@
         }
         if (pPlace) pPlace.classList.remove('hidden');
         if (pSignDate) pSignDate.textContent = '서명 대기중 (미체결)';
+        if (signDateText) signDateText.textContent = '-';
       }
     }
 
+    // 🌟 고객 최종 계약 체결 프로세스
+    window.triggerClientFinalSubmit = function() {
+      handleFieldChange();
+      const c = window.currentContract;
+      if (!c) return;
+
+      if (!c.serviceType) {
+        showToast('빨간색 박스의 [서비스 유형]을 먼저 선택해주세요!', 'warning');
+        return;
+      }
+      if (!c.serviceSide) {
+        showToast('빨간색 박스의 [담당 측]을 먼저 선택해주세요!', 'warning');
+        return;
+      }
+      if (!c.moneyProcess) {
+        showToast('빨간색 박스의 [축의금 처리 방식]을 먼저 선택해주세요!', 'warning');
+        return;
+      }
+      if (!c.receiverName) {
+        showToast('빨간색 박스의 [축의금 인계자 성명]을 입력해주세요!', 'warning');
+        return;
+      }
+      if (!c.consentPrivacy) {
+        showToast('빨간색 박스의 [개인정보 수집·이용 동의]에 체크해주세요!', 'warning');
+        return;
+      }
+      if (!c.clientSigned) {
+        showToast('하단 서명패드를 터치하여 본인 전자서명을 완료해주세요!', 'warning');
+        openSignatureModal();
+        return;
+      }
+
+      // 모달 표시
+      document.getElementById('clientSubmitConfirmModal').classList.remove('hidden');
+    };
+
+    window.closeClientConfirmModal = function() {
+      document.getElementById('clientSubmitConfirmModal').classList.add('hidden');
+    };
+
+    window.executeFinalClientContract = function() {
+      closeClientConfirmModal();
+      if (window.saveContractToCloud && window.currentContract) {
+        window.saveContractToCloud(window.currentContract);
+      }
+      showToast('🎉 메리담 축의대 대행 전자계약이 성공적으로 체결되었습니다!', 'success');
+      
+      // 즉시 정규 계약서 A4 뷰(완벽한 PDF 화면)로 전환 표시
+      syncPrintDocument();
+      document.getElementById('webInteractiveView').classList.add('hidden');
+      document.getElementById('printOfficialDoc').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      setTimeout(() => {
+        downloadOfficialPdf();
+      }, 500);
+    };
+    function openDeleteModal(docId, event) {
+      if (event) event.stopPropagation();
+      pendingDeleteDocId = docId;
+      document.getElementById('deleteTargetDocId').textContent = docId;
+      const modal = document.getElementById('confirmDeleteModal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('div').classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeDeleteModal() {
+      const modal = document.getElementById('confirmDeleteModal');
+      modal.classList.add('opacity-0');
+      modal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        pendingDeleteDocId = null;
+      }, 200);
+    }
+
+    function confirmDeleteContract() {
+      if (!pendingDeleteDocId) return;
+      const docId = pendingDeleteDocId;
+
+      if (window.deleteContractFromCloud) {
+        window.deleteContractFromCloud(docId);
+      }
+
+      closeDeleteModal();
+      showToast(`[${docId}] 계약서가 영구 삭제되었습니다.`, 'info');
+      goToAdminDashboard();
+    }
+
+    function openShareConfigModal() {
+      handleFieldChange();
+      const modal = document.getElementById('shareConfigModal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('div').classList.remove('scale-95');
+      }, 10);
+
+      updateShareUrlPreview();
+    }
+
+    function closeShareConfigModal() {
+      const modal = document.getElementById('shareConfigModal');
+      modal.classList.add('opacity-0');
+      modal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    function updateShareUrlPreview() {
+      const c = window.currentContract;
+      if (!c) return;
+      const payload = encodeURIComponent(JSON.stringify(c));
+      const shareUrl = window.location.origin + window.location.pathname + '?id=' + c.id + '&view=client&data=' + payload;
+      document.getElementById('shareUrlPreviewText').textContent = shareUrl;
+    }
+
+    function copyFinalShareLink() {
+      if (!window.currentContract) return;
+
+      if (window.saveContractToCloud) {
+        window.saveContractToCloud(window.currentContract);
+      }
+
+      const payload = encodeURIComponent(JSON.stringify(window.currentContract));
+      const shareUrl = window.location.origin + window.location.pathname + '?id=' + window.currentContract.id + '&view=client&data=' + payload;
+
+      const dummy = document.createElement('textarea');
+      document.body.appendChild(dummy);
+      dummy.value = shareUrl;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+
+      closeShareConfigModal();
+      showToast('고객 전용 서명 링크가 클립보드에 복사되었습니다!', 'success');
+    }
+
+    // PDF 다운로드 엔진 (A4 2페이지 실측 렌더링)
     async function downloadOfficialPdf() {
       handleFieldChange();
       syncPrintDocument();
@@ -2211,7 +2520,7 @@
       } catch (err) {
         if (offscreenContainer.parentNode) document.body.removeChild(offscreenContainer);
         console.error('PDF generation error', err);
-        showToast('PDF 생성 중 오류가 발생하여 브라우저 인쇄 모드로 전환합니다.', 'warning');
+        showToast('브라우저 인쇄 모드로 전환합니다.', 'warning');
         window.print();
       }
     }
@@ -2222,267 +2531,7 @@
       setTimeout(() => { window.print(); }, 100);
     }
 
-    function switchMode(mode) {
-      if (mode === 'admin' && !isAdminAuthenticated) {
-        document.getElementById('adminPassModal').classList.remove('hidden');
-        return;
-      }
-      appMode = mode;
-      renderModeUI();
-    }
-
-    function renderModeUI() {
-      const adminBtn = document.getElementById('adminModeBtn');
-      const clientBtn = document.getElementById('clientModeBtn');
-      const statusText = document.getElementById('contractStatusText');
-      const adminOnlyElements = document.querySelectorAll('.admin-only');
-      const adminEditableInputs = document.querySelectorAll('.admin-editable');
-
-      const c = window.currentContract;
-
-      if (appMode === 'admin') {
-        if (adminBtn) adminBtn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-sm transition-all flex items-center gap-1 font-bold';
-        if (clientBtn) clientBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 transition-all flex items-center gap-1';
-        if (statusText) statusText.textContent = `현재 상태: 관리자 작성 및 전체 수정 모드 (${c?.id || ''})`;
-
-        adminOnlyElements.forEach(el => el.style.display = '');
-        adminEditableInputs.forEach(el => {
-          el.removeAttribute('readonly');
-          el.classList.remove('cursor-not-allowed', 'bg-slate-100');
-        });
-      } else {
-        if (clientBtn) clientBtn.className = 'px-2.5 py-1 rounded-lg bg-white text-emerald-800 shadow-sm transition-all flex items-center gap-1 font-bold';
-        if (adminBtn) adminBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 transition-all flex items-center gap-1';
-        if (statusText) statusText.textContent = `현재 상태: 의뢰인(고객) 확인 및 전자서명 모드 (${c?.id || ''})`;
-
-        adminOnlyElements.forEach(el => el.style.display = 'none');
-
-        adminEditableInputs.forEach(el => {
-          el.setAttribute('readonly', 'true');
-          el.classList.add('cursor-not-allowed', 'bg-slate-100');
-        });
-      }
-    }
-
-    function toggleDashboardDrawer() {
-      if (!isAdminAuthenticated) {
-        document.getElementById('adminPassModal').classList.remove('hidden');
-        return;
-      }
-      const drawer = document.getElementById('dashboardDrawer');
-      const panel = drawer.querySelector('div');
-      if (drawer.classList.contains('hidden')) {
-        drawer.classList.remove('hidden');
-        renderDashboardList();
-        setTimeout(() => {
-          drawer.classList.remove('opacity-0');
-          panel.classList.remove('translate-x-full');
-        }, 10);
-      } else {
-        drawer.classList.add('opacity-0');
-        panel.classList.add('translate-x-full');
-        setTimeout(() => drawer.classList.add('hidden'), 250);
-      }
-    }
-
-    window.renderDashboardList = function() {
-      const listContainer = document.getElementById('drawerContractList');
-      if (!listContainer) return;
-
-      const query = (document.getElementById('contractSearchInput')?.value || '').toLowerCase().trim();
-      const keys = Object.keys(window.contractPool);
-
-      const totalCounter = document.getElementById('totalContractCounter');
-      const countBadge = document.getElementById('contractCountBadge');
-      if (totalCounter) totalCounter.textContent = keys.length;
-      if (countBadge) countBadge.textContent = keys.length;
-
-      let html = '';
-      keys.forEach(k => {
-        const item = window.contractPool[k];
-        const match = !query || 
-          (item.clientName && item.clientName.toLowerCase().includes(query)) ||
-          (item.clientPhone && item.clientPhone.includes(query)) ||
-          (item.clientBirth && item.clientBirth.includes(query)) ||
-          (item.weddingHall && item.weddingHall.toLowerCase().includes(query)) ||
-          item.id.toLowerCase().includes(query);
-
-        if (!match) return;
-
-        const isCurrent = window.currentContract && window.currentContract.id === item.id;
-        const signStatusHtml = item.clientSigned 
-          ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check-double"></i> 서명체결</span>'
-          : '<span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200"><i class="fa-solid fa-clock"></i> 서명대기</span>';
-
-        html += `
-          <div class="p-3.5 rounded-xl border transition-all relative group ${isCurrent ? 'bg-blue-50/70 border-brand-500 shadow-xs' : 'bg-white border-slate-200 hover:border-slate-300'}">
-            <div onclick="selectContract('${item.id}')" class="cursor-pointer pr-8">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-mono text-xs font-bold text-slate-800">${item.id}</span>
-                ${signStatusHtml}
-              </div>
-              <div class="flex items-center justify-between text-xs text-slate-600 mb-1">
-                <span class="font-bold text-slate-900">${item.clientName || '고객 미지정'} (생년: ${item.clientBirth || '미기재'})</span>
-                <span class="font-semibold text-brand-700">금 ${(item.feeTotal || 0).toLocaleString()}원</span>
-              </div>
-              <div class="text-[11px] text-slate-400 truncate">
-                <i class="fa-solid fa-location-dot mr-1"></i>${item.weddingHall || '예식장 미입력'} (${item.weddingDate || '일자 미정'})
-              </div>
-            </div>
-            <button type="button" onclick="openDeleteModal('${item.id}', event)" title="계약서 삭제" class="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition active:scale-90">
-              <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-          </div>
-        `;
-      });
-
-      if (!html) {
-        html = '<div class="text-center py-8 text-xs text-slate-400">일치하는 계약서가 없습니다.</div>';
-      }
-
-      listContainer.innerHTML = html;
-    };
-
-    function selectContract(id) {
-      if (window.contractPool[id]) {
-        window.currentContract = window.contractPool[id];
-        window.loadContractIntoDOM(window.currentContract);
-        renderModeUI();
-        toggleDashboardDrawer();
-        showToast(`[${id}] 계약서를 불러왔습니다.`, 'info');
-      }
-    }
-
-    function createNewContractDraft() {
-      const newContract = createBlankContract();
-      
-      window.contractPool[newContract.id] = newContract;
-      window.currentContract = newContract;
-      
-      window.loadContractIntoDOM(window.currentContract);
-      
-      try {
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-      } catch (e) {
-        console.warn('URL clean state ignored:', e);
-      }
-      
-      renderDashboardList();
-      renderModeUI();
-
-      if (window.saveContractToCloud) {
-        window.saveContractToCloud(newContract);
-      }
-
-      if (!document.getElementById('dashboardDrawer').classList.contains('hidden')) {
-        toggleDashboardDrawer();
-      }
-      
-      setTimeout(() => {
-        const nameInput = document.getElementById('clientName');
-        if (nameInput) {
-          nameInput.focus();
-          nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 100);
-
-      showToast(`새 계약서 [${newContract.id}] 신규 작성을 시작합니다.`, 'success');
-    }
-
-    function openDeleteModal(docId, event) {
-      if (event) event.stopPropagation();
-      pendingDeleteDocId = docId;
-      document.getElementById('deleteTargetDocId').textContent = docId;
-      const modal = document.getElementById('confirmDeleteModal');
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        modal.querySelector('div').classList.remove('scale-95');
-      }, 10);
-    }
-
-    function closeDeleteModal() {
-      const modal = document.getElementById('confirmDeleteModal');
-      modal.classList.add('opacity-0');
-      modal.querySelector('div').classList.add('scale-95');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        pendingDeleteDocId = null;
-      }, 200);
-    }
-
-    function confirmDeleteContract() {
-      if (!pendingDeleteDocId) return;
-      const docId = pendingDeleteDocId;
-
-      if (window.deleteContractFromCloud) {
-        window.deleteContractFromCloud(docId);
-      }
-
-      closeDeleteModal();
-
-      if (window.currentContract && window.currentContract.id === docId) {
-        const remainingKeys = Object.keys(window.contractPool);
-        if (remainingKeys.length > 0) {
-          window.currentContract = window.contractPool[remainingKeys[0]];
-        } else {
-          window.currentContract = createDefaultContract();
-          window.contractPool[window.currentContract.id] = window.currentContract;
-        }
-        window.loadContractIntoDOM(window.currentContract);
-      }
-
-      showToast(`[${docId}] 계약서가 삭제되었습니다.`, 'info');
-    }
-
-    function openShareConfigModal() {
-      handleFieldChange();
-      const modal = document.getElementById('shareConfigModal');
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        modal.querySelector('div').classList.remove('scale-95');
-      }, 10);
-
-      updateShareUrlPreview();
-    }
-
-    function closeShareConfigModal() {
-      const modal = document.getElementById('shareConfigModal');
-      modal.classList.add('opacity-0');
-      modal.querySelector('div').classList.add('scale-95');
-      setTimeout(() => modal.classList.add('hidden'), 200);
-    }
-
-    function updateShareUrlPreview() {
-      const c = window.currentContract;
-      const payload = encodeURIComponent(JSON.stringify(c));
-      const shareUrl = window.location.origin + window.location.pathname + '?id=' + c.id + '&view=client&data=' + payload;
-      document.getElementById('shareUrlPreviewText').textContent = shareUrl;
-    }
-
-    function copyFinalShareLink() {
-      if (!window.currentContract) return;
-
-      if (window.saveContractToCloud) {
-        window.saveContractToCloud(window.currentContract);
-      }
-
-      const payload = encodeURIComponent(JSON.stringify(window.currentContract));
-      const shareUrl = window.location.origin + window.location.pathname + '?id=' + window.currentContract.id + '&view=client&data=' + payload;
-
-      const dummy = document.createElement('textarea');
-      document.body.appendChild(dummy);
-      dummy.value = shareUrl;
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-
-      closeShareConfigModal();
-      showToast('고객 전용 서명 링크가 클립보드에 복사되었습니다!', 'success');
-    }
-
+    // Canvas Signature Pad Logic
     function initCanvas() {
       canvas = document.getElementById('signatureCanvas');
       if (!canvas) return;
@@ -2551,34 +2600,8 @@
       ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
     }
 
-    // Unblocked, Reliable Signature Modal Trigger
     function openSignatureModal() {
-      // 1. 최신 선택 상태를 즉시 동기화
       handleFieldChange();
-
-      // 2. 고객 입력 상태 점검 (누락 시 친절한 안내)
-      if (!window.currentContract.serviceType) {
-        showToast('빨간색 박스의 [서비스 유형]을 먼저 선택해주세요!', 'warning');
-        return;
-      }
-      if (!window.currentContract.serviceSide) {
-        showToast('빨간색 박스의 [담당 측]을 먼저 선택해주세요!', 'warning');
-        return;
-      }
-      if (!window.currentContract.moneyProcess) {
-        showToast('빨간색 박스의 [축의금 처리 방식]을 먼저 선택해주세요!', 'warning');
-        return;
-      }
-      if (!window.currentContract.receiverName) {
-        showToast('빨간색 박스의 [축의금 인계자 성명]을 입력해주세요!', 'warning');
-        return;
-      }
-      if (!window.currentContract.consentPrivacy) {
-        showToast('빨간색 박스의 [개인정보 수집·이용 동의]에 체크해주세요!', 'warning');
-        return;
-      }
-
-      // 3. 서명 모달 활성화 및 캔버스 준비
       const modal = document.getElementById('sigModal');
       if (!modal) return;
       modal.classList.remove('hidden');
@@ -2623,12 +2646,10 @@
       }
 
       renderSignatureState(window.currentContract);
-      renderDashboardList();
       syncPrintDocument();
       closeSignatureModal();
 
-      document.getElementById('contractStatusText').textContent = `현재 상태: [${window.currentContract.id}] 양 당사자 전자계약 체결 완료 (유효)`;
-      showToast('전자서명이 성공적으로 완료되었습니다!', 'success');
+      showToast('서명이 안전하게 적용되었습니다! 하단 [계약 체결 완료하기]를 눌러주세요.', 'success');
     }
 
     function showToast(message, type = 'info') {
