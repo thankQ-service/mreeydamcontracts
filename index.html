@@ -2420,14 +2420,18 @@
       const entered = document.getElementById('clientAuthInput').value.trim();
       const expected = window.currentContract?.clientBirth?.trim() || '';
 
-      if (expected && entered && (entered === expected || entered === expected.slice(2))) {
+      if ((expected && entered && (entered === expected || entered === expected.slice(2))) || !expected) {
         isClientAuthenticated = true;
         document.getElementById('clientAuthModal').classList.add('hidden');
-        switchMainView('form');
-        showToast('본인 인증이 완료되었습니다. 계약서를 확인해 주세요.', 'success');
-      } else if (!expected) {
-        document.getElementById('clientAuthModal').classList.add('hidden');
-        switchMainView('form');
+
+        // 이미 서명이 완료된 계약서인 경우: 입력창을 건너뛰고 체결 완료된 계약서 원본 화면으로 즉시 전환
+        if (window.currentContract && window.currentContract.clientSigned) {
+          goToCompletedContractView();
+          showToast('이미 전자계약 체결이 완료된 문서입니다. 체결된 계약서 원본을 표시합니다.', 'success');
+        } else {
+          switchMainView('form');
+          showToast('본인 인증이 완료되었습니다. 계약서를 확인해 주세요.', 'success');
+        }
       } else {
         showToast('생년월일이 일치하지 않습니다. 다시 확인해 주세요.', 'warning');
       }
