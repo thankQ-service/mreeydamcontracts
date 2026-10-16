@@ -111,7 +111,7 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      #interactiveAppView, #adminPassModal, #clientAuthModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal {
+      #interactiveAppView, #adminPassModal, #clientAuthModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, header {
         display: none !important;
       }
       #printOfficialDoc {
@@ -232,7 +232,6 @@
 
   <main id="interactiveAppView" class="max-w-5xl mx-auto px-4 py-6">
 
-    <!-- VIEW 1: 관리자 전용 계약서 목록 대시보드 -->
     <div id="dashboardSection" class="space-y-6">
       <!-- 상단 요약 카드 -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -292,7 +291,6 @@
       </div>
     </div>
 
-    <!-- VIEW 2: 계약서 작성 및 전자서명 상세 뷰 -->
     <div id="contractFormSection" class="hidden max-w-4xl mx-auto space-y-6">
 
       <!-- 상단 문서 타이틀 및 번호 -->
@@ -949,7 +947,7 @@
         </div>
       </section>
 
-      <!-- SECTION 9: 전자서명 체결 및 날인 (고객 & 메리담 양방향 터치 서명 탑재) -->
+      <!-- SECTION 9: 전자서명 체결 및 날인 (고객 & 메리담 대표 직접 터치 서명 탑재) -->
       <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>9. 전자계약 체결 및 서명</span>
@@ -991,12 +989,12 @@
             </div>
           </div>
 
-          <!-- 대행업체 (메리담 대표 터치 서명 카드) -->
+          <!-- 대행업체 (메리담 대표 터치 서명 카드 - '메리담 인' 도장 없음) -->
           <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between" id="adminSigCardBox">
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <i class="fa-solid fa-stamp text-brand-600"></i>
+                  <i class="fa-solid fa-file-signature text-brand-600"></i>
                   <span>■ 대행업체 (메리담) 서명 날인</span>
                 </span>
                 <span id="adminSigStateBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
@@ -1019,10 +1017,6 @@
                   <span class="block text-xs font-black text-brand-700 mt-1">대표자 서명 터치하기</span>
                   <span class="text-[10px] text-slate-400">대표 전형민 전자서명 / 날인</span>
                 </div>
-                <!-- 공식 전자 직인 SVG (항시 보조 표시) -->
-                <div class="w-12 h-12 rounded-full border-2 border-red-600/70 flex items-center justify-center text-red-600/80 font-black text-[10px] rotate-[-12deg] shadow-xs bg-red-50/30 absolute right-3 bottom-2 pointer-events-none">
-                  메리담<br>인
-                </div>
               </div>
               <span id="adminSignDateText" class="text-[10px] text-slate-500 text-center block mt-1.5">대표자 서명 날인 유효</span>
             </div>
@@ -1044,7 +1038,6 @@
     </div>
   </main>
 
-  <!-- PRINT & PDF VIEW (정규 A4 2페이지 규격) -->
   <div id="printOfficialDoc">
     <!-- PAGE 1: 1조 ~ 4조 -->
     <div class="a4-page bg-white p-6 text-slate-900 flex flex-col justify-between">
@@ -1121,7 +1114,7 @@
           <div id="p2DocNo" class="text-[8pt] font-mono font-bold text-slate-500">MD-000000-0000</div>
         </div>
 
-        <!-- 5. 서비스 요금 및 지급 (국민은행 계좌로 정확히 반영) -->
+        <!-- 5. 서비스 요금 및 지급 (국민은행 계좌) -->
         <div class="doc-section-title">5. 서비스 요금 및 지급</div>
         <table class="doc-table">
           <colgroup><col style="width: 14%;"><col style="width: 21%;"><col style="width: 14%;"><col style="width: 21%;"><col style="width: 14%;"><col style="width: 16%;"></colgroup>
@@ -1170,7 +1163,7 @@
           </tr>
         </table>
 
-        <!-- 9. 서명 날인 (고객 서명 & 메리담 대표 터치 서명 인쇄 반영) -->
+        <!-- 9. 서명 날인 (고객 서명 & 메리담 대표 터치 서명만 표시) -->
         <div class="doc-section-title">9. 계약 체결 및 전자서명 날인</div>
         <table class="doc-table">
           <colgroup><col style="width: 50%;"><col style="width: 50%;"></colgroup>
@@ -1197,9 +1190,6 @@
                 <div class="h-16 flex items-center justify-center mt-1 border border-slate-200 bg-slate-50 rounded relative overflow-hidden">
                   <img id="pSignAdminImg" class="hidden max-h-14 max-w-full object-contain z-10" alt="대표자 전자서명">
                   <span id="pAdminPlaceholder" class="text-slate-500 font-serif font-bold text-[8.5pt]">대표자 전형민</span>
-                  <div class="w-11 h-11 rounded-full border border-red-600 flex items-center justify-center text-red-600 font-black text-[6.5pt] rotate-[-12deg] absolute right-2 opacity-80">
-                    메리담인
-                  </div>
                 </div>
               </td>
             </tr>
@@ -1247,7 +1237,7 @@
     </div>
   </div>
 
-  <!-- 링크 복사 모달 -->
+  <!-- 링크 복사 모달 (초간결 숏링크) -->
   <div id="linkModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
@@ -1259,7 +1249,7 @@
         </button>
       </div>
       <div class="p-5 space-y-3">
-        <p class="text-xs text-slate-600">아래 링크를 복사하여 고객에게 카카오톡 또는 문자로 전송하세요. 고객은 생년월일 본인 확인 후 서명을 진행합니다.</p>
+        <p class="text-xs text-slate-600">아래 초간결 링크를 복사하여 고객에게 카카오톡 또는 문자로 전송하세요. 고객은 생년월일 본인 확인 후 서명을 진행합니다.</p>
         <div class="flex items-center gap-2">
           <input type="text" id="shareUrlInput" readonly class="text-xs p-2.5 border border-slate-300 rounded-lg w-full bg-slate-50 font-mono select-all">
           <button onclick="copyShareUrl()" class="shrink-0 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-xs">
@@ -1270,7 +1260,7 @@
     </div>
   </div>
 
-  <!-- 고객 본인 확인 모달 (생년월일 입력) -->
+  <!-- 고객 본인 확인 모달 (생년월일 입력 및 Enter 지원) -->
   <div id="clientAuthModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
@@ -1288,7 +1278,7 @@
     </div>
   </div>
 
-  <!-- 마스터 관리자 비밀번호 모달 -->
+  <!-- 마스터 관리자 비밀번호 모달 (Enter 키 지원) -->
   <div id="adminPassModal" class="hidden fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
@@ -1331,10 +1321,9 @@
   <!-- 토스트 알림 컨테이너 -->
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- FIREBASE MODULE SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1353,10 +1342,10 @@
       db = getFirestore(app);
       auth = getAuth(app);
       signInAnonymously(auth).catch((err) => {
-        console.warn("익명 인증 활성화 필요 (Firebase Console):", err);
+        console.warn("Firebase Auth Notice:", err);
       });
     } catch (e) {
-      console.warn("Firebase Init Fallback:", e);
+      console.warn("Firebase Init Notice:", e);
     }
 
     function sanitizeForFirestore(obj) {
@@ -1410,7 +1399,6 @@
     };
   </script>
 
-  <!-- APPLICATION CORE LOGIC SCRIPT -->
   <script>
     const MASTER_ADMIN_PASS = "wlfkf1818!@";
     let isAdminAuthenticated = false;
@@ -1495,6 +1483,7 @@
     window.onload = function() {
       initCanvas();
       loadContractsFromLocalStorage();
+      bindEnterKeyEvents();
 
       const params = new URLSearchParams(window.location.search);
       const urlView = params.get('view');
@@ -1527,6 +1516,29 @@
         }
       });
     };
+
+    // 엔터키(Enter) 이벤트 바인딩
+    function bindEnterKeyEvents() {
+      const adminPassInput = document.getElementById('adminPassInput');
+      if (adminPassInput) {
+        adminPassInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            verifyAdminPass();
+          }
+        });
+      }
+
+      const clientAuthInput = document.getElementById('clientAuthInput');
+      if (clientAuthInput) {
+        clientAuthInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            verifyClientAuth();
+          }
+        });
+      }
+    }
 
     function loadContractsFromLocalStorage() {
       for (let i = 0; i < localStorage.length; i++) {
@@ -1832,7 +1844,7 @@
       clearTimeout(window.saveTimer);
       window.saveTimer = setTimeout(() => {
         window.saveContractToCloud(c);
-      }, 500);
+      }, 400);
     };
 
     // 요금 자동 계산
@@ -1896,7 +1908,7 @@
       showToast('반환 승인자 정보를 가져왔습니다.', 'info');
     };
 
-    // 인쇄용 A4 2페이지 동기화 (수정된 국민은행 계좌 및 대표 서명 포함)
+    // 인쇄용 A4 2페이지 동기화 (국민은행 계좌 및 대표 친필 서명 매핑)
     function syncPrintDocument() {
       const c = window.currentContract;
       if (!c) return;
@@ -1969,7 +1981,7 @@
         if (pClientDate) pClientDate.textContent = '서명 대기중 (미체결)';
       }
 
-      // 메리담 대표 서명 인쇄 뷰 매핑
+      // 메리담 대표 친필 서명 인쇄 뷰 매핑
       const pAdminImg = document.getElementById('pSignAdminImg');
       const pAdminPlace = document.getElementById('pAdminPlaceholder');
       const pAdminDate = document.getElementById('pAdminSignDate');
@@ -2014,7 +2026,7 @@
         clientDateText.textContent = '-';
       }
 
-      // 2. 메리담 대표 서명
+      // 2. 메리담 대표 친필 서명
       const adminImg = document.getElementById('contractAdminSigImg');
       const adminPrompt = document.getElementById('adminSigEmptyPrompt');
       const adminBadge = document.getElementById('adminSigStateBadge');
@@ -2229,7 +2241,7 @@
       }, 800);
     };
 
-    // 서명 링크 생성 및 복사
+    // 서명 링크 생성 및 복사 (초간결 숏링크 생성)
     window.openShareModal = function() {
       handleFieldChange();
       const c = window.currentContract;
@@ -2244,12 +2256,14 @@
       const c = window.contractPool[id];
       if (!c) return;
 
-      const base = window.location.origin + window.location.pathname;
-      const jsonStr = JSON.stringify(c);
-      const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-      const url = `${base}?id=${c.id}&view=client&data=${b64}`;
+      // 파이어베이스 및 로컬 DB에 선행 저장하여 무결성 확보
+      window.saveContractToCloud(c);
 
-      document.getElementById('shareUrlInput').value = url;
+      const base = window.location.origin + window.location.pathname;
+      // 수백~수천 자에 달하던 데이터 페이로드를 제거하고 초간결 숏링크로 단축
+      const shortUrl = `${base}?id=${c.id}&view=client`;
+
+      document.getElementById('shareUrlInput').value = shortUrl;
       document.getElementById('linkModal').classList.remove('hidden');
     };
 
@@ -2265,10 +2279,12 @@
       closeShareModal();
     };
 
-    // 인증 모달
+    // 인증 모달 (엔터키 지원)
     function showAdminPassModal() {
       document.getElementById('adminPassModal').classList.remove('hidden');
-      document.getElementById('adminPassInput').focus();
+      setTimeout(() => {
+        document.getElementById('adminPassInput')?.focus();
+      }, 100);
     }
 
     window.verifyAdminPass = function() {
@@ -2285,7 +2301,9 @@
 
     function showClientAuthModal() {
       document.getElementById('clientAuthModal').classList.remove('hidden');
-      document.getElementById('clientAuthInput').focus();
+      setTimeout(() => {
+        document.getElementById('clientAuthInput')?.focus();
+      }, 100);
     }
 
     window.verifyClientAuth = function() {
@@ -2305,7 +2323,7 @@
       }
     };
 
-    // 인쇄 및 모바일 PDF 다운로드
+    // 인쇄 및 모바일 PDF 다운로드 (초고화질 A4 규격 엔진)
     window.triggerPrintDoc = function() {
       handleFieldChange();
       syncPrintDocument();
@@ -2327,12 +2345,12 @@
 
         for (let i = 0; i < pages.length; i++) {
           const canvas = await html2canvas(pages[i], {
-            scale: 2,
+            scale: 2.2,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff'
           });
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const imgData = canvas.toDataURL('image/jpeg', 0.98);
           if (i > 0) pdf.addPage('a4', 'p');
           pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
         }
