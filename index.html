@@ -1401,7 +1401,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, onSnapshot, enableNetwork } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeFirestore, doc, setDoc, getDoc, deleteDoc, collection, onSnapshot, enableNetwork } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1417,11 +1417,16 @@
     let app, db, auth;
     let activeCollectionUnsubscribe = null;
     let authReadyResolve;
+    let isListening = false;
+    let reconnectTimeout = null;
     const authReadyPromise = new Promise(resolve => { authReadyResolve = resolve; });
 
     try {
       app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
+      // INTERNAL ASSERTION FAILED 방지를 위한 Long Polling 초기화
+      db = initializeFirestore(app, {
+        experimentalForceLongPolling: true
+      });
       auth = getAuth(app);
       
       // 익명 로그인 및 인증 준비 완료
@@ -1434,6 +1439,7 @@
       }).catch((err) => {
         console.warn("Firebase Auth Notice (Fallback mode):", err);
         authReadyResolve(null);
+        window.listenAllContractsFromCloud();
       });
     } catch (e) {
       console.warn("Firebase Init Notice:", e);
@@ -1450,13 +1456,16 @@
 
     // 전체 계약서 실시간 감시 엔진 (PC에서 만들면 모바일에 즉시 뜨고, 모바일에서 서명하면 PC에 즉시 반영)
     window.listenAllContractsFromCloud = function() {
-      if (!db) return;
-      if (activeCollectionUnsubscribe) {
-        activeCollectionUnsubscribe();
-      }
+      if (!db || isListening) return;
 
       try {
+        if (typeof activeCollectionUnsubscribe === 'function') {
+          activeCollectionUnsubscribe();
+          activeCollectionUnsubscribe = null;
+        }
+
         const contractsCol = collection(db, 'merrydam_contracts');
+        isListening = true;
         activeCollectionUnsubscribe = onSnapshot(contractsCol, (snapshot) => {
           snapshot.docChanges().forEach((change) => {
             const data = change.doc.data();
@@ -1495,9 +1504,11 @@
           }
         }, (err) => {
           console.warn("Collection listener notice:", err);
+          isListening = false;
         });
       } catch (e) {
         console.warn("Error setting up collection listener:", e);
+        isListening = false;
       }
     };
 
@@ -1563,23 +1574,21 @@
       } catch (e) {}
     };
 
-    // 모바일 포커스 및 네트워크 복귀 시 강제 재연결
-    const reconnectHandler = async () => {
-      if (db && typeof enableNetwork === 'function') {
-        try {
-          await enableNetwork(db);
-        } catch(e) {}
-      }
-      if (typeof window.listenAllContractsFromCloud === 'function') {
-        window.listenAllContractsFromCloud();
-      }
+    // 모바일 포커스 및 네트워크 복귀 시 안전 재연결 (중복 호출 디바운스 적용)
+    const safeReconnect = () => {
+      clearTimeout(reconnectTimeout);
+      reconnectTimeout = setTimeout(async () => {
+        if (!isListening && typeof window.listenAllContractsFromCloud === 'function') {
+          window.listenAllContractsFromCloud();
+        }
+      }, 500);
     };
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") reconnectHandler();
+      if (document.visibilityState === "visible") safeReconnect();
     });
-    window.addEventListener("focus", reconnectHandler);
-    window.addEventListener("online", reconnectHandler);
+    window.addEventListener("focus", safeReconnect);
+    window.addEventListener("online", safeReconnect);
   </script>
 
   <script>
