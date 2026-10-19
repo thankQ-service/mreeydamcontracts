@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>메리담(MerryDam) 전자계약서 관리 시스템</title>
 
   <!-- Tailwind CSS -->
@@ -42,21 +42,28 @@
     body {
       font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       word-break: keep-all;
+      overflow-wrap: break-word;
       background-color: #f8fafc;
       color: #0f172a;
       -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 모바일 가독성 및 터치 향상 */
+    input, select, textarea, button {
+      font-size: 14px; /* iOS 자동 줌 방지 */
     }
 
     /* 고객 확인 및 입력용 빨간색 강조 박스 */
     .client-red-box {
       border: 2px solid #ef4444 !important;
       background-color: #fffafb !important;
-      border-radius: 0.75rem !important;
+      border-radius: 0.875rem !important;
       position: relative;
       transition: all 0.2s ease-in-out;
     }
     .client-red-box:focus-within {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
     }
 
     /* 빨간색 안내 펄스 뱃지 */
@@ -68,9 +75,10 @@
       color: #ffffff;
       font-size: 0.6875rem;
       font-weight: 800;
-      padding: 0.15rem 0.5rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 9999px;
       letter-spacing: -0.025em;
+      white-space: nowrap;
       animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
@@ -96,15 +104,15 @@
       }
       body.completed-contract-view #printOfficialDoc {
         display: block !important;
-        max-width: 820px;
-        margin: 20px auto 40px auto;
-        padding: 10px;
+        max-width: 840px;
+        margin: 12px auto 40px auto;
+        padding: 8px;
       }
       body.completed-contract-view .a4-page {
         margin-bottom: 24px;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         border: 1px solid #cbd5e1;
-        border-radius: 8px;
+        border-radius: 12px;
         background: #ffffff;
       }
     }
@@ -203,109 +211,110 @@
 <body class="min-h-screen text-slate-800 antialiased selection:bg-brand-500 selection:text-white pb-20">
 
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+    <div class="max-w-5xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-md">
           M
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-extrabold text-slate-900 tracking-tight text-base sm:text-lg">메리담(MerryDam)</span>
-            <span id="roleBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="font-extrabold text-slate-900 tracking-tight text-base sm:text-lg truncate">메리담(MerryDam)</span>
+            <span id="roleBadge" class="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
               관리자 모드
             </span>
           </div>
-          <p class="text-[11px] text-slate-500 hidden sm:block">프리미엄 축의대 대행 전문 전자계약 체결 솔루션</p>
+          <p class="text-[11px] text-slate-500 hidden sm:block truncate">프리미엄 축의대 대행 전문 전자계약 체결 솔루션</p>
         </div>
       </div>
 
       <!-- 상단 액션 버튼 그룹 -->
-      <div class="flex items-center gap-1.5 sm:gap-2">
-        <button id="btnSwitchView" onclick="toggleMainView()" class="admin-only px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition">
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button id="btnSwitchView" onclick="toggleMainView()" class="admin-only px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-list-check text-slate-500"></i>
-          <span id="txtSwitchView">계약서 목록</span>
+          <span id="txtSwitchView" class="hidden sm:inline">계약서 목록</span>
         </button>
-        <button onclick="createNewContractDraft()" class="admin-only px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
+        <button onclick="createNewContractDraft()" class="admin-only px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
           <i class="fa-solid fa-plus"></i>
-          <span class="hidden sm:inline">새 계약서 작성</span>
+          <span class="hidden sm:inline">새 계약서</span>
         </button>
-        <button onclick="openShareModal()" class="admin-only px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
+        <button onclick="openShareModal()" class="admin-only px-2.5 sm:px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
           <i class="fa-solid fa-link"></i>
-          <span>서명링크 복사</span>
+          <span class="hidden xs:inline">서명링크</span>
         </button>
 
         <!-- 공통 인쇄/PDF 버튼 -->
-        <button onclick="triggerPrintDoc()" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition">
+        <button onclick="triggerPrintDoc()" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-print text-slate-500"></i>
-          <span class="hidden sm:inline">인쇄</span>
+          <span class="hidden md:inline">인쇄</span>
         </button>
-        <button id="btnDownloadPdfHeader" onclick="downloadOfficialPdf()" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
+        <button id="btnDownloadPdfHeader" onclick="downloadOfficialPdf()" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
           <i class="fa-solid fa-file-pdf text-rose-400"></i>
-          <span>PDF 다운로드</span>
+          <span>PDF</span>
         </button>
       </div>
     </div>
 
     <!-- 관리자 전용 실시간 상태 알림 바 -->
-    <div id="adminStatusBar" class="admin-only bg-slate-900 text-slate-300 text-[11px] py-1 px-4 border-t border-slate-800">
-      <div class="max-w-5xl mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span id="syncStatusBadge" class="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+    <div id="adminStatusBar" class="admin-only bg-slate-900 text-slate-300 text-[11px] py-1 px-3 sm:px-4 border-t border-slate-800">
+      <div class="max-w-5xl mx-auto flex items-center justify-between text-xs sm:text-[11px]">
+        <div class="flex items-center gap-2 truncate">
+          <span id="syncStatusBadge" class="inline-flex items-center gap-1.5 text-emerald-400 font-medium shrink-0">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            클라우드 실시간 동기화 활성
+            <span class="hidden sm:inline">클라우드 실시간 동기화 활성</span>
+            <span class="sm:hidden">동기화 활성</span>
           </span>
           <span class="text-slate-500">|</span>
-          <span id="activeContractNo">문서번호: 생성 대기중</span>
+          <span id="activeContractNo" class="truncate font-mono">문서번호: 대기중</span>
         </div>
-        <div class="text-slate-400">
+        <div class="text-slate-400 shrink-0 hidden sm:block">
           마스터 관리자 인증 완료
         </div>
       </div>
     </div>
   </header>
 
-  <main id="interactiveAppView" class="max-w-5xl mx-auto px-4 py-6">
+  <main id="interactiveAppView" class="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
 
     <!-- DASHBOARD VIEW -->
-    <div id="dashboardSection" class="space-y-6">
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-medium text-slate-500 block">전체 계약서</span>
-          <span id="statTotalCount" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+    <div id="dashboardSection" class="space-y-4 sm:space-y-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-medium text-slate-500 block">전체 계약서</span>
+          <span id="statTotalCount" class="text-xl sm:text-2xl font-black text-slate-900 mt-1 block">0</span>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-medium text-emerald-600 block">서명 완료 (체결)</span>
-          <span id="statSignedCount" class="text-2xl font-black text-emerald-600 mt-1 block">0</span>
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-medium text-emerald-600 block">서명 완료 (체결)</span>
+          <span id="statSignedCount" class="text-xl sm:text-2xl font-black text-emerald-600 mt-1 block">0</span>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-medium text-amber-600 block">서명 대기중</span>
-          <span id="statWaitingCount" class="text-2xl font-black text-amber-600 mt-1 block">0</span>
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-medium text-amber-600 block">서명 대기중</span>
+          <span id="statWaitingCount" class="text-xl sm:text-2xl font-black text-amber-600 mt-1 block">0</span>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span class="text-xs font-medium text-brand-600 block">총 계약 금액</span>
-          <span id="statTotalAmount" class="text-xl sm:text-2xl font-black text-brand-700 mt-1 block">0원</span>
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-medium text-brand-600 block">총 계약 금액</span>
+          <span id="statTotalAmount" class="text-lg sm:text-2xl font-black text-brand-700 mt-1 block truncate">0원</span>
         </div>
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="p-3.5 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 class="text-lg font-extrabold text-slate-900">계약서 통합 관리 보관함</h2>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">계약서 통합 관리 보관함</h2>
             <p class="text-xs text-slate-500 mt-0.5">발행된 모든 전자계약서의 실시간 체결 상태를 조회하고 관리합니다.</p>
           </div>
           <div class="flex items-center gap-2">
-            <div class="relative">
+            <div class="relative flex-1 sm:flex-initial">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
-              <input type="text" id="searchInput" oninput="renderDashboardTable()" placeholder="고객명, 연락처, 예식장 검색" class="text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-300 w-52 sm:w-64 focus:outline-hidden focus:border-brand-500">
+              <input type="text" id="searchInput" oninput="renderDashboardTable()" placeholder="고객명, 연락처, 예식장 검색" class="text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-300 w-full sm:w-64 focus:outline-hidden focus:border-brand-500">
             </div>
-            <button onclick="createNewContractDraft()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold flex items-center gap-1.5 transition">
+            <button onclick="createNewContractDraft()" class="shrink-0 px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold flex items-center gap-1.5 transition">
               <i class="fa-solid fa-plus"></i> 새 계약서
             </button>
           </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="w-full text-left text-xs border-collapse min-w-[580px]">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
               <tr>
                 <th class="p-3">문서번호</th>
@@ -325,19 +334,19 @@
     </div>
 
     <!-- CONTRACT FORM VIEW -->
-    <div id="contractFormSection" class="hidden max-w-4xl mx-auto space-y-6">
+    <div id="contractFormSection" class="hidden max-w-4xl mx-auto space-y-4 sm:space-y-6">
 
       <!-- Preamble & Confidentiality Warning -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3 sm:pb-4">
           <div>
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[11px] font-extrabold tracking-wide">공식 프리미엄 축의대 대행</span>
+              <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] sm:text-[11px] font-extrabold tracking-wide">공식 프리미엄 축의대 대행</span>
               <span id="topDocNoBadge" class="text-xs font-mono font-bold text-slate-500">MD-000000-0000</span>
             </div>
-            <h1 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">메리담 축의대 대행 서비스 간편계약서</h1>
+            <h1 class="text-lg sm:text-2xl font-black text-slate-900 mt-1">메리담 축의대 대행 서비스 간편계약서</h1>
           </div>
-          <div class="text-right">
+          <div class="sm:text-right">
             <span id="contractStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-700 border border-amber-200">
               <i class="fa-solid fa-clock"></i> 서명 대기중
             </span>
@@ -358,69 +367,69 @@
         </div>
 
         <!-- 고객 모드 전용 알림 바 -->
-        <div id="clientGuideAlert" class="mt-3.5 p-3.5 bg-red-50 border-2 border-red-500 rounded-xl text-red-950 text-xs flex items-start gap-2.5 shadow-xs">
+        <div id="clientGuideAlert" class="mt-3.5 p-3 sm:p-3.5 bg-red-50 border-2 border-red-500 rounded-xl text-red-950 text-xs flex items-start gap-2.5 shadow-xs">
           <i class="fa-solid fa-circle-exclamation text-red-600 text-base mt-0.5 shrink-0"></i>
           <div>
-            <span class="font-extrabold text-[13px] block text-red-700">📢 고객님 확인 및 작성 안내</span>
+            <span class="font-extrabold text-[12px] sm:text-[13px] block text-red-700">📢 고객님 확인 및 작성 안내</span>
             <p class="mt-0.5 text-slate-700 leading-normal">
-              화면에 표시된 <b>[빨간색 박스 테두리]</b> 항목들을 꼼꼼히 확인 및 선택해 주신 후, 맨 하단 서명란에 전자서명을 완료해 주시면 계약이 체결됩니다.
+              화면에 표시된 <b>[빨간색 박스 테두리]</b> 항목들을 꼼꼼히 확인 및 선택해 주신 후, 맨 하단 서명란에 전자서명을 완료해 주시면 계약이 공식 체결됩니다.
             </p>
           </div>
         </div>
       </div>
 
       <!-- SECTION 1: 계약 당사자 -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>1. 계약 당사자</span>
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           <!-- 대행업체 (메리담) -->
-          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+          <div class="p-3.5 sm:p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
             <div class="font-bold text-slate-700 flex items-center justify-between">
               <span>■ 대행업체 (메리담)</span>
               <span class="text-[10px] text-slate-400">사업자 정보</span>
             </div>
-            <div class="grid grid-cols-2 gap-2 text-slate-600">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-600">
               <div><b class="text-slate-800">상호:</b> 메리담(MerryDam)</div>
               <div><b class="text-slate-800">대표자:</b> 전형민</div>
               <div><b class="text-slate-800">사업자등록번호:</b> 764-29-02122</div>
               <div><b class="text-slate-800">연락처:</b> 010-9300-5770</div>
-              <div class="col-span-2"><b class="text-slate-800">주소:</b> 인천광역시 미추홀구 수봉로 48</div>
+              <div class="sm:col-span-2"><b class="text-slate-800">주소:</b> 인천광역시 미추홀구 수봉로 48</div>
             </div>
           </div>
 
           <!-- 의뢰인 (예약자 정보) - 고객 빨간색 박스 -->
-          <div class="client-red-box p-4 space-y-2.5 text-xs">
-            <div class="font-bold text-red-950 flex items-center justify-between">
-              <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-user-pen text-red-600"></i>
-                <span>■ 의뢰인 (예약자 정보)</span>
+          <div class="client-red-box p-3.5 sm:p-4 space-y-2.5 text-xs">
+            <div class="font-bold text-red-950 flex items-center justify-between gap-1">
+              <span class="flex items-center gap-1.5 truncate">
+                <i class="fa-solid fa-user-pen text-red-600 shrink-0"></i>
+                <span class="truncate">■ 의뢰인 (예약자 정보)</span>
               </span>
               <span class="client-guide-badge">고객 확인 및 입력</span>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">성명 <span class="text-red-500">*</span></label>
-                <input type="text" id="clientName" onchange="handleFieldChange()" placeholder="홍길동" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-semibold focus:border-red-500 focus:outline-hidden">
+                <input type="text" id="clientName" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="홍길동" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-semibold focus:border-red-500 focus:outline-hidden bg-white">
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">연락처 <span class="text-red-500">*</span></label>
-                <input type="tel" id="clientPhone" onchange="handleFieldChange()" placeholder="010-0000-0000" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-semibold focus:border-red-500 focus:outline-hidden">
+                <input type="tel" id="clientPhone" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="010-0000-0000" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-semibold focus:border-red-500 focus:outline-hidden bg-white">
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">생년월일 (6자리) <span class="text-red-500">*</span></label>
-                <input type="text" id="clientBirth" maxlength="8" onchange="handleFieldChange()" placeholder="950101" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-semibold focus:border-red-500 focus:outline-hidden">
+                <input type="text" id="clientBirth" maxlength="8" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="예: 950101" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-semibold focus:border-red-500 focus:outline-hidden bg-white">
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">신랑 성명</label>
-                <input type="text" id="groomName" onchange="handleFieldChange()" placeholder="신랑 성함" class="w-full p-2 border border-slate-300 rounded-lg text-xs focus:border-red-500 focus:outline-hidden">
+                <input type="text" id="groomName" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="신랑 성함" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:border-red-500 focus:outline-hidden bg-white">
               </div>
-              <div class="col-span-2">
+              <div class="sm:col-span-2">
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">신부 성명</label>
-                <input type="text" id="brideName" onchange="handleFieldChange()" placeholder="신부 성함" class="w-full p-2 border border-slate-300 rounded-lg text-xs focus:border-red-500 focus:outline-hidden">
+                <input type="text" id="brideName" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="신부 성함" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:border-red-500 focus:outline-hidden bg-white">
               </div>
             </div>
           </div>
@@ -428,8 +437,8 @@
       </section>
 
       <!-- SECTION 2: 예식 및 서비스 내용 -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>2. 예식 및 서비스 내용</span>
         </h2>
 
@@ -437,110 +446,110 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
           <div>
             <label class="block font-bold text-slate-700 mb-1">예식일자</label>
-            <input type="date" id="weddingDate" onchange="handleFieldChange()" class="admin-editable w-full p-2 border border-slate-300 rounded-lg">
+            <input type="date" id="weddingDate" oninput="handleFieldChange()" onchange="handleFieldChange()" class="admin-editable w-full p-2.5 border border-slate-300 rounded-lg">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">예식 시간</label>
-            <input type="time" id="weddingTime" onchange="handleFieldChange()" class="admin-editable w-full p-2 border border-slate-300 rounded-lg">
+            <input type="time" id="weddingTime" oninput="handleFieldChange()" onchange="handleFieldChange()" class="admin-editable w-full p-2.5 border border-slate-300 rounded-lg">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">현장 도착 시간</label>
-            <input type="time" id="arriveTime" onchange="handleFieldChange()" class="admin-editable w-full p-2 border border-slate-300 rounded-lg">
+            <input type="time" id="arriveTime" oninput="handleFieldChange()" onchange="handleFieldChange()" class="admin-editable w-full p-2.5 border border-slate-300 rounded-lg">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">예식장 및 홀</label>
-            <input type="text" id="weddingHall" onchange="handleFieldChange()" placeholder="예) 아펠가모 공덕 마리에홀" class="admin-editable w-full p-2 border border-slate-300 rounded-lg">
+            <input type="text" id="weddingHall" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="예) 아펠가모 공덕 마리에홀" class="admin-editable w-full p-2.5 border border-slate-300 rounded-lg">
           </div>
           <div class="sm:col-span-2">
             <label class="block font-bold text-slate-700 mb-1">예식장 주소</label>
-            <input type="text" id="weddingAddress" onchange="handleFieldChange()" placeholder="서울시 마포구 마포대로 92" class="admin-editable w-full p-2 border border-slate-300 rounded-lg">
+            <input type="text" id="weddingAddress" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="서울시 마포구 마포대로 92" class="admin-editable w-full p-2.5 border border-slate-300 rounded-lg">
           </div>
           <div class="sm:col-span-3">
             <label class="block font-bold text-slate-700 mb-1">접수 종료 및 인계 예정 시간</label>
-            <input type="text" id="finishTime" onchange="handleFieldChange()" placeholder="예) 예식 시작 후 60분 (14:00 인계)" class="admin-editable w-full p-2 border border-slate-300 rounded-lg">
+            <input type="text" id="finishTime" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="예) 예식 시작 후 60분 (14:00 인계)" class="admin-editable w-full p-2.5 border border-slate-300 rounded-lg">
           </div>
         </div>
 
         <!-- 고객 필수 선택: 서비스 유형 및 담당 측 (빨간색 박스) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <!-- 서비스 유형 -->
           <div class="client-red-box p-3.5 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
-                <i class="fa-solid fa-users text-red-600"></i> 서비스 유형 <span class="text-red-500">*</span>
+            <div class="flex items-center justify-between gap-1">
+              <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5 truncate">
+                <i class="fa-solid fa-users text-red-600 shrink-0"></i> 서비스 유형 <span class="text-red-500">*</span>
               </span>
               <span class="client-guide-badge">필수 선택</span>
             </div>
             <div class="space-y-1.5 text-xs">
-              <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-                <input type="radio" name="serviceType" value="일반형 2인 1조" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+                <input type="radio" name="serviceType" value="일반형 2인 1조" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
                 <span class="font-bold text-slate-800">일반형 2인 1조 (한쪽 전담)</span>
               </label>
-              <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-                <input type="radio" name="serviceType" value="양측형 4인 2조" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
-                <span class="font-bold text-slate-800">양측형 4인 2조 (신랑·신부 양측)</span>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+                <input type="radio" name="serviceType" value="양측형 4인 2조" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
+                <span class="font-bold text-slate-800">양측형 4인 2조 (양측 전담)</span>
               </label>
-              <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-                <input type="radio" name="serviceType" value="기타 맞춤형" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
-                <span class="font-bold text-slate-800">기타 맞춤형 (특약에 별도 기재)</span>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+                <input type="radio" name="serviceType" value="기타 맞춤형" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
+                <span class="font-bold text-slate-800">기타 맞춤형 (특약에 기재)</span>
               </label>
             </div>
           </div>
 
           <!-- 담당 측 -->
           <div class="client-red-box p-3.5 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
-                <i class="fa-solid fa-heart text-red-600"></i> 담당 측 <span class="text-red-500">*</span>
+            <div class="flex items-center justify-between gap-1">
+              <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5 truncate">
+                <i class="fa-solid fa-heart text-red-600 shrink-0"></i> 담당 측 <span class="text-red-500">*</span>
               </span>
               <span class="client-guide-badge">필수 선택</span>
             </div>
             <div class="space-y-1.5 text-xs">
-              <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-                <input type="radio" name="serviceSide" value="신랑측" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+                <input type="radio" name="serviceSide" value="신랑측" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
                 <span class="font-bold text-slate-800">신랑측 축의대</span>
               </label>
-              <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-                <input type="radio" name="serviceSide" value="신부측" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+                <input type="radio" name="serviceSide" value="신부측" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
                 <span class="font-bold text-slate-800">신부측 축의대</span>
               </label>
-              <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-                <input type="radio" name="serviceSide" value="신랑·신부 양측" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+                <input type="radio" name="serviceSide" value="신랑·신부 양측" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
                 <span class="font-bold text-slate-800">신랑·신부 양측 모두</span>
               </label>
             </div>
           </div>
         </div>
 
-        <!-- 신규 추가: 서비스 유형 컨셉 선택 (빨간색 박스) -->
+        <!-- 서비스 유형 컨셉 선택 (빨간색 박스) -->
         <div class="client-red-box p-3.5 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
-              <i class="fa-solid fa-user-tie text-red-600"></i> 서비스 진행 컨셉 선택 <span class="text-red-500">*</span>
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5 truncate">
+              <i class="fa-solid fa-user-tie text-red-600 shrink-0"></i> 서비스 진행 컨셉 선택 <span class="text-red-500">*</span>
             </span>
             <span class="client-guide-badge">필수 선택</span>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-              <input type="radio" name="serviceConcept" value="전문 업체" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+              <input type="radio" name="serviceConcept" value="전문 업체" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
               <span class="font-bold text-slate-800">전문 업체</span>
             </label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-              <input type="radio" name="serviceConcept" value="사촌" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+              <input type="radio" name="serviceConcept" value="사촌" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
               <span class="font-bold text-slate-800">사촌</span>
             </label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-              <input type="radio" name="serviceConcept" value="친구" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+              <input type="radio" name="serviceConcept" value="친구" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
               <span class="font-bold text-slate-800">친구</span>
             </label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-              <input type="radio" name="serviceConcept" value="지인" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
+              <input type="radio" name="serviceConcept" value="지인" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
               <span class="font-bold text-slate-800">지인</span>
             </label>
           </div>
 
-          <p class="text-[11px] text-red-700 bg-red-50/70 p-2 rounded-lg leading-relaxed">
+          <p class="text-[11px] text-red-700 bg-red-50/70 p-2.5 rounded-lg leading-relaxed">
             💡 보통 평균적으로 <b>'전문 업체'</b>로 진행하시어 전문적이고 신뢰감 있는 느낌으로 가장 많이들 진행하십니다. 하객 응대 시 원하시는 컨셉을 편하게 선택해 주세요.
           </p>
         </div>
@@ -548,7 +557,7 @@
         <!-- 기본 제공 업무 공식 약관 -->
         <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-2">
           <span class="font-bold text-slate-800 block">■ 기본 제공 업무 (메리담 공식 수행 업무)</span>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-slate-600">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600">
             <div>• 하객 안내 및 축의금 접수</div>
             <div>• 하객 명부 작성 및 식권 전달</div>
             <div>• 축의금 봉투 넘버링 금액 확인 후 밀봉</div>
@@ -557,12 +566,12 @@
             <div>• 축의금·명부·잔여 식권의 최종 인계</div>
           </div>
 
-          <div class="mt-2.5 pt-2 border-t border-slate-200 flex items-center justify-between flex-wrap gap-2">
+          <div class="mt-2.5 pt-2.5 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span class="text-[11px] text-red-700 font-bold flex items-center gap-1">
               <i class="fa-solid fa-clipboard-check text-red-600"></i> 메리담 기본 제공 업무 확인 <span class="text-red-500">*</span>
             </span>
-            <label class="client-red-box px-3 py-1.5 flex items-center gap-2 cursor-pointer bg-red-50/80">
-              <input type="checkbox" id="chkServiceBasic" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer">
+            <label class="client-red-box px-3 py-2 flex items-center gap-2 cursor-pointer bg-red-50/80">
+              <input type="checkbox" id="chkServiceBasic" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer shrink-0">
               <span class="text-[11px] font-extrabold text-red-900">수행 업무를 확인하였습니다.</span>
             </label>
           </div>
@@ -571,35 +580,35 @@
         <!-- 특약 사항 -->
         <div>
           <label class="block font-bold text-xs text-slate-700 mb-1">추가 서비스 또는 특약 사항</label>
-          <input type="text" id="specialNotes" onchange="handleFieldChange()" placeholder="요청 특약이 있는 경우 기재" class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+          <input type="text" id="specialNotes" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="요청 특약이 있는 경우 기재" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs">
         </div>
       </section>
 
       <!-- SECTION 3: 축의금 처리 방식 -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>3. 축의금 처리 방식</span>
         </h2>
 
-        <div class="client-red-box p-4 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
-              <i class="fa-solid fa-money-bill-wave text-red-600"></i> 축의금 처리 방식 선택 <span class="text-red-500">*</span>
+        <div class="client-red-box p-3.5 sm:p-4 space-y-2.5">
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5 truncate">
+              <i class="fa-solid fa-money-bill-wave text-red-600 shrink-0"></i> 축의금 처리 방식 선택 <span class="text-red-500">*</span>
             </span>
             <span class="client-guide-badge">필수 선택</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <label class="flex flex-col p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <label class="flex flex-col p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
               <div class="flex items-center gap-2 mb-1">
-                <input type="radio" name="moneyProcess" value="미개봉 보관" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+                <input type="radio" name="moneyProcess" value="미개봉 보관" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
                 <span class="font-extrabold text-slate-900 text-sm">미개봉 보관</span>
               </div>
               <span class="text-[11px] text-slate-500">봉투를 개봉하지 않고 수량만 확인하여 안전하게 보관</span>
             </label>
-            <label class="flex flex-col p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
+            <label class="flex flex-col p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400 transition">
               <div class="flex items-center gap-2 mb-1">
-                <input type="radio" name="moneyProcess" value="봉투별 기록" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
+                <input type="radio" name="moneyProcess" value="봉투별 기록" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0">
                 <span class="font-extrabold text-slate-900 text-sm">봉투별 기록</span>
               </div>
               <span class="text-[11px] text-slate-500">봉투 개봉 후 하객 성명과 축의 금액을 장부에 꼼꼼히 기록</span>
@@ -613,106 +622,106 @@
       </section>
 
       <!-- SECTION 4: 식권 및 인계 (6대 규칙) -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>4. 식권 및 인계</span>
         </h2>
 
         <!-- 규칙 1: 계좌이체 하객 -->
         <div class="client-red-box p-3.5 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-xs text-red-950">1. 계좌이체로 축의금을 보냈다는 하객 식권 지급 기준 <span class="text-red-500">*</span></span>
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-extrabold text-xs text-red-950">1. 계좌이체 하객 식권 지급 기준 <span class="text-red-500">*</span></span>
             <span class="client-guide-badge">필수 선택</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="별도 확인 없이 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>별도 확인 없이 즉시 지급</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="이체 내역 화면 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>스마트폰 이체 내역 확인 후 지급</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="사전 전달 명단 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>사전 전달된 명단 대조 후 지급</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="혼주 또는 지정 담당자 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>혼주 또는 지정 담당자 확인 후 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="별도 확인 없이 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>별도 확인 없이 즉시 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="이체 내역 화면 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>스마트폰 이체 내역 확인 후 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="사전 전달 명단 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>사전 전달된 명단 대조 후 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketTransferProcess" value="혼주 또는 지정 담당자 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>혼주 또는 지정 담당자 확인 후 지급</span></label>
           </div>
         </div>
 
         <!-- 규칙 2 & 3: 최소 금액 기준 -->
         <div class="client-red-box p-3.5 space-y-2">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-1">
             <span class="font-extrabold text-xs text-red-950">2. 식권 지급을 위한 최소 축의금 기준 <span class="text-red-500">*</span></span>
             <span class="client-guide-badge">필수 선택</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketMinAmountType" value="금액 관계없이 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>금액 관계없이 지급</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketMinAmountType" value="최소 금액 기준 있음" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>최소 금액 기준 있음</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketMinAmountType" value="담당자 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>지정 담당자 확인 후 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketMinAmountType" value="금액 관계없이 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>금액 관계없이 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketMinAmountType" value="최소 금액 기준 있음" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>최소 금액 기준 있음</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketMinAmountType" value="담당자 확인 후 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>지정 담당자 확인 후 지급</span></label>
           </div>
 
-          <div class="pt-1.5 border-t border-red-200/60">
+          <div class="pt-2 border-t border-red-200/60">
             <span class="text-[11px] font-bold text-slate-700 block mb-1.5">3. 식권 최소 금액 빠른 선택:</span>
-            <div class="flex flex-wrap items-center gap-1.5">
-              <button type="button" onclick="setTicketMinAmount('봉투당 3만 원 이상')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 3만 원 이상</button>
-              <button type="button" onclick="setTicketMinAmount('봉투당 5만 원 이상')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 5만 원 이상</button>
-              <button type="button" onclick="setTicketMinAmount('봉투당 10만 원 이상')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 10만 원 이상</button>
-              <input type="text" id="ticketMinAmountVal" onchange="handleFieldChange()" placeholder="직접 입력 (예: 봉투당 5만원)" class="text-xs p-1.5 border border-slate-300 rounded-md w-40">
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5">
+              <button type="button" onclick="setTicketMinAmount('봉투당 3만 원 이상')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 3만 원 이상</button>
+              <button type="button" onclick="setTicketMinAmount('봉투당 5만 원 이상')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 5만 원 이상</button>
+              <button type="button" onclick="setTicketMinAmount('봉투당 10만 원 이상')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 10만 원 이상</button>
+              <input type="text" id="ticketMinAmountVal" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="직접 입력 (예: 봉투당 5만원)" class="text-xs p-1.5 border border-slate-300 rounded-md w-full sm:w-44">
             </div>
           </div>
         </div>
 
         <!-- 규칙 4 & 5: 추가 요청 및 최대 식권 수량 -->
         <div class="client-red-box p-3.5 space-y-2">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-1">
             <span class="font-extrabold text-xs text-red-950">4. 식권 추가 요청 시 지급 방식 <span class="text-red-500">*</span></span>
             <span class="client-guide-badge">필수 선택</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="요청 수량대로 추가 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>요청 수량대로 추가 지급</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="1인당 1매 원칙 (추가불가)" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>1인당 1매 지급 (추가 지급 불가)</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="최대 수량 한도 내 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>정해진 최대 수량 내에서 지급</span></label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="담당자 승인 후 추가 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600"><span>혼주 또는 담당자 승인 후 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="요청 수량대로 추가 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>요청 수량대로 추가 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="1인당 1매 원칙 (추가불가)" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>1인당 1매 지급 (추가 지급 불가)</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="최대 수량 한도 내 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>정해진 최대 수량 내에서 지급</span></label>
+            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer"><input type="radio" name="ticketExtraRule" value="담당자 승인 후 추가 지급" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 shrink-0"><span>혼주 또는 담당자 승인 후 지급</span></label>
           </div>
 
-          <div class="pt-1.5 border-t border-red-200/60">
+          <div class="pt-2 border-t border-red-200/60">
             <span class="text-[11px] font-bold text-slate-700 block mb-1.5">5. 봉투당 최대 식권 수량 보기 선택:</span>
-            <div class="flex flex-wrap items-center gap-1.5">
-              <button type="button" onclick="setTicketMaxLimit('봉투당 최대 1매')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 최대 1매</button>
-              <button type="button" onclick="setTicketMaxLimit('봉투당 최대 2매 (초과 시 담당자 확인)')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 최대 2매 (초과 시 확인)</button>
-              <button type="button" onclick="setTicketMaxLimit('봉투당 최대 3매 (초과 시 담당자 확인)')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 최대 3매</button>
-              <button type="button" onclick="setTicketMaxLimit('수량 제한 없음 (하객 요청 전원 지급)')" class="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">수량 제한 없음</button>
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5">
+              <button type="button" onclick="setTicketMaxLimit('봉투당 최대 1매')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 최대 1매</button>
+              <button type="button" onclick="setTicketMaxLimit('봉투당 최대 2매 (초과 시 담당자 확인)')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 최대 2매</button>
+              <button type="button" onclick="setTicketMaxLimit('봉투당 최대 3매 (초과 시 담당자 확인)')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">봉투당 최대 3매</button>
+              <button type="button" onclick="setTicketMaxLimit('수량 제한 없음 (하객 요청 전원 지급)')" class="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-red-500 text-[11px] font-semibold text-slate-700">수량 제한 없음</button>
             </div>
-            <input type="text" id="ticketMaxLimitNotes" onchange="handleFieldChange()" placeholder="식권 추가 요청 관련 세부사항" class="text-xs p-2 border border-slate-300 rounded-md w-full mt-1.5">
+            <input type="text" id="ticketMaxLimitNotes" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="식권 추가 요청 관련 세부사항" class="text-xs p-2.5 border border-slate-300 rounded-md w-full mt-2">
           </div>
         </div>
 
         <!-- 규칙 6: 식권 확인 지정 담당자 -->
         <div class="client-red-box p-3.5 space-y-2">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-1">
             <span class="font-extrabold text-xs text-red-950">6. 식권 지급 확인 지정 담당자</span>
             <span class="client-guide-badge">선택 입력</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <input type="text" id="ticketApproverName" onchange="handleFieldChange()" placeholder="식권 확인 담당자 성함" class="p-2 border border-slate-300 rounded-lg">
-            <input type="tel" id="ticketApproverPhone" onchange="handleFieldChange()" placeholder="식권 확인 담당자 연락처" class="p-2 border border-slate-300 rounded-lg">
+            <input type="text" id="ticketApproverName" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="식권 확인 담당자 성함" class="p-2.5 border border-slate-300 rounded-lg bg-white">
+            <input type="tel" id="ticketApproverPhone" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="식권 확인 담당자 연락처" class="p-2.5 border border-slate-300 rounded-lg bg-white">
           </div>
         </div>
 
         <!-- 축의금 인계자 -->
-        <div class="client-red-box p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
-              <i class="fa-solid fa-hand-holding-dollar text-red-600"></i> 축의금 최종 인계자 (수령인) <span class="text-red-500">*</span>
+        <div class="client-red-box p-3.5 sm:p-4 space-y-2">
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5 truncate">
+              <i class="fa-solid fa-hand-holding-dollar text-red-600 shrink-0"></i> 축의금 최종 인계자 (수령인) <span class="text-red-500">*</span>
             </span>
             <span class="client-guide-badge">필수 입력</span>
           </div>
-          <p class="text-[10px] text-slate-600">예식 종료 후 축의금 봉투·현금·명부·잔여식권을 직접 인계받으실 분의 인적사항입니다.</p>
+          <p class="text-[11px] text-slate-600">예식 종료 후 축의금 봉투·현금·명부·잔여식권을 직접 인계받으실 분의 인적사항입니다.</p>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
-            <input type="text" id="receiverName" onchange="handleFieldChange()" placeholder="인계자 성명 (필수)" class="p-2 border border-slate-300 rounded-lg font-bold">
-            <input type="text" id="receiverRel" onchange="handleFieldChange()" placeholder="관계 (예: 신랑 본인, 부친)" class="p-2 border border-slate-300 rounded-lg">
-            <input type="tel" id="receiverPhone" onchange="handleFieldChange()" placeholder="연락처 (010-0000-0000)" class="p-2 border border-slate-300 rounded-lg">
+            <input type="text" id="receiverName" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="인계자 성명 (필수)" class="p-2.5 border border-slate-300 rounded-lg font-bold bg-white">
+            <input type="text" id="receiverRel" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="관계 (예: 신랑 본인, 부친)" class="p-2.5 border border-slate-300 rounded-lg bg-white">
+            <input type="tel" id="receiverPhone" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="연락처 (010-0000-0000)" class="p-2.5 border border-slate-300 rounded-lg bg-white">
           </div>
         </div>
       </section>
 
       <!-- SECTION 5: 서비스 요금 및 지급 -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>5. 서비스 요금 및 지급</span>
         </h2>
 
@@ -737,82 +746,84 @@
 
         <div class="admin-only flex flex-wrap items-center gap-1.5 text-[11px]">
           <span class="font-bold text-slate-500">할인 프리셋:</span>
-          <button type="button" onclick="applyDiscount(10000)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">얼리버드 1만</button>
-          <button type="button" onclick="applyDiscount(20000)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">짝꿍 2만</button>
-          <button type="button" onclick="applyDiscount(30000)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">후기 3만</button>
-          <button type="button" onclick="applyDiscount(0)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">초기화</button>
+          <button type="button" onclick="applyDiscount(10000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">얼리버드 1만</button>
+          <button type="button" onclick="applyDiscount(20000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">짝꿍 2만</button>
+          <button type="button" onclick="applyDiscount(30000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">후기 3만</button>
+          <button type="button" onclick="applyDiscount(0)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">초기화</button>
         </div>
 
-        <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl flex items-center justify-between">
+        <div class="p-3.5 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl flex items-center justify-between">
           <div>
             <span class="text-xs font-bold text-blue-900 block">최종 계약 확정 금액 (VAT 포함)</span>
             <span class="text-[11px] text-blue-700">사전 합의된 세금 및 제반 비용 일체 포함</span>
           </div>
-          <span id="feeFinalDisplay" class="text-xl sm:text-2xl font-black text-blue-900">250,000원</span>
+          <span id="feeFinalDisplay" class="text-lg sm:text-2xl font-black text-blue-900">250,000원</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
             <span class="font-bold text-slate-700 block mb-1">계약금 (예약금)</span>
             <div class="flex items-center gap-2">
-              <input type="number" id="depositAmount" oninput="calculateBalance()" value="50000" class="admin-editable p-1.5 border border-slate-300 rounded-md font-bold w-1/2">
-              <span class="text-[11px] text-slate-500">기한: 체결 후 24시간 이내</span>
+              <input type="number" id="depositAmount" oninput="calculateBalance()" value="50000" class="admin-editable p-2 border border-slate-300 rounded-md font-bold w-1/2 bg-white">
+              <span class="text-[11px] text-slate-500">기한: 24시간 이내</span>
             </div>
           </div>
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
             <span class="font-bold text-slate-700 block mb-1">잔금</span>
             <div class="flex items-center gap-2">
-              <span id="balanceDisplay" class="font-bold text-slate-900 w-1/2 p-1.5 bg-white border border-slate-200 rounded-md">200,000원</span>
-              <span class="text-[11px] text-slate-500">기한: 예식 3일 전까지</span>
+              <span id="balanceDisplay" class="font-bold text-slate-900 w-1/2 p-2 bg-white border border-slate-200 rounded-md">200,000원</span>
+              <span class="text-[11px] text-slate-500">기한: 예식 3일 전</span>
             </div>
           </div>
         </div>
 
         <!-- 수정된 입금 계좌 정보 (국민은행 전형민) -->
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 bg-amber-500 text-white rounded font-extrabold text-[10px]">입금 계좌</span>
-            <b class="text-slate-900 font-mono text-sm">국민은행 208437-04-011488 (예금주: 전형민(메리담))</b>
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+            <span class="px-2 py-0.5 bg-amber-500 text-white rounded font-extrabold text-[10px] w-fit">입금 계좌</span>
+            <b class="text-slate-900 font-mono text-xs sm:text-sm">국민은행 208437-04-011488 (예금주: 전형민(메리담))</b>
           </div>
           <div class="text-[11px] text-slate-500 mt-1">※ 예약은 계약서 서명, 계약금 입금 및 메리담의 예약 확정 안내가 완료된 때 최종 확정됩니다.</div>
         </div>
 
-        <div class="client-red-box p-3 flex items-center justify-between flex-wrap gap-2">
+        <div class="client-red-box p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
             <span class="font-extrabold text-red-950 text-xs block">서비스 요금 및 지급 일정 확인 <span class="text-red-500">*</span></span>
             <p class="text-[10px] text-slate-600 mt-0.5">최종 계약 금액 및 계약금·잔금 지급 일정을 확인하셨습니까?</p>
           </div>
-          <label class="px-3 py-1.5 flex items-center gap-2 cursor-pointer bg-white rounded-lg border border-red-300 shadow-xs">
-            <input type="checkbox" id="chkFeeConfirm" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer">
+          <label class="px-3 py-2 flex items-center gap-2 cursor-pointer bg-white rounded-lg border border-red-300 shadow-xs shrink-0">
+            <input type="checkbox" id="chkFeeConfirm" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer shrink-0">
             <span class="text-[11px] font-extrabold text-red-900">금액 및 일정을 확인하였습니다.</span>
           </label>
         </div>
       </section>
 
       <!-- SECTION 6: 일정 변경 및 취소·환불 -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>6. 일정 변경 및 취소·환불</span>
         </h2>
 
         <div class="border border-slate-200 rounded-xl overflow-hidden text-xs">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-slate-100 text-slate-700 font-semibold">
-              <tr>
-                <th class="p-2.5">취소 시점</th>
-                <th class="p-2.5 text-right">취소 수수료</th>
-                <th class="p-2.5 text-right">환급 기준</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-[11px] text-slate-600">
-              <tr><td class="p-2">예식일 31일 전까지</td><td class="p-2 text-right font-bold text-emerald-600">없음</td><td class="p-2 text-right">전액 환급</td></tr>
-              <tr><td class="p-2">예식일 30일 전부터 15일 전까지</td><td class="p-2 text-right font-bold text-amber-600">총 계약 금액의 20%</td><td class="p-2 text-right">수수료 공제 후 7영업일 내 환급</td></tr>
-              <tr><td class="p-2">예식일 14일 전부터 8일 전까지</td><td class="p-2 text-right font-bold text-amber-700">총 계약 금액의 30%</td><td class="p-2 text-right">수수료 공제 후 7영업일 내 환급</td></tr>
-              <tr><td class="p-2">예식일 7일 전부터 4일 전까지</td><td class="p-2 text-right font-bold text-rose-600">총 계약 금액의 50%</td><td class="p-2 text-right">수수료 공제 후 7영업일 내 환급</td></tr>
-              <tr><td class="p-2">예식일 3일 전부터 1일 전까지</td><td class="p-2 text-right font-bold text-rose-700">총 계약 금액의 80%</td><td class="p-2 text-right">수수료 공제 후 7영업일 내 환급</td></tr>
-              <tr class="bg-rose-50/50"><td class="p-2 font-bold text-rose-900">예식 당일</td><td class="p-2 text-right font-bold text-rose-700">총 계약 금액의 100%</td><td class="p-2 text-right text-rose-700 font-bold">환급 불가</td></tr>
-            </tbody>
-          </table>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse min-w-[320px]">
+              <thead class="bg-slate-100 text-slate-700 font-semibold">
+                <tr>
+                  <th class="p-2.5">취소 시점</th>
+                  <th class="p-2.5 text-right">취소 수수료</th>
+                  <th class="p-2.5 text-right">환급 기준</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-[11px] text-slate-600">
+                <tr><td class="p-2">예식일 31일 전까지</td><td class="p-2 text-right font-bold text-emerald-600">없음</td><td class="p-2 text-right">전액 환급</td></tr>
+                <tr><td class="p-2">예식일 30일 전부터 15일 전까지</td><td class="p-2 text-right font-bold text-amber-600">총 계약 금액의 20%</td><td class="p-2 text-right">7영업일 내 환급</td></tr>
+                <tr><td class="p-2">예식일 14일 전부터 8일 전까지</td><td class="p-2 text-right font-bold text-amber-700">총 계약 금액의 30%</td><td class="p-2 text-right">7영업일 내 환급</td></tr>
+                <tr><td class="p-2">예식일 7일 전부터 4일 전까지</td><td class="p-2 text-right font-bold text-rose-600">총 계약 금액의 50%</td><td class="p-2 text-right">7영업일 내 환급</td></tr>
+                <tr><td class="p-2">예식일 3일 전부터 1일 전까지</td><td class="p-2 text-right font-bold text-rose-700">총 계약 금액의 80%</td><td class="p-2 text-right">7영업일 내 환급</td></tr>
+                <tr class="bg-rose-50/50"><td class="p-2 font-bold text-rose-900">예식 당일</td><td class="p-2 text-right font-bold text-rose-700">총 계약 금액의 100%</td><td class="p-2 text-right text-rose-700 font-bold">환급 불가</td></tr>
+              </tbody>
+            </table>
+          </div>
 
           <div class="p-3 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-600 space-y-1">
             <p>• 취소일은 의뢰인의 취소 의사가 메리담에 도달한 날을 기준으로 합니다.</p>
@@ -820,13 +831,13 @@
             <p>• 천재지변, 재난 등 당사자 책임 없는 사유 발생 시 우선 일정 변경을 협의하고 불가 시 미제공 대금을 환급합니다.</p>
           </div>
 
-          <div class="p-3 bg-red-50/80 border-t border-red-200 flex items-center justify-between flex-wrap gap-2">
+          <div class="p-3 bg-red-50/80 border-t border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
               <span class="font-extrabold text-red-950 text-xs block">취소 수수료 및 환불 규정 숙지 동의 <span class="text-red-500">*</span></span>
               <p class="text-[10px] text-slate-600 mt-0.5">예식 일정별 취소 수수료율 및 귀책/불가항력 환급 기준을 확인하셨습니까?</p>
             </div>
-            <label class="client-red-box px-3 py-1.5 flex items-center gap-2 cursor-pointer bg-white shadow-xs">
-              <input type="checkbox" id="chkRefundConfirm" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer">
+            <label class="client-red-box px-3 py-2 flex items-center gap-2 cursor-pointer bg-white shadow-xs shrink-0">
+              <input type="checkbox" id="chkRefundConfirm" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer shrink-0">
               <span class="text-[11px] font-extrabold text-red-900">동의하고 확인하였습니다.</span>
             </label>
           </div>
@@ -834,9 +845,9 @@
       </section>
 
       <!-- SECTION 7: 사고 발생 시 처리 및 책임 (완전 독립 섹션) -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
             <span>7. 사고 발생 시 처리 및 책임</span>
           </h2>
           <span class="client-guide-badge">조항별 개별 확인</span>
@@ -845,13 +856,13 @@
         <div class="space-y-3">
           <!-- ①항 -->
           <div class="client-red-box p-3.5 space-y-2">
-            <div class="flex items-start justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div class="text-[11px] text-slate-700 leading-relaxed">
                 <span class="font-extrabold text-slate-900 block text-xs mb-1">① 서비스 미제공 시 조치</span>
                 메리담의 귀책 사유로 서비스 제공이 어려운 경우, 계약자에게 신속히 알리고 인력 교체 등 대체 조치를 취합니다. 이후에도 서비스 제공이 불가능한 경우 전부 미제공 시 이용금액 전액을, 일부 미제공 시 해당 금액을 환급합니다.
               </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs">
-                <input type="checkbox" id="chkDamage1" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer">
+              <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs w-fit self-end sm:self-auto">
+                <input type="checkbox" id="chkDamage1" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer shrink-0">
                 <span class="text-[11px] font-bold text-red-900">확인하였습니다.</span>
               </label>
             </div>
@@ -859,13 +870,13 @@
 
           <!-- ②항 -->
           <div class="client-red-box p-3.5 space-y-2">
-            <div class="flex items-start justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div class="text-[11px] text-slate-700 leading-relaxed">
                 <span class="font-extrabold text-slate-900 block text-xs mb-1">② 사고 통지 및 자료 보존</span>
                 서비스 중 축의금 도난·분실 또는 인수인계 불일치가 발생한 경우, 메리담은 계약자에게 지체 없이 알리고 장부, 인수인계서, 촬영 영상 등 관련 자료를 보존합니다. 계약자는 사고 확인 및 관계 기관의 조사에 합리적으로 협조해야 합니다.
               </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs">
-                <input type="checkbox" id="chkDamage2" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer">
+              <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs w-fit self-end sm:self-auto">
+                <input type="checkbox" id="chkDamage2" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer shrink-0">
                 <span class="text-[11px] font-bold text-red-900">확인하였습니다.</span>
               </label>
             </div>
@@ -873,7 +884,7 @@
 
           <!-- ③항 (5대 면책/제한 사유 완비) -->
           <div class="client-red-box p-3.5 space-y-2">
-            <div class="flex items-start justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div class="text-[11px] text-slate-700 leading-relaxed space-y-1.5">
                 <div>
                   <span class="font-extrabold text-slate-900 block text-xs mb-1">③ 책임 범위 및 피해 확인</span>
@@ -888,8 +899,8 @@
                   <p>5. 객관적으로 확인하기 어려운 간접손해·기대이익·정신적 손해</p>
                 </div>
               </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs">
-                <input type="checkbox" id="chkDamage3" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer">
+              <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs w-fit self-end sm:self-auto">
+                <input type="checkbox" id="chkDamage3" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer shrink-0">
                 <span class="text-[11px] font-bold text-red-900">확인하였습니다.</span>
               </label>
             </div>
@@ -898,8 +909,8 @@
       </section>
 
       <!-- SECTION 8: 개인정보 및 촬영 자료 (완전 독립 섹션) -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>8. 개인정보 및 촬영 자료</span>
         </h2>
 
@@ -909,46 +920,46 @@
         </div>
 
         <div class="space-y-2.5 text-xs">
-          <div class="client-red-box p-3 flex items-center justify-between flex-wrap gap-2">
+          <div class="client-red-box p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
               <span class="font-bold text-slate-900">[필수] 개인정보 수집 및 이용 동의 <span class="text-red-500">*</span></span>
               <p class="text-[10px] text-slate-500">계약 체결 및 현장 축의대 대행 서비스 수행 목적</p>
             </div>
-            <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-red-300 shadow-xs">
-              <input type="checkbox" id="consentPrivacy" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer">
+            <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-red-300 shadow-xs shrink-0 self-end sm:self-auto">
+              <input type="checkbox" id="consentPrivacy" onchange="handleFieldChange()" class="w-4 h-4 rounded text-red-600 accent-red-600 cursor-pointer shrink-0">
               <span class="text-[11px] font-extrabold text-red-900">동의합니다</span>
             </label>
           </div>
 
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between flex-wrap gap-2">
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
               <span class="font-bold text-slate-800">[선택] 현장 사진 및 실시간 자료 전송 동의</span>
               <p class="text-[10px] text-slate-500">화환 사진, 접수대 진행 상황 실시간 카카오톡 전송</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 shrink-0">
               <label class="flex items-center gap-1.5 cursor-pointer font-bold text-slate-700">
-                <input type="radio" name="consentPhotoTransfer" value="동의" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-brand-600 accent-brand-600">
+                <input type="radio" name="consentPhotoTransfer" value="동의" onchange="handleFieldChange()" class="w-4 h-4 text-brand-600 accent-brand-600 shrink-0">
                 <span>동의</span>
               </label>
               <label class="flex items-center gap-1.5 cursor-pointer text-slate-500">
-                <input type="radio" name="consentPhotoTransfer" value="동의안함" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-slate-400 accent-slate-400">
+                <input type="radio" name="consentPhotoTransfer" value="동의안함" onchange="handleFieldChange()" class="w-4 h-4 text-slate-400 accent-slate-400 shrink-0">
                 <span>동의안함</span>
               </label>
             </div>
           </div>
 
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between flex-wrap gap-2">
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
               <span class="font-bold text-slate-800">[선택] 홍보 목적 사진 사용 동의</span>
               <p class="text-[10px] text-slate-500">블로그/SNS 게시 (하객 개인정보 및 얼굴 철저히 모자이크 블러 처리)</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 shrink-0">
               <label class="flex items-center gap-1.5 cursor-pointer font-bold text-slate-700">
-                <input type="radio" name="consentMarketing" value="동의" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-brand-600 accent-brand-600">
+                <input type="radio" name="consentMarketing" value="동의" onchange="handleFieldChange()" class="w-4 h-4 text-brand-600 accent-brand-600 shrink-0">
                 <span>동의</span>
               </label>
               <label class="flex items-center gap-1.5 cursor-pointer text-slate-500">
-                <input type="radio" name="consentMarketing" value="동의안함" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-slate-400 accent-slate-400">
+                <input type="radio" name="consentMarketing" value="동의안함" onchange="handleFieldChange()" class="w-4 h-4 text-slate-400 accent-slate-400 shrink-0">
                 <span>동의안함</span>
               </label>
             </div>
@@ -957,8 +968,8 @@
       </section>
 
       <!-- SECTION 9: 전자계약 체결 및 서명 (완전 독립 섹션) -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
+      <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>9. 전자계약 체결 및 서명</span>
         </h2>
 
@@ -966,7 +977,7 @@
           양 당사자는 본 계약의 서비스 내용, 요금, 축의금 처리, 인계 및 취소·환불, 손해배상 기준을 확인하고 동의하며 성실히 이행할 것을 확약합니다.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-1">
           <!-- 의뢰인 서명 카드 -->
           <div class="client-red-box p-4 flex flex-col justify-between">
             <div>
@@ -1030,12 +1041,12 @@
           </div>
         </div>
 
-        <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3 justify-end items-center">
-          <button id="btnAdminSaveBack" onclick="saveAndReturnToList()" class="admin-only w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center justify-center gap-2">
+        <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-end items-center">
+          <button id="btnAdminSaveBack" onclick="saveAndReturnToList()" class="admin-only w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>계약서 저장 및 목록 복귀</span>
           </button>
-          <button id="btnClientFinalSubmit" onclick="triggerClientFinalSubmit()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2">
+          <button id="btnClientFinalSubmit" onclick="triggerClientFinalSubmit()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-file-signature"></i>
             <span>메리담 계약 체결 완료하기</span>
           </button>
@@ -1056,11 +1067,11 @@
           <p class="text-xs text-emerald-700 mt-0.5">양 당사자의 전자서명이 날인된 정규 계약서 원본입니다. PDF 저장 또는 인쇄하여 보관하실 수 있습니다.</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <button onclick="downloadOfficialPdf()" class="px-3.5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+      <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+        <button onclick="downloadOfficialPdf()" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
           <i class="fa-solid fa-file-pdf"></i> PDF 저장하기
         </button>
-        <button onclick="triggerPrintDoc()" class="px-3.5 py-2 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-900 text-xs font-bold flex items-center gap-1.5 transition">
+        <button onclick="triggerPrintDoc()" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-900 text-xs font-bold flex items-center justify-center gap-1.5 transition">
           <i class="fa-solid fa-print"></i> 인쇄하기
         </button>
       </div>
@@ -1244,15 +1255,15 @@
   </div>
 
   <!-- 공용 인터랙티브 서명 모달 -->
-  <div id="sigModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="sigModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i id="sigModalIcon" class="fa-solid fa-pen-nib text-red-600"></i>
           <h3 id="sigModalTitle" class="font-extrabold text-sm text-slate-900">전자서명 작성</h3>
         </div>
-        <button onclick="closeSignatureModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition">
-          <i class="fa-solid fa-xmark text-xs"></i>
+        <button onclick="closeSignatureModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
@@ -1266,10 +1277,10 @@
         </div>
 
         <div class="flex items-center justify-between pt-1">
-          <button type="button" onclick="clearSignatureCanvas()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+          <button type="button" onclick="clearSignatureCanvas()" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
             <i class="fa-solid fa-rotate-left"></i> 다시 쓰기
           </button>
-          <button type="button" onclick="saveSignatureAndClose()" id="btnSaveSigModal" class="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-md shadow-red-500/20 transition">
+          <button type="button" onclick="saveSignatureAndClose()" id="btnSaveSigModal" class="px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-md shadow-red-500/20 transition">
             서명 완료 및 적용
           </button>
         </div>
@@ -1278,21 +1289,21 @@
   </div>
 
   <!-- 링크 복사 모달 (초간결 숏링크) -->
-  <div id="linkModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="linkModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
         <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-2">
           <i class="fa-solid fa-share-nodes text-brand-600"></i> 고객용 전자서명 링크 생성
         </h3>
-        <button onclick="closeShareModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-xs"></i>
+        <button onclick="closeShareModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
-      <div class="p-5 space-y-3">
+      <div class="p-4 sm:p-5 space-y-3">
         <p class="text-xs text-slate-600">아래 초간결 링크를 복사하여 고객에게 카카오톡 또는 문자로 전송하세요. 고객은 생년월일 본인 확인 후 서명을 진행합니다.</p>
         <div class="flex items-center gap-2">
-          <input type="text" id="shareUrlInput" readonly class="text-xs p-2.5 border border-slate-300 rounded-lg w-full bg-slate-50 font-mono select-all">
-          <button onclick="copyShareUrl()" class="shrink-0 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-xs">
+          <input type="text" id="shareUrlInput" readonly class="text-xs p-3 border border-slate-300 rounded-lg w-full bg-slate-50 font-mono select-all">
+          <button onclick="copyShareUrl()" class="shrink-0 px-4 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-xs">
             복사
           </button>
         </div>
@@ -1302,7 +1313,7 @@
 
   <!-- 고객 본인 확인 모달 -->
   <div id="clientAuthModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center space-y-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
         <i class="fa-solid fa-user-lock"></i>
       </div>
@@ -1310,8 +1321,8 @@
         <h3 class="text-base font-extrabold text-slate-900">계약자 본인 확인</h3>
         <p class="text-xs text-slate-500 mt-1">안전한 전자서명을 위해 의뢰인의 생년월일을 입력해 주세요.</p>
       </div>
-      <input type="password" id="clientAuthInput" maxlength="8" placeholder="생년월일 입력" class="w-full p-3 border-2 border-red-500 rounded-xl text-center text-sm font-black tracking-widest focus:outline-hidden">
-      <button onclick="verifyClientAuth()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-xl shadow-md transition">
+      <input type="password" id="clientAuthInput" maxlength="8" placeholder="생년월일 6자리 (예: 950101)" class="w-full p-3.5 border-2 border-red-500 rounded-xl text-center text-sm font-black tracking-widest focus:outline-hidden">
+      <button onclick="verifyClientAuth()" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-xl shadow-md transition">
         본인 확인 및 계약서 열기
       </button>
       <p class="text-[10px] text-slate-400">* 본인 확인 비밀번호는 고객님의 생년월일입니다.</p>
@@ -1320,7 +1331,7 @@
 
   <!-- 관리자 비밀번호 모달 -->
   <div id="adminPassModal" class="hidden fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center space-y-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
         <i class="fa-solid fa-shield-halved"></i>
       </div>
@@ -1328,8 +1339,8 @@
         <h3 class="text-base font-extrabold text-slate-900">메리담 관리자 인증</h3>
         <p class="text-xs text-slate-500 mt-1">관리자 전용 마스터 비밀번호를 입력해 주세요.</p>
       </div>
-      <input type="password" id="adminPassInput" placeholder="비밀번호 입력" class="w-full p-3 border-2 border-brand-500 rounded-xl text-center text-sm font-bold focus:outline-hidden">
-      <button onclick="verifyAdminPass()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition">
+      <input type="password" id="adminPassInput" placeholder="비밀번호 입력" class="w-full p-3.5 border-2 border-brand-500 rounded-xl text-center text-sm font-bold focus:outline-hidden">
+      <button onclick="verifyAdminPass()" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition">
         관리자 모드 로그인
       </button>
     </div>
@@ -1337,7 +1348,7 @@
 
   <!-- 계약 체결 확인 컨펌 모달 -->
   <div id="clientSubmitConfirmModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 text-center space-y-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
         <i class="fa-solid fa-circle-check"></i>
       </div>
@@ -1348,10 +1359,10 @@
         </p>
       </div>
       <div class="flex items-center gap-2 pt-2">
-        <button onclick="closeSubmitConfirmModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+        <button onclick="closeSubmitConfirmModal()" class="w-1/2 py-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
           다시 검토하기
         </button>
-        <button onclick="executeFinalSignAndSubmit()" class="w-1/2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-md">
+        <button onclick="executeFinalSignAndSubmit()" class="w-1/2 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-md">
           네, 체결합니다
         </button>
       </div>
@@ -1360,13 +1371,13 @@
 
   <!-- 계약 체결 성공 축하 및 최종 계약서 전환 모달 -->
   <div id="clientSubmitSuccessModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
-      <div class="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-3xl flex items-center justify-center mx-auto text-2xl shadow-lg shadow-emerald-500/30">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 text-white rounded-3xl flex items-center justify-center mx-auto text-2xl shadow-lg shadow-emerald-500/30">
         <i class="fa-solid fa-handshake"></i>
       </div>
       <div>
         <span class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider block">Signature Completed</span>
-        <h3 class="text-lg font-black text-slate-900 mt-0.5">계약 체결이 완료되었습니다!</h3>
+        <h3 class="text-base sm:text-lg font-black text-slate-900 mt-0.5">계약 체결이 완료되었습니다!</h3>
         <p class="text-xs text-slate-600 mt-2 leading-relaxed">
           소중한 예식의 축의대 대행을 믿고 맡겨주셔서 감사드립니다.<br>
           메리담이 가장 정직하고 품격 있는 서비스로 함께하겠습니다.
@@ -1387,11 +1398,11 @@
   </div>
 
   <!-- 토스트 알림 컨테이너 -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
+  <div id="toastContainer" class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 space-y-2 pointer-events-none max-w-[90vw] sm:max-w-md"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, enableNetwork } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1405,11 +1416,18 @@
     };
 
     let app, db, auth;
+    let activeUnsubscribe = null;
+
     try {
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
-      signInAnonymously(auth).catch((err) => {
+      
+      // 익명 로그인 보장
+      signInAnonymously(auth).then(() => {
+        window.isFirebaseAuthReady = true;
+        console.log("Firebase Auth Connected");
+      }).catch((err) => {
         console.warn("Firebase Auth Notice:", err);
       });
     } catch (e) {
@@ -1419,29 +1437,43 @@
     function sanitizeForFirestore(obj) {
       const clean = {};
       for (const [k, v] of Object.entries(obj)) {
-        clean[k] = (v === undefined) ? "" : v;
+        clean[k] = (v === undefined || v === null) ? "" : v;
       }
       return clean;
     }
 
+    // 클라우드 저장 엔진 (모바일 즉시 반영 강화)
     window.saveContractToCloud = async function(contract) {
       if (!contract || !contract.id) return;
-      localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(contract));
+      
+      // 1. 브라우저 로컬 저장소 우선 반영
+      try {
+        localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(contract));
+      } catch (e) {}
       window.contractPool[contract.id] = contract;
 
+      // 2. 파이어베이스 클라우드 동기화
       if (!db) return;
       try {
         const cleanData = sanitizeForFirestore(contract);
+        cleanData.lastUpdated = new Date().toISOString();
         await setDoc(doc(db, 'merrydam_contracts', contract.id), cleanData);
+        
+        const badge = document.getElementById('syncStatusBadge');
+        if (badge) {
+          badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="hidden sm:inline">클라우드 실시간 동기화 완료</span><span class="sm:hidden">동기화됨</span>';
+        }
       } catch (e) {
-        // Fallback to LocalStorage silently
+        console.warn("Cloud Sync Notice (Local Mirror Safe):", e);
       }
     };
 
     window.deleteContractFromCloud = async function(id) {
       if (!id) return;
       delete window.contractPool[id];
-      localStorage.removeItem('MD_CONTRACT_' + id);
+      try {
+        localStorage.removeItem('MD_CONTRACT_' + id);
+      } catch (e) {}
 
       if (!db) return;
       try {
@@ -1449,22 +1481,40 @@
       } catch (e) {}
     };
 
+    // 모바일 포커스 복귀 시 리스너 재부착
     window.initRealtimeContractListener = function(id) {
       if (!db || !id) return;
+      if (activeUnsubscribe) {
+        activeUnsubscribe();
+        activeUnsubscribe = null;
+      }
+
       try {
-        onSnapshot(doc(db, 'merrydam_contracts', id), (snapshot) => {
+        activeUnsubscribe = onSnapshot(doc(db, 'merrydam_contracts', id), { includeMetadataChanges: true }, (snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.data();
             window.contractPool[id] = data;
+            
+            // 현재 작업 중인 계약서가 실시간 업데이트된 경우 DOM 동기화
             if (window.currentContract && window.currentContract.id === id) {
-              window.currentContract = data;
-              window.loadContractIntoDOM(data);
+              // 서명 상태나 고객 정보가 변경된 경우 반영
+              window.currentContract = Object.assign({}, window.currentContract, data);
+              window.loadContractIntoDOM(window.currentContract);
             }
             window.renderDashboardTable();
           }
-        }, () => {});
+        }, (err) => {
+          console.warn("Realtime listener notice:", err);
+        });
       } catch (e) {}
     };
+
+    // 모바일 앱 전환 시 재동기화 보장
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && window.currentContract && window.currentContract.id) {
+        window.initRealtimeContractListener(window.currentContract.id);
+      }
+    });
   </script>
 
   <script>
@@ -1555,7 +1605,7 @@
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
         document.getElementById('clientGuideAlert')?.classList.remove('hidden');
         document.getElementById('roleBadge').textContent = '의뢰인 서명 모드';
-        document.getElementById('roleBadge').className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
+        document.getElementById('roleBadge').className = 'text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
 
         loadTargetContract(urlId, params.get('data'));
         showClientAuthModal();
@@ -1644,12 +1694,12 @@
       if (view === 'dashboard') {
         dSection.classList.remove('hidden');
         fSection.classList.add('hidden');
-        txtSwitch.textContent = '현재 계약서 작성';
+        if (txtSwitch) txtSwitch.textContent = '현재 계약서 작성';
         renderDashboardTable();
       } else {
         dSection.classList.add('hidden');
         fSection.classList.remove('hidden');
-        txtSwitch.textContent = '계약서 목록';
+        if (txtSwitch) txtSwitch.textContent = '계약서 목록';
         if (!window.currentContract) {
           createNewContractDraft();
         } else {
@@ -1704,15 +1754,15 @@
           </td>
           <td class="p-3">
             <span class="font-semibold text-slate-800">${c.weddingDate || '일자 미정'} ${c.weddingTime || ''}</span>
-            <span class="text-[11px] text-slate-500 block">${c.weddingHall || '예식장 미입력'}</span>
+            <span class="text-[11px] text-slate-500 block truncate max-w-[140px]">${c.weddingHall || '예식장 미입력'}</span>
           </td>
-          <td class="p-3 text-right font-black text-brand-700">금 ${(c.feeTotal || 0).toLocaleString()}원</td>
-          <td class="p-3 text-center">
+          <td class="p-3 text-right font-black text-brand-700 whitespace-nowrap">금 ${(c.feeTotal || 0).toLocaleString()}원</td>
+          <td class="p-3 text-center whitespace-nowrap">
             ${c.clientSigned
               ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800">체결완료</span>'
               : '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">서명대기</span>'}
           </td>
-          <td class="p-3 text-center">
+          <td class="p-3 text-center whitespace-nowrap">
             <div class="flex items-center justify-center gap-1.5">
               <button onclick="openContractDetail('${c.id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px]">열기</button>
               <button onclick="copyLinkForContract('${c.id}')" class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px]">링크</button>
@@ -1831,6 +1881,7 @@
       syncPrintDocument();
     };
 
+    // 모바일 터치 및 인풋 즉각 반응형 핸들러 (250ms 디바운스)
     window.handleFieldChange = function() {
       if (!window.currentContract) return;
 
@@ -1894,7 +1945,7 @@
       clearTimeout(window.saveTimer);
       window.saveTimer = setTimeout(() => {
         window.saveContractToCloud(c);
-      }, 400);
+      }, 250);
     };
 
     window.calculateTotalFees = function() {
@@ -2143,12 +2194,12 @@
         title.textContent = '메리담 대표자(전형민) 전자서명';
         desc.textContent = '대행업체 대표자로서 신뢰의 서명을 패드에 직접 작성해 주세요.';
         icon.className = 'fa-solid fa-file-signature text-brand-600';
-        btn.className = 'px-5 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-black shadow-md shadow-brand-500/20 transition';
+        btn.className = 'px-5 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-black shadow-md shadow-brand-500/20 transition';
       } else {
         title.textContent = '의뢰인(예약자) 전자서명';
         desc.textContent = '계약 당사자 본인 서명을 패드에 정자로 직접 작성해 주세요.';
         icon.className = 'fa-solid fa-pen-nib text-red-600';
-        btn.className = 'px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-md shadow-red-500/20 transition';
+        btn.className = 'px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-md shadow-red-500/20 transition';
       }
 
       modal.classList.remove('hidden');
@@ -2429,10 +2480,10 @@
       const container = document.getElementById('toastContainer');
       if (!container) return;
       const toast = document.createElement('div');
-      toast.className = `p-3.5 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-200 pointer-events-auto flex items-center gap-2 ${
+      toast.className = `p-3 sm:p-3.5 rounded-xl shadow-lg text-xs font-bold text-white transition-all transform duration-200 pointer-events-auto flex items-center gap-2 ${
         type === 'warning' ? 'bg-amber-600' : type === 'success' ? 'bg-emerald-600' : 'bg-slate-900'
       }`;
-      toast.innerHTML = `<i class="fa-solid fa-${type === 'warning' ? 'triangle-exclamation' : type === 'success' ? 'circle-check' : 'circle-info'}"></i> <span>${msg}</span>`;
+      toast.innerHTML = `<i class="fa-solid fa-${type === 'warning' ? 'triangle-exclamation' : type === 'success' ? 'circle-check' : 'circle-info'} shrink-0"></i> <span>${msg}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
