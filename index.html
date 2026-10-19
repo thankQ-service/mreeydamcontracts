@@ -49,9 +49,8 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 모바일 가독성 및 터치 향상 */
     input, select, textarea, button {
-      font-size: 14px; /* iOS 자동 줌 방지 */
+      font-size: 14px;
     }
 
     /* 고객 확인 및 입력용 빨간색 강조 박스 */
@@ -87,7 +86,7 @@
       50% { opacity: 0.85; transform: scale(1.02); }
     }
 
-    /* 서명 패드 캔버스 터치 최적화 */
+    /* 서명 패드 터치 최적화 */
     #sigCanvas {
       touch-action: none;
       cursor: crosshair;
@@ -1402,7 +1401,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, enableNetwork } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, onSnapshot, enableNetwork } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1416,22 +1415,29 @@
     };
 
     let app, db, auth;
-    let activeUnsubscribe = null;
+    let activeCollectionUnsubscribe = null;
+    let authReadyResolve;
+    const authReadyPromise = new Promise(resolve => { authReadyResolve = resolve; });
 
     try {
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
       
-      // 익명 로그인 보장
-      signInAnonymously(auth).then(() => {
+      // 익명 로그인 및 인증 준비 완료
+      signInAnonymously(auth).then((cred) => {
         window.isFirebaseAuthReady = true;
-        console.log("Firebase Auth Connected");
+        authReadyResolve(cred.user);
+        
+        // 전체 컬렉션 실시간 동기화 시작 (PC <-> 모바일 완벽 공유)
+        window.listenAllContractsFromCloud();
       }).catch((err) => {
-        console.warn("Firebase Auth Notice:", err);
+        console.warn("Firebase Auth Notice (Fallback mode):", err);
+        authReadyResolve(null);
       });
     } catch (e) {
       console.warn("Firebase Init Notice:", e);
+      authReadyResolve(null);
     }
 
     function sanitizeForFirestore(obj) {
@@ -1442,19 +1448,73 @@
       return clean;
     }
 
-    // 클라우드 저장 엔진 (모바일 즉시 반영 강화)
+    // 전체 계약서 실시간 감시 엔진 (PC에서 만들면 모바일에 즉시 뜨고, 모바일에서 서명하면 PC에 즉시 반영)
+    window.listenAllContractsFromCloud = function() {
+      if (!db) return;
+      if (activeCollectionUnsubscribe) {
+        activeCollectionUnsubscribe();
+      }
+
+      try {
+        const contractsCol = collection(db, 'merrydam_contracts');
+        activeCollectionUnsubscribe = onSnapshot(contractsCol, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            const data = change.doc.data();
+            const id = change.doc.id;
+
+            if (change.type === "added" || change.type === "modified") {
+              window.contractPool[id] = data;
+              try {
+                localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data));
+              } catch(e) {}
+
+              // 현재 열려있는 계약서가 외부 기기(모바일/PC)에서 서명되거나 수정된 경우 실시간 화면 갱신
+              if (window.currentContract && window.currentContract.id === id) {
+                window.currentContract = Object.assign({}, window.currentContract, data);
+                if (typeof window.loadContractIntoDOM === 'function') {
+                  window.loadContractIntoDOM(window.currentContract);
+                }
+              }
+            }
+            if (change.type === "removed") {
+              delete window.contractPool[id];
+              try {
+                localStorage.removeItem('MD_CONTRACT_' + id);
+              } catch(e) {}
+            }
+          });
+
+          // 대시보드 리스트 실시간 리렌더링
+          if (typeof window.renderDashboardTable === 'function') {
+            window.renderDashboardTable();
+          }
+
+          const badge = document.getElementById('syncStatusBadge');
+          if (badge) {
+            badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="hidden sm:inline">클라우드 실시간 동기화 활성</span><span class="sm:hidden">동기화 활성</span>';
+          }
+        }, (err) => {
+          console.warn("Collection listener notice:", err);
+        });
+      } catch (e) {
+        console.warn("Error setting up collection listener:", e);
+      }
+    };
+
+    // 단일 계약서 클라우드 즉시 저장
     window.saveContractToCloud = async function(contract) {
       if (!contract || !contract.id) return;
       
-      // 1. 브라우저 로컬 저장소 우선 반영
+      // 로컬 즉시 미러링
+      window.contractPool[contract.id] = contract;
       try {
         localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(contract));
       } catch (e) {}
-      window.contractPool[contract.id] = contract;
 
-      // 2. 파이어베이스 클라우드 동기화
       if (!db) return;
+
       try {
+        await authReadyPromise; // 인증 완료 대기
         const cleanData = sanitizeForFirestore(contract);
         cleanData.lastUpdated = new Date().toISOString();
         await setDoc(doc(db, 'merrydam_contracts', contract.id), cleanData);
@@ -1468,6 +1528,27 @@
       }
     };
 
+    // 단일 계약서 클라우드 조회 (모바일에서 링크로 처음 접속했을 때 100% 로드 보장)
+    window.fetchContractFromCloud = async function(id) {
+      if (!id || !db) return null;
+      try {
+        await authReadyPromise;
+        const snap = await getDoc(doc(db, 'merrydam_contracts', id));
+        if (snap.exists()) {
+          const data = snap.data();
+          window.contractPool[id] = data;
+          try {
+            localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data));
+          } catch(e) {}
+          return data;
+        }
+      } catch(e) {
+        console.warn("Error fetching contract from cloud:", e);
+      }
+      return null;
+    };
+
+    // 계약서 클라우드 삭제
     window.deleteContractFromCloud = async function(id) {
       if (!id) return;
       delete window.contractPool[id];
@@ -1477,44 +1558,28 @@
 
       if (!db) return;
       try {
+        await authReadyPromise;
         await deleteDoc(doc(db, 'merrydam_contracts', id));
       } catch (e) {}
     };
 
-    // 모바일 포커스 복귀 시 리스너 재부착
-    window.initRealtimeContractListener = function(id) {
-      if (!db || !id) return;
-      if (activeUnsubscribe) {
-        activeUnsubscribe();
-        activeUnsubscribe = null;
+    // 모바일 포커스 및 네트워크 복귀 시 강제 재연결
+    const reconnectHandler = async () => {
+      if (db && typeof enableNetwork === 'function') {
+        try {
+          await enableNetwork(db);
+        } catch(e) {}
       }
-
-      try {
-        activeUnsubscribe = onSnapshot(doc(db, 'merrydam_contracts', id), { includeMetadataChanges: true }, (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.data();
-            window.contractPool[id] = data;
-            
-            // 현재 작업 중인 계약서가 실시간 업데이트된 경우 DOM 동기화
-            if (window.currentContract && window.currentContract.id === id) {
-              // 서명 상태나 고객 정보가 변경된 경우 반영
-              window.currentContract = Object.assign({}, window.currentContract, data);
-              window.loadContractIntoDOM(window.currentContract);
-            }
-            window.renderDashboardTable();
-          }
-        }, (err) => {
-          console.warn("Realtime listener notice:", err);
-        });
-      } catch (e) {}
+      if (typeof window.listenAllContractsFromCloud === 'function') {
+        window.listenAllContractsFromCloud();
+      }
     };
 
-    // 모바일 앱 전환 시 재동기화 보장
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible" && window.currentContract && window.currentContract.id) {
-        window.initRealtimeContractListener(window.currentContract.id);
-      }
+      if (document.visibilityState === "visible") reconnectHandler();
     });
+    window.addEventListener("focus", reconnectHandler);
+    window.addEventListener("online", reconnectHandler);
   </script>
 
   <script>
@@ -1591,7 +1656,7 @@
       };
     }
 
-    window.onload = function() {
+    window.onload = async function() {
       initCanvas();
       loadContractsFromLocalStorage();
       bindEnterKeyEvents();
@@ -1607,7 +1672,8 @@
         document.getElementById('roleBadge').textContent = '의뢰인 서명 모드';
         document.getElementById('roleBadge').className = 'text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
 
-        loadTargetContract(urlId, params.get('data'));
+        // 클라우드에서 해당 계약서 즉시 동기화 조회
+        await loadTargetContract(urlId, params.get('data'));
         showClientAuthModal();
       } else {
         window.appMode = 'admin';
@@ -1663,7 +1729,7 @@
       }
     }
 
-    function loadTargetContract(id, dataPayload) {
+    async function loadTargetContract(id, dataPayload) {
       if (dataPayload) {
         try {
           const parsed = JSON.parse(decodeURIComponent(escape(atob(dataPayload))));
@@ -1672,13 +1738,19 @@
           }
         } catch (e) {}
       }
+
       let c = window.contractPool[id];
+
+      // 로컬에 없으면 클라우드 Firestore에서 즉시 패치
+      if (!c && window.fetchContractFromCloud) {
+        c = await window.fetchContractFromCloud(id);
+      }
+
       if (!c) {
         c = createBlankContract(id);
         window.contractPool[id] = c;
       }
       window.currentContract = c;
-      if (window.initRealtimeContractListener) window.initRealtimeContractListener(id);
     }
 
     window.toggleMainView = function() {
@@ -1779,7 +1851,6 @@
       window.contractPool[newContract.id] = newContract;
       window.currentContract = newContract;
       window.saveContractToCloud(newContract);
-      if (window.initRealtimeContractListener) window.initRealtimeContractListener(newContract.id);
 
       switchMainView('form');
       window.loadContractIntoDOM(newContract);
@@ -1791,7 +1862,6 @@
       const c = window.contractPool[id];
       if (c) {
         window.currentContract = c;
-        if (window.initRealtimeContractListener) window.initRealtimeContractListener(id);
         switchMainView('form');
         window.loadContractIntoDOM(c);
       }
