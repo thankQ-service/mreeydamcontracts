@@ -519,11 +519,10 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-slate-600">
             <div>• 하객 안내 및 축의금 접수</div>
             <div>• 하객 명부 작성 및 식권 전달</div>
-            <div>• 축의금 봉투·현금의 구분 보관</div>
-            <div>• 선택한 방식에 따른 개봉·금액 기록·계수</div>
+            <div>• 축의금 봉투 넘버링 금액 확인 후 밀봉</div>
             <div>• 디지털 또는 엑셀 장부 작성</div>
             <div>• 화환 및 현장 진행 사진 전송</div>
-            <div class="sm:col-span-2">• 축의금·명부·잔여 식권의 최종 인계</div>
+            <div>• 축의금·명부·잔여 식권의 최종 인계</div>
           </div>
 
           <!-- 2조 확인 체크박스 (고객 확인용 빨간색 박스) -->
@@ -551,7 +550,7 @@
           <span>3. 축의금 처리 방식</span>
         </h2>
 
-        <!-- 고객 선택: 처리 방식 (빨간색 박스) -->
+        <!-- 고객 선택: 처리 방식 (미개봉 보관 / 봉투별 기록 2가지만 제공) -->
         <div class="client-red-box p-4 space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
@@ -560,50 +559,25 @@
             <span class="client-guide-badge">필수 선택</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-            <label class="flex flex-col p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex flex-col p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
               <div class="flex items-center gap-2 mb-1">
                 <input type="radio" name="moneyProcess" value="미개봉 보관" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
-                <span class="font-extrabold text-slate-900">미개봉 보관</span>
+                <span class="font-extrabold text-slate-900 text-sm">미개봉 보관</span>
               </div>
-              <span class="text-[10px] text-slate-500">봉투를 개봉하지 않고 수량만 확인</span>
+              <span class="text-[11px] text-slate-500">봉투를 개봉하지 않고 수량만 확인하여 안전하게 보관</span>
             </label>
-            <label class="flex flex-col p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
+            <label class="flex flex-col p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
               <div class="flex items-center gap-2 mb-1">
                 <input type="radio" name="moneyProcess" value="봉투별 기록" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
-                <span class="font-extrabold text-slate-900">봉투별 기록</span>
+                <span class="font-extrabold text-slate-900 text-sm">봉투별 기록</span>
               </div>
-              <span class="text-[10px] text-slate-500">봉투 개봉 후 성명과 금액 장부 기록</span>
-            </label>
-            <label class="flex flex-col p-2.5 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-red-400">
-              <div class="flex items-center gap-2 mb-1">
-                <input type="radio" name="moneyProcess" value="계수·정산" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600">
-                <span class="font-extrabold text-slate-900">계수·정산</span>
-              </div>
-              <span class="text-[10px] text-slate-500">권종별 수량 및 총액 2인 대조 정산</span>
+              <span class="text-[11px] text-slate-500">봉투 개봉 후 하객 성명과 축의 금액을 장부에 꼼꼼히 기록</span>
             </label>
           </div>
 
           <div class="text-[11px] text-slate-500 space-y-0.5 pt-1">
-            <p>※ 계수·정산을 선택한 경우 담당자와 확인자 2인이 장부와 현금을 대조하는 것을 원칙으로 합니다.</p>
-            <p>※ 신랑측과 신부측 축의금은 철저히 구분하여 관리하며, 메리담은 임의로 사용·공제·반환·반출하지 않습니다.</p>
-          </div>
-        </div>
-
-        <!-- 하객 반환 요청 승인자 (고객 입력용 빨간색 박스) -->
-        <div class="client-red-box p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-xs text-red-950 flex items-center gap-1.5">
-              <i class="fa-solid fa-user-shield text-red-600"></i> 하객 축의금 반환 요청 시 지정 승인자
-            </span>
-            <span class="client-guide-badge">고객 입력</span>
-          </div>
-          <p class="text-[10px] text-slate-600">하객이 축의금 반환을 요구하는 경우, 아래 지정 승인자의 유선 확인을 거친 후 처리합니다.</p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
-            <input type="text" id="returnApproverName" onchange="handleFieldChange()" placeholder="승인자 성명 (예: 신랑 부친)" class="p-2 border border-slate-300 rounded-lg">
-            <input type="text" id="returnApproverRel" onchange="handleFieldChange()" placeholder="관계 (예: 부친, 모친, 본인)" class="p-2 border border-slate-300 rounded-lg">
-            <input type="tel" id="returnApproverPhone" onchange="handleFieldChange()" placeholder="연락처 (010-0000-0000)" class="p-2 border border-slate-300 rounded-lg">
+            <p>※ 신랑측과 신부측 축의금은 철저히 구분하여 관리하며, 메리담은 임의로 사용·공제·반환하거나 외부로 반출하지 않습니다.</p>
           </div>
         </div>
       </section>
@@ -682,9 +656,7 @@
         <div class="client-red-box p-3.5 space-y-2">
           <div class="flex items-center justify-between">
             <span class="font-extrabold text-xs text-red-950">6. 식권 지급 확인 지정 담당자</span>
-            <button type="button" onclick="copyReturnApproverToTicket()" class="px-2 py-0.5 rounded-md bg-red-100 hover:bg-red-200 text-red-900 font-extrabold text-[10px] transition">
-              <i class="fa-solid fa-copy"></i> 3조 반환 승인자 정보 가져오기
-            </button>
+            <span class="client-guide-badge">선택 입력</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <input type="text" id="ticketApproverName" onchange="handleFieldChange()" placeholder="식권 확인 담당자 성함" class="p-2 border border-slate-300 rounded-lg">
@@ -839,97 +811,71 @@
         </div>
       </section>
 
-      <!-- SECTION 7: 사고 및 손해배상 (전문 6개 항 및 개별 확인 체크박스) -->
+      <!-- SECTION 7: 사고 발생 시 처리 및 책임 (단독 독립 섹션으로 깔끔하게 분리) -->
       <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
-            <span>7. 사고 및 손해배상</span>
+            <span>7. 사고 발생 시 처리 및 책임</span>
           </h2>
-          <span class="client-guide-badge">전 조항 개별 확인</span>
+          <span class="client-guide-badge">조항별 개별 확인</span>
         </div>
 
-        <div class="space-y-2.5">
-          <!-- ①항 -->
-          <div class="client-red-box p-3">
+        <div class="space-y-3">
+          <!-- ①항: 서비스 미제공 시 조치 -->
+          <div class="client-red-box p-3.5 space-y-2">
             <div class="flex items-start justify-between gap-3">
               <div class="text-[11px] text-slate-700 leading-relaxed">
-                <span class="font-bold text-slate-900">① 서비스 미제공 배상:</span> 메리담의 귀책 사유로 계약된 축의대 대행 서비스가 전부 제공되지 않은 경우, 메리담은 고객이 결제한 서비스 이용금액 전액을 환급하고, 해당 서비스 미제공으로 발생한 것으로 확인된 <b class="text-red-700">피해 금액의 200%를 별도로 보상</b>합니다.
+                <span class="font-extrabold text-slate-900 block text-xs mb-1">① 서비스 미제공 시 조치</span>
+                메리담의 귀책 사유로 서비스 제공이 어려운 경우, 계약자에게 신속히 알리고 인력 교체 등 대체 조치를 취합니다. 이후에도 서비스 제공이 불가능한 경우 전부 미제공 시 이용금액 전액을, 일부 미제공 시 해당 금액을 환급합니다.
               </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50">
-                <input type="checkbox" id="chkDamage1" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-red-600 accent-red-600 cursor-pointer">
-                <span class="text-[10px] font-bold text-red-900">확인하였습니다.</span>
+              <label class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs">
+                <input type="checkbox" id="chkDamage1" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer">
+                <span class="text-[11px] font-bold text-red-900">확인하였습니다.</span>
               </label>
             </div>
           </div>
 
-          <!-- ②항 -->
-          <div class="client-red-box p-3">
+          <!-- ②항: 사고 통지 및 자료 보존 -->
+          <div class="client-red-box p-3.5 space-y-2">
             <div class="flex items-start justify-between gap-3">
               <div class="text-[11px] text-slate-700 leading-relaxed">
-                <span class="font-bold text-slate-900">② 사고 인지 및 자료 보존:</span> 메리담의 귀책 사유로 서비스 수행 중 축의금의 도난·분실 등 사고가 발생한 경우, 메리담은 사고 인지 즉시 계약자에게 알리고 장부, 인수인계서, 촬영 영상 등 관련 자료를 보존합니다.
+                <span class="font-extrabold text-slate-900 block text-xs mb-1">② 사고 통지 및 자료 보존</span>
+                서비스 중 축의금 도난·분실 또는 인수인계 불일치가 발생한 경우, 메리담은 계약자에게 지체 없이 알리고 장부, 인수인계서, 촬영 영상 등 관련 자료를 보존합니다. 계약자는 사고 확인 및 관계 기관의 조사에 합리적으로 협조해야 합니다.
               </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50">
-                <input type="checkbox" id="chkDamage2" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-red-600 accent-red-600 cursor-pointer">
-                <span class="text-[10px] font-bold text-red-900">확인하였습니다.</span>
+              <label class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs">
+                <input type="checkbox" id="chkDamage2" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer">
+                <span class="text-[11px] font-bold text-red-900">확인하였습니다.</span>
               </label>
             </div>
           </div>
 
-          <!-- ③항 -->
-          <div class="client-red-box p-3">
+          <!-- ③항: 책임 범위 및 피해 확인 (5대 면책/제한 사유 수록) -->
+          <div class="client-red-box p-3.5 space-y-2">
             <div class="flex items-start justify-between gap-3">
-              <div class="text-[11px] text-slate-700 leading-relaxed">
-                <span class="font-bold text-slate-900">③ 사고 경위 공동 확인:</span> 메리담과 계약자는 관련 자료를 바탕으로 사고 경위, 귀책 사유 및 실제 피해 금액을 공동으로 확인합니다. 필요한 경우 관계 기관의 조사 결과를 함께 반영합니다.
+              <div class="text-[11px] text-slate-700 leading-relaxed space-y-1.5">
+                <div>
+                  <span class="font-extrabold text-slate-900 block text-xs mb-1">③ 책임 범위 및 피해 확인</span>
+                  양측은 관련 자료와 조사 결과를 바탕으로 사고 경위, 귀책 정도 및 피해 금액을 확인합니다. 메리담은 귀책 사유와 직접적인 인과관계가 있는 통상손해에 한하여 책임을 부담하며, 축의금 피해액은 객관적인 자료로 확인된 금액을 기준으로 합니다.
+                </div>
+                <div class="p-2.5 bg-slate-100/80 rounded-lg border border-slate-200 text-[10.5px] text-slate-600 space-y-0.5">
+                  <span class="font-bold text-slate-800 block">※ 다음 사유로 발생하거나 확대된 손해는 메리담의 책임을 제한하거나 제외할 수 있습니다:</span>
+                  <p>1. 계약자, 혼주, 하객, 예식장 관계자 등 제3자의 고의·과실</p>
+                  <p>2. 계약자가 제공한 정보나 지시의 오류·누락</p>
+                  <p>3. 천재지변, 화재, 정전, 예식장 통제 등 불가항력</p>
+                  <p>4. 계약자의 자료 제출 또는 조사 협조 지연</p>
+                  <p>5. 객관적으로 확인하기 어려운 간접손해·기대이익·정신적 손해</p>
+                </div>
               </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50">
-                <input type="checkbox" id="chkDamage3" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-red-600 accent-red-600 cursor-pointer">
-                <span class="text-[10px] font-bold text-red-900">확인하였습니다.</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- ④항 -->
-          <div class="client-red-box p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="text-[11px] text-slate-700 leading-relaxed">
-                <span class="font-bold text-slate-900">④ 도난·분실 200% 보상:</span> 제②항에 따른 사고에 대하여 메리담은 확인된 피해 금액의 200%를 보상합니다. 보상금은 피해 원금 100%와 추가 보상금 100%를 합한 금액으로 합니다.
-              </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50">
-                <input type="checkbox" id="chkDamage4" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-red-600 accent-red-600 cursor-pointer">
-                <span class="text-[10px] font-bold text-red-900">확인하였습니다.</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- ⑤항 -->
-          <div class="client-red-box p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="text-[11px] text-slate-700 leading-relaxed">
-                <span class="font-bold text-slate-900">⑤ 보상금 지급 기한:</span> 메리담은 피해 금액 및 보상금이 확정된 날부터 14일 이내에 계약자가 지정한 계좌로 지급합니다. 일정 변경 필요 시 계약자와 별도 합의합니다.
-              </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50">
-                <input type="checkbox" id="chkDamage5" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-red-600 accent-red-600 cursor-pointer">
-                <span class="text-[10px] font-bold text-red-900">인지하였습니다.</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- ⑥항 -->
-          <div class="client-red-box p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div class="text-[11px] text-slate-700 leading-relaxed">
-                <span class="font-bold text-slate-900">⑥ 중복 보상 배제:</span> 동일한 피해에 대해서는 본 조에 따른 보상금을 중복하여 산정하지 않습니다.
-              </div>
-              <label class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50">
-                <input type="checkbox" id="chkDamage6" onchange="handleFieldChange()" class="w-3.5 h-3.5 text-red-600 accent-red-600 cursor-pointer">
-                <span class="text-[10px] font-bold text-red-900">확인하였습니다.</span>
+              <label class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-300 rounded-md cursor-pointer hover:bg-red-50 shadow-xs">
+                <input type="checkbox" id="chkDamage3" onchange="handleFieldChange()" class="w-4 h-4 text-red-600 accent-red-600 cursor-pointer">
+                <span class="text-[11px] font-bold text-red-900">확인하였습니다.</span>
               </label>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SECTION 8: 개인정보 및 촬영 자료 활용 동의 -->
+      <!-- SECTION 8: 개인정보 및 촬영 자료 활용 동의 (단독 독립 섹션) -->
       <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>8. 개인정보 및 촬영 자료</span>
@@ -991,7 +937,7 @@
         </div>
       </section>
 
-      <!-- SECTION 9: 전자서명 체결 및 날인 (고객 & 메리담 대표 직접 터치 서명 탑재) -->
+      <!-- SECTION 9: 전자서명 체결 및 날인 (단독 독립 섹션) -->
       <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>9. 전자계약 체결 및 서명</span>
@@ -1143,26 +1089,26 @@
           <tr><th>예식장 및 홀</th><td><b id="pWeddingHall" class="text-slate-900">-</b></td><th>접수종료·인계</th><td id="pFinishTime">-</td></tr>
           <tr><th>예식장 주소</th><td colspan="3" id="pWeddingAddress">-</td></tr>
           <tr><th>서비스 유형</th><td><b id="pServiceType" class="text-brand-700">-</b></td><th>담당 측</th><td><b id="pServiceSide" class="text-brand-700">-</b></td></tr>
-          <tr><th>기본 제공 업무</th><td colspan="3" class="text-[7pt] text-slate-700 leading-tight">하객 안내 및 축의금 접수 / 하객 명부 작성 및 식권 전달 / 축의금 봉투·현금 구분 보관 / 선택 방식 개봉·금액 기록·계수 / 디지털·엑셀 정산 장부 작성 / 화환 및 현장 사진 전송 / 축의금·명부·잔여식권 최종 인계 <span id="pServiceBasicConfirmTag" class="text-blue-900 font-bold ml-1">[고객 업무 확인 완료]</span></td></tr>
+          <tr><th>기본 제공 업무</th><td colspan="3" class="text-[7pt] text-slate-700 leading-tight">하객 안내 및 축의금 접수 / 하객 명부 작성 및 식권 전달 / 축의금 봉투 넘버링 금액 확인 후 밀봉 / 디지털·엑셀 정산 장부 작성 / 화환 및 현장 사진 전송 / 축의금·명부·잔여식권 최종 인계 <span id="pServiceBasicConfirmTag" class="text-blue-900 font-bold ml-1">[고객 업무 확인 완료]</span></td></tr>
           <tr><th>특약 및 요청사항</th><td colspan="3" id="pSpecialNotes">특약사항 없음</td></tr>
         </table>
 
-        <!-- 3. 축의금 처리 방식 -->
+        <!-- 3. 축의금 처리 방식 (인쇄 뷰) -->
         <div class="doc-section-title">3. 축의금 처리 방식</div>
         <table class="doc-table">
-          <colgroup><col style="width: 18%;"><col style="width: 32%;"><col style="width: 18%;"><col style="width: 32%;"></colgroup>
-          <tr><th>선택 처리 방식</th><td><b id="pMoneyProcess" class="text-brand-700">-</b></td><th>반환 승인자</th><td id="pReturnApprover">-</td></tr>
-          <tr><th>원칙 및 주의사항</th><td colspan="3" class="text-[6.5pt] text-slate-600 leading-tight">계수·정산 선택 시 담당자/확인자 2인 대조 원칙 / 신랑측·신부측 구분 관리 / 축의금 임의 사용·공제·반환·반출 불가 / 하객 반환 요청 시 지정 승인자 유선 승인 후 처리 및 기록</td></tr>
+          <colgroup><col style="width: 20%;"><col style="width: 80%;"></colgroup>
+          <tr><th>선택 처리 방식</th><td><b id="pMoneyProcess" class="text-brand-700 font-bold">-</b></td></tr>
+          <tr><th>관리 원칙</th><td class="text-[7pt] text-slate-600 leading-tight">신랑측과 신부측 축의금은 구분하여 철저히 관리하며, 메리담은 축의금을 임의로 사용·공제·반환하거나 외부로 반출하지 않습니다.</td></tr>
         </table>
 
-        <!-- 4. 식권 및 인계 -->
+        <!-- 4. 식권 및 인계 (인쇄 뷰) -->
         <div class="doc-section-title">4. 식권 및 인계 기준</div>
         <table class="doc-table">
           <colgroup><col style="width: 20%;"><col style="width: 30%;"><col style="width: 20%;"><col style="width: 30%;"></colgroup>
           <tr><th>계좌이체 하객 식권</th><td id="pTicketTransfer">-</td><th>식권 최소 금액 기준</th><td id="pTicketMinAmount">-</td></tr>
           <tr><th>추가 요청 지급 기준</th><td id="pTicketExtraRule">-</td><th>봉투당 최대 수량</th><td id="pTicketMaxNotes">-</td></tr>
           <tr><th>식권 확인 지정자</th><td id="pTicketApproverInfo">-</td><th>축의금 최종 인계자</th><td><b id="pReceiverInfo" class="text-slate-900">-</b></td></tr>
-          <tr><th>인계 품목 및 절차</th><td colspan="3" class="text-[6.5pt] text-slate-600 leading-tight">축의금 봉투 및 현금, 하객 명부와 정산 장부, 잔여 식권, 반환 내역 등 일체 인계 / 담당자와 지정 수령인이 수량·총액 확인 후 인수인계서 서명</td></tr>
+          <tr><th>인계 품목 및 절차</th><td colspan="3" class="text-[6.5pt] text-slate-600 leading-tight">축의금 봉투 및 현금, 하객 명부와 정산 장부, 잔여 식권, 반환 및 현장 결제 내역 등 일체 인계 / 담당자와 지정 수령인이 수량·총액 확인 후 인수인계서 서명</td></tr>
         </table>
       </div>
 
@@ -1207,13 +1153,13 @@
 
         <!-- 7. 사고 및 손해배상 -->
         <div class="doc-section-title">7. 사고 및 손해배상 (전문 수록)</div>
-        <div class="text-[6.5pt] text-slate-700 leading-tight space-y-0.5 border border-slate-300 p-2 rounded bg-slate-50">
-          <p>① 메리담 귀책으로 서비스 전부 미제공 시 이용금액 전액 환급 및 확인된 피해 금액의 200% 별도 보상</p>
-          <p>② 도난·분실 사고 발생 시 즉시 계약자 통보 및 장부, 인수인계서, 영상 등 일체 자료 보존</p>
-          <p>③ 관련 자료 바탕 사고 경위 및 피해 금액 공동 확인 (필요 시 관계 기관 조사 결과 반영)</p>
-          <p>④ 도난·분실 사고 시 확인된 피해 금액의 200% 보상 (피해 원금 100% + 추가 보상금 100%)</p>
-          <p>⑤ 확정일로부터 14일 이내 지정 계좌 지급 / ⑥ 동일 피해 중복 보상 배제</p>
-          <div class="text-blue-900 font-bold pt-0.5 text-right" id="pDamageStatusText">※ 의뢰인 6개 전 조항 개별 확인 및 인지 완료필</div>
+        <!-- 7. 사고 발생 시 처리 및 책임 (인쇄 뷰) -->
+        <div class="doc-section-title">7. 사고 발생 시 처리 및 책임</div>
+        <div class="text-[6.5pt] text-slate-700 leading-tight space-y-1 border border-slate-300 p-2.5 rounded bg-slate-50">
+          <p><b>① 서비스 미제공 시 조치:</b> 귀책 사유로 서비스 곤란 시 신속 통지 및 인력 교체 등 대체 조치 / 불가능 시 전부 미제공 전액, 일부 미제공 해당액 환급</p>
+          <p><b>② 사고 통지 및 자료 보존:</b> 도난·분실 또는 인수인계 불일치 시 지체 없이 통지 및 장부·영상 등 보존 / 계약자는 확인 및 관계 기관 조사에 합리적 협조</p>
+          <p><b>③ 책임 범위 및 피해 확인:</b> 통상손해 한정 책임 및 객관적 확인 피해액 기준 / 제3자 고의·과실, 정보 오류, 불가항력, 협조 지연, 간접·정신적 손해 책임 제한 및 제외</p>
+          <div class="text-blue-900 font-bold pt-0.5 text-right" id="pDamageStatusText">※ 의뢰인 3개 항 개별 확인 및 인지 완료필</div>
         </div>
 
         <!-- 8. 개인정보 및 분쟁 해결 -->
@@ -1529,9 +1475,6 @@
         chkServiceBasic: false,
         specialNotes: '',
         moneyProcess: '',
-        returnApproverName: '',
-        returnApproverRel: '',
-        returnApproverPhone: '',
         ticketTransferProcess: '',
         ticketMinAmountType: '',
         ticketMinAmountVal: '',
@@ -1547,9 +1490,6 @@
         chkDamage1: false,
         chkDamage2: false,
         chkDamage3: false,
-        chkDamage4: false,
-        chkDamage5: false,
-        chkDamage6: false,
         feeBasic: 250000,
         feeTravel: 0,
         feeExtra: 0,
@@ -1831,10 +1771,6 @@
       setRadio('ticketExtraRule', c.ticketExtraRule);
       setVal('ticketMaxLimitNotes', c.ticketMaxLimitNotes);
 
-      setVal('returnApproverName', c.returnApproverName);
-      setVal('returnApproverRel', c.returnApproverRel);
-      setVal('returnApproverPhone', c.returnApproverPhone);
-
       setVal('ticketApproverName', c.ticketApproverName);
       setVal('ticketApproverPhone', c.ticketApproverPhone);
 
@@ -1849,9 +1785,6 @@
       setChk('chkDamage1', c.chkDamage1);
       setChk('chkDamage2', c.chkDamage2);
       setChk('chkDamage3', c.chkDamage3);
-      setChk('chkDamage4', c.chkDamage4);
-      setChk('chkDamage5', c.chkDamage5);
-      setChk('chkDamage6', c.chkDamage6);
 
       setChk('consentPrivacy', c.consentPrivacy);
       setRadio('consentPhotoTransfer', c.consentPhotoTransfer);
@@ -1899,9 +1832,6 @@
       c.chkServiceBasic = getChk('chkServiceBasic');
 
       c.moneyProcess = getRadio('moneyProcess');
-      c.returnApproverName = getVal('returnApproverName');
-      c.returnApproverRel = getVal('returnApproverRel');
-      c.returnApproverPhone = getVal('returnApproverPhone');
 
       c.ticketTransferProcess = getRadio('ticketTransferProcess');
       c.ticketMinAmountType = getRadio('ticketMinAmountType');
@@ -1921,9 +1851,6 @@
       c.chkDamage1 = getChk('chkDamage1');
       c.chkDamage2 = getChk('chkDamage2');
       c.chkDamage3 = getChk('chkDamage3');
-      c.chkDamage4 = getChk('chkDamage4');
-      c.chkDamage5 = getChk('chkDamage5');
-      c.chkDamage6 = getChk('chkDamage6');
 
       c.consentPrivacy = getChk('consentPrivacy');
       c.consentPhotoTransfer = getRadio('consentPhotoTransfer');
@@ -2002,6 +1929,7 @@
     };
 
     // 인쇄용 A4 2페이지 동기화 (국민은행 계좌 및 대표 친필 서명 매핑)
+    // 인쇄용 A4 2페이지 동기화
     function syncPrintDocument() {
       const c = window.currentContract;
       if (!c) return;
@@ -2029,7 +1957,6 @@
       setText('pSpecialNotes', c.specialNotes || '특약사항 없음');
 
       setText('pMoneyProcess', c.moneyProcess || '미선택');
-      setText('pReturnApprover', `${c.returnApproverName || '미지정'} (${c.returnApproverRel || '-'}) / ${c.returnApproverPhone || '-'}`);
 
       setText('pTicketTransfer', c.ticketTransferProcess || '미선택');
       setText('pTicketMinAmount', c.ticketMinAmountVal ? `${c.ticketMinAmountType || ''} (${c.ticketMinAmountVal})` : (c.ticketMinAmountType || '금액 관계없이 지급'));
@@ -2049,8 +1976,8 @@
       setText('pFeeConfirmTag', c.chkFeeConfirm ? '[고객 요금 및 지급조건 확인필]' : '[요금 확인 미완료]');
       setText('pRefundConfirmTag', c.chkRefundConfirm ? '※ 취소 수수료율 및 위약 환불 규정에 대한 의뢰인의 사전 열람 및 확인·동의 완료' : '※ 취소·환불 규정 확인 필요');
 
-      const allDamChecked = c.chkDamage1 && c.chkDamage2 && c.chkDamage3 && c.chkDamage4 && c.chkDamage5 && c.chkDamage6;
-      setText('pDamageStatusText', allDamChecked ? '※ 의뢰인 6개 전 조항 개별 확인 및 인지 완료필' : '※ 사고 및 손해배상 보장 규정 확인');
+      const allDamChecked = c.chkDamage1 && c.chkDamage2 && c.chkDamage3;
+      setText('pDamageStatusText', allDamChecked ? '※ 의뢰인 3개 항 개별 확인 및 인지 완료필' : '※ 사고 발생 시 처리 및 책임 규정 확인');
 
       setText('pConsentPrivacy', c.consentPrivacy ? '동의' : '미동의');
       setText('pConsentPhotoTransfer', c.consentPhotoTransfer || '미선택');
@@ -2303,8 +2230,8 @@
         document.getElementById('chkRefundConfirm')?.focus();
         return;
       }
-      if (!c.chkDamage1 || !c.chkDamage2 || !c.chkDamage3 || !c.chkDamage4 || !c.chkDamage5 || !c.chkDamage6) {
-        showToast('7조 [사고 및 손해배상] 약관 6개 조항의 확인 체크를 모두 완료해 주세요.', 'warning');
+      if (!c.chkDamage1 || !c.chkDamage2 || !c.chkDamage3) {
+        showToast('7조 [사고 발생 시 처리 및 책임] 약관 3개 항의 확인 체크를 모두 완료해 주세요.', 'warning');
         return;
       }
       if (!c.consentPrivacy) {
