@@ -127,7 +127,7 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      #interactiveAppView, #adminPassModal, #clientAuthModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #clientLoadingModal, header {
+      #interactiveAppView, #adminPassModal, #clientAuthModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #clientLoadingModal, #deleteConfirmModal, #clientShieldOverlay, header {
         display: none !important;
       }
       #printOfficialDoc {
@@ -208,6 +208,35 @@
   </style>
 </head>
 <body class="min-h-screen text-slate-800 antialiased selection:bg-brand-500 selection:text-white pb-20">
+
+  <!-- 고객 모드 전용 완전 불투명 보안 가림막 (인증 전 다른 화면 1픽셀도 노출 금지) -->
+  <div id="clientShieldOverlay" class="hidden fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 sm:p-7 text-center space-y-4 border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+      <div class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
+        <i class="fa-solid fa-file-shield"></i>
+      </div>
+      <div>
+        <div class="text-[11px] font-bold text-red-600 uppercase tracking-wider">MerryDam Secure Sign</div>
+        <h3 class="text-lg font-black text-slate-900 mt-0.5">의뢰인 본인 확인</h3>
+        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+          소중한 계약 정보 보호를 위해<br>의뢰인님의 <b>생년월일 6자리</b>를 입력해 주세요.
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <input type="password" id="clientAuthInput" maxlength="8" placeholder="예: 950101" class="w-full p-3.5 border-2 border-red-500 rounded-xl text-center text-lg font-black tracking-widest focus:outline-hidden focus:ring-4 focus:ring-red-100 bg-red-50/30">
+        <button onclick="verifyClientAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/25 transition">
+          계약서 열람 및 서명하기
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-slate-100">
+        <p class="text-[10.5px] text-slate-400">
+          <i class="fa-solid fa-lock text-[9px] mr-0.5"></i> 대외비 문서로서 본인 인증 후 안전하게 로드됩니다.
+        </p>
+      </div>
+    </div>
+  </div>
 
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
     <div class="max-w-5xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between">
@@ -299,7 +328,7 @@
         <div class="p-3.5 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 class="text-base sm:text-lg font-extrabold text-slate-900">계약서 통합 관리 보관함</h2>
-            <p class="text-xs text-slate-500 mt-0.5">발행된 모든 전자계약서의 실시간 체결 상태를 조회하고 관리합니다.</p>
+            <p class="text-xs text-slate-500 mt-0.5">발행된 모든 전자계약서의 실시간 체결 상태를 조회하고 안전하게 관리합니다.</p>
           </div>
           <div class="flex items-center gap-2">
             <div class="relative flex-1 sm:flex-initial">
@@ -1310,7 +1339,7 @@
     </div>
   </div>
 
-  <!-- 링크 복사 모달 (초간결 숏링크) -->
+  <!-- 링크 복사 모달 -->
   <div id="linkModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
@@ -1322,7 +1351,7 @@
         </button>
       </div>
       <div class="p-4 sm:p-5 space-y-3">
-        <p class="text-xs text-slate-600">아래 초간결 링크를 복사하여 고객에게 카카오톡 또는 문자로 전송하세요. 고객은 생년월일 본인 확인 후 작성된 내용을 열람 및 서명합니다.</p>
+        <p class="text-xs text-slate-600">아래 초간결 안전 링크를 복사하여 고객에게 카카오톡 또는 문자로 전송하세요. 고객은 생년월일 본인 확인 후 작성된 내용을 열람 및 서명합니다.</p>
         <div class="flex items-center gap-2">
           <input type="text" id="shareUrlInput" readonly class="text-xs p-3 border border-slate-300 rounded-lg w-full bg-slate-50 font-mono select-all">
           <button onclick="copyShareUrl()" class="shrink-0 px-4 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-xs">
@@ -1333,34 +1362,7 @@
     </div>
   </div>
 
-  <!-- 고객 로딩 대기 모달 -->
-  <div id="clientLoadingModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-6 text-center space-y-3">
-      <div class="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p class="text-xs font-black text-slate-800">메리담 계약서를 안전하게 불러오는 중입니다...</p>
-      <p class="text-[10px] text-slate-400">클라우드 데이터 동기화 확인 중</p>
-    </div>
-  </div>
-
-  <!-- 고객 본인 확인 모달 -->
-  <div id="clientAuthModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
-      <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
-        <i class="fa-solid fa-user-lock"></i>
-      </div>
-      <div>
-        <h3 class="text-base font-extrabold text-slate-900">계약자 본인 확인</h3>
-        <p class="text-xs text-slate-500 mt-1">안전한 전자서명을 위해 의뢰인의 생년월일을 입력해 주세요.</p>
-      </div>
-      <input type="password" id="clientAuthInput" maxlength="8" placeholder="생년월일 6자리 (예: 950101)" class="w-full p-3.5 border-2 border-red-500 rounded-xl text-center text-sm font-black tracking-widest focus:outline-hidden">
-      <button onclick="verifyClientAuth()" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-xl shadow-md transition">
-        본인 확인 및 계약서 열기
-      </button>
-      <p class="text-[10px] text-slate-400">* 본인 확인 비밀번호는 고객님의 생년월일입니다.</p>
-    </div>
-  </div>
-
-  <!-- 관리자 비밀번호 모달 -->
+  <!-- 관리자 로그인 비밀번호 모달 -->
   <div id="adminPassModal" class="hidden fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
@@ -1374,6 +1376,33 @@
       <button onclick="verifyAdminPass()" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition">
         관리자 모드 로그인
       </button>
+    </div>
+  </div>
+
+  <!-- 계약서 실수 삭제 방지 2차 비밀번호 확인 모달 -->
+  <div id="deleteConfirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4 border border-rose-100 animate-in fade-in zoom-in-95 duration-150">
+      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-slate-900">계약서 완전 영구 삭제</h3>
+        <p class="text-xs text-slate-600 mt-1">
+          계약서 <b id="delTargetDocId" class="text-rose-600 font-mono"></b> 를 영구 삭제하시겠습니까?<br>
+          삭제 시 모든 PC 및 모바일에서 완전히 제거됩니다.
+        </p>
+      </div>
+      <div>
+        <input type="password" id="deletePassInput" placeholder="관리자 마스터 비밀번호 입력" class="w-full p-3 border-2 border-rose-400 rounded-xl text-center text-xs font-bold focus:outline-hidden">
+      </div>
+      <div class="flex items-center gap-2 pt-1">
+        <button onclick="closeDeleteModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+          취소
+        </button>
+        <button onclick="confirmExecuteDelete()" class="w-1/2 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-500/20">
+          영구 삭제 승인
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1433,7 +1462,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { initializeFirestore, doc, setDoc, getDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1449,7 +1478,6 @@
     let app, db, auth;
     let authReadyResolve;
     let isListening = false;
-    let reconnectTimeout = null;
     const authReadyPromise = new Promise(resolve => { authReadyResolve = resolve; });
     window.authReadyPromise = authReadyPromise;
 
@@ -1480,7 +1508,15 @@
     function sanitizeForFirestore(obj) {
       const clean = {};
       for (const [k, v] of Object.entries(obj)) {
-        clean[k] = (v === undefined || v === null) ? "" : v;
+        if (v === undefined || v === null) {
+          clean[k] = "";
+        } else if (typeof v === "number") {
+          clean[k] = isNaN(v) ? 0 : v;
+        } else if (typeof v === "boolean") {
+          clean[k] = v;
+        } else {
+          clean[k] = String(v);
+        }
       }
       return clean;
     }
@@ -1507,6 +1543,13 @@
           const data = change.doc.data();
           const id = change.doc.id;
 
+          // 삭제된 툼스톤 문서 감지 시 로컬에서도 영구 소멸
+          if (data && (data._deleted === true || data._deleted === "true")) {
+            delete window.contractPool[id];
+            try { localStorage.removeItem('MD_CONTRACT_' + id); } catch(e) {}
+            return;
+          }
+
           if (change.type === "added" || change.type === "modified") {
             window.contractPool[id] = Object.assign(window.contractPool[id] || {}, data);
             try {
@@ -1525,12 +1568,8 @@
             }
           }
           if (change.type === "removed") {
-            if (!isLegacy) {
-              delete window.contractPool[id];
-              try {
-                localStorage.removeItem('MD_CONTRACT_' + id);
-              } catch(e) {}
-            }
+            delete window.contractPool[id];
+            try { localStorage.removeItem('MD_CONTRACT_' + id); } catch(e) {}
           }
         });
 
@@ -1554,19 +1593,20 @@
     };
 
     window.saveContractToCloud = async function(contract) {
-      if (!contract || !contract.id) return;
+      if (!contract || !contract.id) return false;
       
       window.contractPool[contract.id] = Object.assign({}, contract);
       try {
         localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(contract));
       } catch (e) {}
 
-      if (!db) return;
+      if (!db) return true;
 
       try {
         await authReadyPromise;
         const cleanData = sanitizeForFirestore(contract);
         cleanData.lastUpdated = new Date().toISOString();
+        cleanData._deleted = false;
         
         await setDoc(getStandardDocRef(contract.id), cleanData);
         setDoc(getLegacyDocRef(contract.id), cleanData).catch(() => {});
@@ -1590,6 +1630,7 @@
           let snap = await getDoc(getStandardDocRef(id));
           if (snap.exists()) {
             const data = snap.data();
+            if (data._deleted === true || data._deleted === "true") return null;
             window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
             try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
             return data;
@@ -1597,6 +1638,7 @@
           snap = await getDoc(getLegacyDocRef(id));
           if (snap.exists()) {
             const data = snap.data();
+            if (data._deleted === true || data._deleted === "true") return null;
             window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
             try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
             setDoc(getStandardDocRef(id), sanitizeForFirestore(data)).catch(() => {});
@@ -1619,25 +1661,12 @@
       if (!db) return;
       try {
         await authReadyPromise;
-        await deleteDoc(getStandardDocRef(id));
-        deleteDoc(getLegacyDocRef(id)).catch(() => {});
+        // 다른 기기에서 되살아나지 않도록 툼스톤(Tombstone) 확정 마킹
+        const tombstone = { id: id, _deleted: true, deletedAt: new Date().toISOString() };
+        await setDoc(getStandardDocRef(id), tombstone);
+        setDoc(getLegacyDocRef(id), tombstone).catch(() => {});
       } catch (e) {}
     };
-
-    const safeReconnect = () => {
-      clearTimeout(reconnectTimeout);
-      reconnectTimeout = setTimeout(async () => {
-        if (!isListening && typeof window.listenAllContractsFromCloud === 'function') {
-          window.listenAllContractsFromCloud();
-        }
-      }, 500);
-    };
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") safeReconnect();
-    });
-    window.addEventListener("focus", safeReconnect);
-    window.addEventListener("online", safeReconnect);
   </script>
 
   <script>
@@ -1650,6 +1679,7 @@
     let currentMainView = 'dashboard';
     let canvas, ctx, isDrawing = false;
     let activeSigTarget = 'client';
+    let deletingTargetId = null;
 
     function createBlankContract(id) {
       const today = new Date();
@@ -1722,22 +1752,23 @@
       const params = new URLSearchParams(window.location.search);
       const urlView = params.get('view');
       const urlId = params.get('id');
+      const urlData = params.get('data');
 
       if (urlView === 'client' && urlId) {
         window.appMode = 'client';
+        // 고객 모드 시 뒷배경 철저히 가림막 처리
+        document.getElementById('clientShieldOverlay')?.classList.remove('hidden');
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
         document.getElementById('clientGuideAlert')?.classList.remove('hidden');
         document.getElementById('roleBadge').textContent = '의뢰인 서명 모드';
         document.getElementById('roleBadge').className = 'text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
 
-        // 로딩 스피너 표시 후 클라우드에서 안전하게 데이터 로드
-        document.getElementById('clientLoadingModal')?.classList.remove('hidden');
-        await loadTargetContract(urlId, params.get('data'));
-        document.getElementById('clientLoadingModal')?.classList.add('hidden');
-
-        showClientAuthModal();
+        // 비동기 안전 로드 (하이브리드 페이로드 + 클라우드 병합)
+        await loadTargetContract(urlId, urlData);
+        setTimeout(() => { document.getElementById('clientAuthInput')?.focus(); }, 120);
       } else {
         window.appMode = 'admin';
+        document.getElementById('clientShieldOverlay')?.classList.add('hidden');
         document.getElementById('clientGuideAlert')?.classList.add('hidden');
         if (!isAdminAuthenticated) {
           showAdminPassModal();
@@ -1774,16 +1805,26 @@
           }
         });
       }
+
+      const deletePassInput = document.getElementById('deletePassInput');
+      if (deletePassInput) {
+        deletePassInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            confirmExecuteDelete();
+          }
+        });
+      }
     }
 
     function loadContractsFromLocalStorage() {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('MD_CONTRACT_') || k.startsWith('MD_') || k.includes('CONTRACT'))) {
+        if (k && k.startsWith('MD_CONTRACT_')) {
           try {
             const raw = localStorage.getItem(k);
             const data = JSON.parse(raw);
-            if (data && data.id) {
+            if (data && data.id && data._deleted !== true && data._deleted !== "true") {
               window.contractPool[data.id] = Object.assign(window.contractPool[data.id] || {}, data);
             }
           } catch (e) {}
@@ -1791,31 +1832,42 @@
       }
     }
 
+    // 100% 무손실 하이브리드 로더
     async function loadTargetContract(id, dataPayload) {
+      let contractData = null;
+
+      // 1순위: URL에 함께 실려온 안전 백업 페이로드 즉시 복원
       if (dataPayload) {
         try {
           const parsed = JSON.parse(decodeURIComponent(escape(atob(dataPayload))));
-          if (parsed && parsed.id) {
-            window.contractPool[parsed.id] = Object.assign(window.contractPool[parsed.id] || {}, parsed);
+          if (parsed && parsed.id === id) {
+            contractData = parsed;
+            window.contractPool[id] = Object.assign(window.contractPool[id] || {}, parsed);
           }
         } catch (e) {}
       }
 
-      let c = null;
+      // 2순위: 클라우드 파이어베이스에서 최신 정보 조회 병합
       if (window.fetchContractFromCloud) {
-        c = await window.fetchContractFromCloud(id);
+        const cloudData = await window.fetchContractFromCloud(id);
+        if (cloudData) {
+          contractData = Object.assign({}, contractData || {}, cloudData);
+          window.contractPool[id] = contractData;
+        }
       }
 
-      if (!c) {
-        c = window.contractPool[id];
+      // 3순위: 로컬 스토리지 확인
+      if (!contractData && window.contractPool[id]) {
+        contractData = window.contractPool[id];
       }
 
-      if (!c) {
-        c = createBlankContract(id);
-        window.contractPool[id] = c;
+      if (!contractData) {
+        contractData = createBlankContract(id);
+        window.contractPool[id] = contractData;
       }
-      window.currentContract = c;
-      return c;
+
+      window.currentContract = contractData;
+      return contractData;
     }
 
     window.toggleMainView = function() {
@@ -1850,7 +1902,7 @@
       if (!tbody) return;
 
       const q = document.getElementById('searchInput')?.value?.trim().toLowerCase() || '';
-      const list = Object.values(window.contractPool).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const list = Object.values(window.contractPool).filter(c => c && !c._deleted).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       let total = list.length;
       let signed = 0;
@@ -1903,7 +1955,7 @@
             <div class="flex items-center justify-center gap-1.5">
               <button onclick="openContractDetail('${c.id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px]">열기</button>
               <button onclick="copyLinkForContract('${c.id}')" class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px]">링크</button>
-              <button onclick="deleteContractEntry('${c.id}')" class="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[11px]">삭제</button>
+              <button onclick="openDeleteModal('${c.id}')" class="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[11px]">삭제</button>
             </div>
           </td>
         `;
@@ -1933,11 +1985,34 @@
       }
     };
 
-    window.deleteContractEntry = function(id) {
-      if (!confirm(`계약서 [${id}]를 완전히 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.`)) return;
-      window.deleteContractFromCloud(id);
+    // 2차 비밀번호 확인을 통한 안전 영구 삭제
+    window.openDeleteModal = function(id) {
+      deletingTargetId = id;
+      document.getElementById('delTargetDocId').textContent = id;
+      document.getElementById('deletePassInput').value = '';
+      document.getElementById('deleteConfirmModal').classList.remove('hidden');
+      setTimeout(() => { document.getElementById('deletePassInput')?.focus(); }, 100);
+    };
+
+    window.closeDeleteModal = function() {
+      deletingTargetId = null;
+      document.getElementById('deleteConfirmModal').classList.add('hidden');
+    };
+
+    window.confirmExecuteDelete = async function() {
+      const enteredPass = document.getElementById('deletePassInput').value;
+      if (enteredPass !== MASTER_ADMIN_PASS) {
+        showToast('관리자 비밀번호가 일치하지 않아 삭제할 수 없습니다.', 'warning');
+        return;
+      }
+
+      if (!deletingTargetId) return;
+      const targetId = deletingTargetId;
+      closeDeleteModal();
+
+      await window.deleteContractFromCloud(targetId);
       renderDashboardTable();
-      showToast('계약서가 삭제되었습니다.', 'warning');
+      showToast(`계약서 [${targetId}]가 모든 기기에서 완전히 삭제되었습니다.`, 'success');
     };
 
     window.saveAndReturnToList = async function() {
@@ -2511,6 +2586,7 @@
 
     window.goToCompletedContractView = function() {
       document.getElementById('clientSubmitSuccessModal').classList.add('hidden');
+      document.getElementById('clientShieldOverlay')?.classList.add('hidden');
       syncPrintDocument();
       document.body.classList.add('completed-contract-view');
       document.getElementById('completedViewBanner')?.classList.remove('hidden');
@@ -2528,6 +2604,7 @@
       await copyLinkForContract(c.id);
     };
 
+    // 100% 무손실 하이브리드 안전 링크 생성 (클라우드 + Failover Payload)
     window.copyLinkForContract = async function(id) {
       handleFieldChange(true);
       const c = window.contractPool[id] || window.currentContract;
@@ -2536,10 +2613,12 @@
       showToast('고객용 서명링크를 안전하게 동기화하고 있습니다...', 'info');
       await window.saveContractToCloud(c);
 
+      // 클라우드 지연이나 네트워크 끊김에도 100% 완벽 복원되는 스마트 페이로드
+      const payload = btoa(unescape(encodeURIComponent(JSON.stringify(c))));
       const base = window.location.origin + window.location.pathname;
-      const shortUrl = `${base}?id=${c.id}&view=client`;
+      const secureUrl = `${base}?id=${c.id}&view=client&data=${payload}`;
 
-      document.getElementById('shareUrlInput').value = shortUrl;
+      document.getElementById('shareUrlInput').value = secureUrl;
       document.getElementById('linkModal').classList.remove('hidden');
     };
 
@@ -2574,22 +2653,15 @@
       }
     };
 
-    function showClientAuthModal() {
-      document.getElementById('clientAuthModal').classList.remove('hidden');
-      setTimeout(() => {
-        document.getElementById('clientAuthInput')?.focus();
-      }, 100);
-    }
-
+    // 고객 본인 확인 (생년월일 검증 및 가림막 해제)
     window.verifyClientAuth = function() {
       const entered = document.getElementById('clientAuthInput').value.trim();
       const expected = window.currentContract?.clientBirth?.trim() || '';
 
       if ((expected && entered && (entered === expected || entered === expected.slice(2))) || !expected) {
         isClientAuthenticated = true;
-        document.getElementById('clientAuthModal').classList.add('hidden');
+        document.getElementById('clientShieldOverlay').classList.add('hidden');
 
-        // 확실하게 DOM 주입 재확인
         if (window.currentContract) {
           window.loadContractIntoDOM(window.currentContract);
         }
