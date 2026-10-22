@@ -127,7 +127,7 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      #interactiveAppView, #adminPassModal, #clientAuthModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #clientLoadingModal, #deleteConfirmModal, #clientShieldOverlay, header {
+      #interactiveAppView, #adminPassModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #deleteConfirmModal, #clientShieldOverlay, header {
         display: none !important;
       }
       #printOfficialDoc {
@@ -223,9 +223,14 @@
         </p>
       </div>
 
-      <div class="space-y-2">
+      <div id="clientCloudLoadingBox" class="py-2 text-xs text-blue-600 font-bold flex items-center justify-center gap-2">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <span>클라우드에서 최신 계약서 정보를 불러오는 중...</span>
+      </div>
+
+      <div id="clientAuthFormBox" class="space-y-2">
         <input type="password" id="clientAuthInput" maxlength="8" placeholder="예: 950101" class="w-full p-3.5 border-2 border-red-500 rounded-xl text-center text-lg font-black tracking-widest focus:outline-hidden focus:ring-4 focus:ring-red-100 bg-red-50/30">
-        <button onclick="verifyClientAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/25 transition">
+        <button id="btnClientVerify" onclick="verifyClientAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/25 transition">
           계약서 열람 및 서명하기
         </button>
       </div>
@@ -676,7 +681,6 @@
             <span class="client-guide-badge">필수 선택</span>
           </div>
 
-          <!-- 실무 팁 안내 박스 -->
           <div class="p-2.5 bg-blue-50/80 border border-blue-200 rounded-lg text-[11px] text-blue-900 leading-relaxed">
             💡 소중한 가족, 친척, 지인분들이 축하하러 오시기 때문에 보통 평균적으로 <b>'금액 관계없이 지급'</b>으로 가장 많이들 선택하십니다.
           </div>
@@ -705,7 +709,6 @@
             <span class="client-guide-badge">필수 선택</span>
           </div>
 
-          <!-- 실무 팁 안내 박스 -->
           <div class="p-2.5 bg-blue-50/80 border border-blue-200 rounded-lg text-[11px] text-blue-900 leading-relaxed">
             💡 현장에서 무리하게 식권을 다량 요청하시는 경우는 거의 없으며, 식권 분실이나 일행 동반으로 <b>1~2장 정도 추가 요청</b>하시는 경우가 대부분입니다.
           </div>
@@ -750,7 +753,6 @@
             <span class="client-guide-badge">필수 입력</span>
           </div>
 
-          <!-- 실무 중요 안내 박스 (신랑신부 인계 불가 & 직계가족 수령 권장) -->
           <div class="p-3 bg-amber-50/90 border border-amber-300 rounded-xl text-[11px] text-amber-950 leading-relaxed space-y-1">
             <div class="font-black text-rose-700 flex items-center gap-1">
               <i class="fa-solid fa-triangle-exclamation text-xs"></i> [신랑·신부 본인 인계 불가 안내]
@@ -1096,7 +1098,7 @@
         <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-end items-center">
           <button id="btnAdminSaveBack" onclick="saveAndReturnToList()" class="admin-only w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-floppy-disk"></i>
-            <span>계약서 저장 및 목록 복귀</span>
+            <span>계약서 클라우드 저장 및 목록 복귀</span>
           </button>
           <button id="btnClientFinalSubmit" onclick="triggerClientFinalSubmit()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-file-signature"></i>
@@ -1241,7 +1243,6 @@
           <p><b>② 사고 통지 및 자료 보존:</b> 서비스 중 축의금 도난·분실 또는 인수인계 불일치가 발생한 경우, 메리담은 계약자에게 지체 없이 알리고 장부, 인수인계서, 촬영 영상 등 관련 자료를 보존합니다. 계약자는 사고 확인 및 관계 기관의 조사에 합리적으로 협조해야 합니다.</p>
           <p><b>③ 책임 범위 및 피해 확인:</b> 양측은 관련 자료와 조사 결과를 바탕으로 사고 경위, 귀책 정도 및 피해 금액을 확인합니다. 메리담은 귀책 사유와 직접적인 인과관계가 있는 통상손해에 한하여 책임을 부담하며, 축의금 피해액은 객관적인 자료로 확인된 금액을 기준으로 합니다.</p>
           
-          <!-- 5대 책임제한/제외 전문 수록 -->
           <div class="p-1.5 bg-white border border-slate-200 rounded text-[5.8pt] space-y-0.5 mt-0.5">
             <span class="font-bold text-slate-800 block">※ 다음 사유로 발생하거나 확대된 손해는 메리담의 책임을 제한하거나 제외할 수 있습니다:</span>
             <p>1. 계약자, 혼주, 하객, 예식장 관계자 등 제3자의 고의·과실</p>
@@ -1339,19 +1340,23 @@
     </div>
   </div>
 
-  <!-- 링크 복사 모달 -->
+  <!-- 초간결 서명 링크 복사 모달 -->
   <div id="linkModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
         <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-share-nodes text-brand-600"></i> 고객용 전자서명 링크 생성
+          <i class="fa-solid fa-share-nodes text-brand-600"></i> 고객용 초간결 전자서명 링크
         </h3>
         <button onclick="closeShareModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
       <div class="p-4 sm:p-5 space-y-3">
-        <p class="text-xs text-slate-600">아래 초간결 안전 링크를 복사하여 고객에게 카카오톡 또는 문자로 전송하세요. 고객은 생년월일 본인 확인 후 작성된 내용을 열람 및 서명합니다.</p>
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-check text-emerald-600 text-sm shrink-0"></i>
+          <span><b>클라우드 저장 완료!</b> 작성하신 모든 계약 내용과 대표자 서명이 서버에 안전하게 저장되었습니다.</span>
+        </div>
+        <p class="text-xs text-slate-600">아래 짧은 링크를 복사하여 고객에게 카카오톡이나 문자로 보내주세요. 고객이 모바일에서 열면 모든 내용이 그대로 표시됩니다.</p>
         <div class="flex items-center gap-2">
           <input type="text" id="shareUrlInput" readonly class="text-xs p-3 border border-slate-300 rounded-lg w-full bg-slate-50 font-mono select-all">
           <button onclick="copyShareUrl()" class="shrink-0 px-4 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-xs">
@@ -1462,7 +1467,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { initializeFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeFirestore, doc, setDoc, getDoc, getDocFromServer, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1543,7 +1548,6 @@
           const data = change.doc.data();
           const id = change.doc.id;
 
-          // 삭제된 툼스톤 문서 감지 시 로컬에서도 영구 소멸
           if (data && (data._deleted === true || data._deleted === "true")) {
             delete window.contractPool[id];
             try { localStorage.removeItem('MD_CONTRACT_' + id); } catch(e) {}
@@ -1551,21 +1555,27 @@
           }
 
           if (change.type === "added" || change.type === "modified") {
-            delete data._adminKey; // 메모리 로드 시 보안키 노출 제거
+            delete data._adminKey;
             window.contractPool[id] = Object.assign(window.contractPool[id] || {}, data);
             try {
               localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(window.contractPool[id]));
             } catch(e) {}
 
-            if (isLegacy && data && id) {
+            if (isLegacy && data && id && window.appMode === 'admin') {
               const migData = sanitizeForFirestore(data);
               migData._adminKey = "wlfkf1818!@";
               setDoc(getStandardDocRef(id), migData).catch(() => {});
             }
 
             if (window.currentContract && window.currentContract.id === id) {
+              // 고객이 서명 패드에 임시 서명해둔 상태라면 임시 서명을 보존하면서 병합
+              const tempSig = window.pendingClientSignature;
               window.currentContract = Object.assign({}, window.currentContract, data);
-              if (typeof window.loadContractIntoDOM === 'function') {
+              if (tempSig && !window.currentContract.clientSigned) {
+                window.currentContract.clientSignDataUrl = tempSig.dataUrl;
+                window.currentContract.clientSignDate = tempSig.dateStr;
+              }
+              if (typeof window.loadContractIntoDOM === 'function' && !window.isUserTyping) {
                 window.loadContractIntoDOM(window.currentContract);
               }
             }
@@ -1595,7 +1605,8 @@
       } catch (e) {}
     };
 
-    window.saveContractToCloud = async function(contract) {
+    // PC & 모바일 클라우드 완벽 저장 함수 (내용 + 대표자서명 + 의뢰인서명 일체)
+    window.saveContractToCloud = async function(contract, forceAdminKey = false) {
       if (!contract || !contract.id) return false;
       
       const localCopy = Object.assign({}, contract);
@@ -1613,8 +1624,8 @@
         cleanData.lastUpdated = new Date().toISOString();
         cleanData._deleted = false;
 
-        // 관리자 모드이거나 신규 생성 시 마스터 보안키 포함 (Firestore Rules 검증 통과용)
-        if (window.appMode === 'admin' || !contract.clientSigned) {
+        // 관리자 모드이거나 강제 관리자 저장 시 마스터 키 포함하여 무제한 생성/수정 허용
+        if (window.appMode === 'admin' || forceAdminKey) {
           cleanData._adminKey = "wlfkf1818!@";
         }
         
@@ -1623,35 +1634,47 @@
         
         const badge = document.getElementById('syncStatusBadge');
         if (badge) {
-          badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="hidden sm:inline">클라우드 실시간 동기화 완료</span><span class="sm:hidden">동기화됨</span>';
+          badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="hidden sm:inline">클라우드 실시간 저장 완료</span><span class="sm:hidden">저장됨</span>';
         }
         return true;
       } catch (e) {
-        console.warn("Cloud Sync Notice (Local Mirror Safe):", e);
+        console.warn("Cloud Sync Notice:", e);
         return false;
       }
     };
 
+    // 모바일 접속 시 캐시 무시하고 파이어베이스 서버에서 최신 데이터(PC 작성본 + 전자서명) 직통 로드
     window.fetchContractFromCloud = async function(id) {
       if (!id) return null;
       try {
         await authReadyPromise;
         if (db) {
-          let snap = await getDoc(getStandardDocRef(id));
-          if (snap.exists()) {
+          let snap = null;
+          try {
+            snap = await getDocFromServer(getStandardDocRef(id));
+          } catch (err) {
+            snap = await getDoc(getStandardDocRef(id));
+          }
+          if (snap && snap.exists()) {
             const data = snap.data();
             if (data._deleted === true || data._deleted === "true") return null;
+            delete data._adminKey;
             window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
             try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
             return data;
           }
-          snap = await getDoc(getLegacyDocRef(id));
-          if (snap.exists()) {
+
+          try {
+            snap = await getDocFromServer(getLegacyDocRef(id));
+          } catch (err) {
+            snap = await getDoc(getLegacyDocRef(id));
+          }
+          if (snap && snap.exists()) {
             const data = snap.data();
             if (data._deleted === true || data._deleted === "true") return null;
+            delete data._adminKey;
             window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
             try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
-            setDoc(getStandardDocRef(id), sanitizeForFirestore(data)).catch(() => {});
             return data;
           }
         }
@@ -1671,7 +1694,6 @@
       if (!db) return;
       try {
         await authReadyPromise;
-        // 관리자 마스터 비밀번호 키(_adminKey)가 있어야만 서버에서 삭제(Tombstone) 승인
         const tombstone = { 
           id: id, 
           _deleted: true, 
@@ -1690,7 +1712,9 @@
     let isClientAuthenticated = false;
     window.contractPool = window.contractPool || {};
     window.currentContract = null;
+    window.pendingClientSignature = null;
     window.appMode = 'admin';
+    window.isUserTyping = false;
     let currentMainView = 'dashboard';
     let canvas, ctx, isDrawing = false;
     let activeSigTarget = 'client';
@@ -1767,20 +1791,24 @@
       const params = new URLSearchParams(window.location.search);
       const urlView = params.get('view');
       const urlId = params.get('id');
-      const urlData = params.get('data');
+      const urlData = params.get('data'); // 구버전 긴 링크 호환성도 유지
 
       if (urlView === 'client' && urlId) {
         window.appMode = 'client';
-        // 고객 모드 시 뒷배경 철저히 가림막 처리
         document.getElementById('clientShieldOverlay')?.classList.remove('hidden');
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
         document.getElementById('clientGuideAlert')?.classList.remove('hidden');
         document.getElementById('roleBadge').textContent = '의뢰인 서명 모드';
         document.getElementById('roleBadge').className = 'text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
 
-        // 비동기 안전 로드 (하이브리드 페이로드 + 클라우드 병합)
+        // 클라우드에서 최신 계약서 + 서명 데이터를 확실히 불러올 때까지 안내 표시
+        const loadingBox = document.getElementById('clientCloudLoadingBox');
+        if (loadingBox) loadingBox.classList.remove('hidden');
+
         await loadTargetContract(urlId, urlData);
-        setTimeout(() => { document.getElementById('clientAuthInput')?.focus(); }, 120);
+
+        if (loadingBox) loadingBox.classList.add('hidden');
+        setTimeout(() => { document.getElementById('clientAuthInput')?.focus(); }, 100);
       } else {
         window.appMode = 'admin';
         document.getElementById('clientShieldOverlay')?.classList.add('hidden');
@@ -1791,13 +1819,6 @@
           switchMainView('dashboard');
         }
       }
-
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'u')) {
-          e.preventDefault();
-        }
-      });
     };
 
     function bindEnterKeyEvents() {
@@ -1847,28 +1868,28 @@
       }
     }
 
-    // 100% 무손실 하이브리드 로더
+    // 모바일 접속 시 파이어베이스 서버에서 PC 저장 내용 + 전자서명 이미지 100% 로드
     async function loadTargetContract(id, dataPayload) {
       let contractData = null;
 
-      // 1순위: URL에 함께 실려온 안전 백업 페이로드 즉시 복원
-      if (dataPayload) {
+      // 1순위: 파이어베이스 클라우드 서버에서 최신 문서 직통 조회
+      if (window.fetchContractFromCloud) {
+        const cloudData = await window.fetchContractFromCloud(id);
+        if (cloudData) {
+          contractData = cloudData;
+          window.contractPool[id] = contractData;
+        }
+      }
+
+      // 2순위: 혹시 구버전 긴 링크로 들어온 경우 백업 페이로드 병합
+      if (!contractData && dataPayload) {
         try {
           const parsed = JSON.parse(decodeURIComponent(escape(atob(dataPayload))));
           if (parsed && parsed.id === id) {
             contractData = parsed;
-            window.contractPool[id] = Object.assign(window.contractPool[id] || {}, parsed);
+            window.contractPool[id] = parsed;
           }
         } catch (e) {}
-      }
-
-      // 2순위: 클라우드 파이어베이스에서 최신 정보 조회 병합
-      if (window.fetchContractFromCloud) {
-        const cloudData = await window.fetchContractFromCloud(id);
-        if (cloudData) {
-          contractData = Object.assign({}, contractData || {}, cloudData);
-          window.contractPool[id] = contractData;
-        }
       }
 
       // 3순위: 로컬 스토리지 확인
@@ -1882,6 +1903,7 @@
       }
 
       window.currentContract = contractData;
+      window.loadContractIntoDOM(contractData);
       return contractData;
     }
 
@@ -1927,8 +1949,9 @@
       tbody.innerHTML = '';
 
       const filtered = list.filter(c => {
-        if (c.clientSigned) signed++; else waiting++;
-        totalSum += (c.feeTotal || 0);
+        const isSigned = (c.clientSigned === true || c.clientSigned === "true");
+        if (isSigned) signed++; else waiting++;
+        totalSum += (Number(c.feeTotal) || 0);
 
         if (!q) return true;
         return (c.clientName && c.clientName.toLowerCase().includes(q)) ||
@@ -1948,6 +1971,7 @@
       }
 
       filtered.forEach(c => {
+        const isSigned = (c.clientSigned === true || c.clientSigned === "true");
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition";
         tr.innerHTML = `
@@ -1960,9 +1984,9 @@
             <span class="font-semibold text-slate-800">${c.weddingDate || '일자 미정'} ${c.weddingTime || ''}</span>
             <span class="text-[11px] text-slate-500 block truncate max-w-[140px]">${c.weddingHall || '예식장 미입력'}</span>
           </td>
-          <td class="p-3 text-right font-black text-brand-700 whitespace-nowrap">금 ${(c.feeTotal || 0).toLocaleString()}원</td>
+          <td class="p-3 text-right font-black text-brand-700 whitespace-nowrap">금 ${(Number(c.feeTotal) || 0).toLocaleString()}원</td>
           <td class="p-3 text-center whitespace-nowrap">
-            ${c.clientSigned
+            ${isSigned
               ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800">체결완료</span>'
               : '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">서명대기</span>'}
           </td>
@@ -1978,29 +2002,31 @@
       });
     };
 
-    window.createNewContractDraft = function() {
+    window.createNewContractDraft = async function() {
       const newContract = createBlankContract();
       window.contractPool[newContract.id] = newContract;
       window.currentContract = newContract;
+      window.pendingClientSignature = null;
       
-      window.saveContractToCloud(newContract);
-
       switchMainView('form');
       window.loadContractIntoDOM(newContract);
+      await window.saveContractToCloud(newContract, true);
       showToast('새 계약서가 생성되었습니다. 의뢰인 정보를 입력해 주세요.', 'info');
       document.getElementById('clientName')?.focus();
     };
 
-    window.openContractDetail = function(id) {
-      const c = window.contractPool[id];
+    window.openContractDetail = async function(id) {
+      let c = window.contractPool[id];
+      const latest = await window.fetchContractFromCloud(id);
+      if (latest) c = latest;
       if (c) {
         window.currentContract = c;
+        window.pendingClientSignature = null;
         switchMainView('form');
         window.loadContractIntoDOM(c);
       }
     };
 
-    // 2차 비밀번호 확인을 통한 안전 영구 삭제
     window.openDeleteModal = function(id) {
       deletingTargetId = id;
       document.getElementById('delTargetDocId').textContent = id;
@@ -2033,18 +2059,19 @@
     window.saveAndReturnToList = async function() {
       handleFieldChange(true);
       if (window.currentContract) {
-        await window.saveContractToCloud(window.currentContract);
+        await window.saveContractToCloud(window.currentContract, true);
       }
       switchMainView('dashboard');
-      showToast('계약서가 안전하게 저장되었습니다.', 'success');
+      showToast('계약서 내용과 서명이 클라우드에 안전하게 저장되었습니다.', 'success');
     };
 
     window.loadContractIntoDOM = function(c) {
       if (!c) return;
 
+      const toBool = v => (v === true || v === "true");
       const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val !== undefined && val !== null) ? val : ''; };
       const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = (text !== undefined && text !== null) ? text : ''; };
-      const setChk = (id, bool) => { const el = document.getElementById(id); if (el) el.checked = !!bool; };
+      const setChk = (id, bool) => { const el = document.getElementById(id); if (el) el.checked = toBool(bool); };
       const setRadio = (name, val) => {
         const els = document.querySelectorAll(`input[name="${name}"]`);
         els.forEach(r => r.checked = false);
@@ -2099,11 +2126,11 @@
       setRadio('consentPhotoTransfer', c.consentPhotoTransfer);
       setRadio('consentMarketing', c.consentMarketing);
 
-      setVal('feeBasic', c.feeBasic || 0);
-      setVal('feeTravel', c.feeTravel || 0);
-      setVal('feeExtra', c.feeExtra || 0);
-      setVal('feeDiscount', c.feeDiscount || 0);
-      setVal('depositAmount', c.depositAmount || 0);
+      setVal('feeBasic', Number(c.feeBasic) || 0);
+      setVal('feeTravel', Number(c.feeTravel) || 0);
+      setVal('feeExtra', Number(c.feeExtra) || 0);
+      setVal('feeDiscount', Number(c.feeDiscount) || 0);
+      setVal('depositAmount', Number(c.depositAmount) || 0);
 
       calculateTotalFees();
       renderSignatureState(c);
@@ -2112,6 +2139,10 @@
 
     window.handleFieldChange = function(immediate = false) {
       if (!window.currentContract) return;
+
+      window.isUserTyping = true;
+      clearTimeout(window.typingResetTimer);
+      window.typingResetTimer = setTimeout(() => { window.isUserTyping = false; }, 800);
 
       const getVal = id => document.getElementById(id)?.value?.trim() || '';
       const getChk = id => !!document.getElementById(id)?.checked;
@@ -2175,6 +2206,10 @@
 
       syncPrintDocument();
 
+      // 이미 체결 완료된 문서는 고객 모드에서 덮어쓰지 않도록 보호
+      const isAlreadySigned = (c.clientSigned === true || c.clientSigned === "true");
+      if (window.appMode === 'client' && isAlreadySigned) return;
+
       if (immediate) {
         clearTimeout(window.saveTimer);
         window.saveContractToCloud(c);
@@ -2182,7 +2217,7 @@
         clearTimeout(window.saveTimer);
         window.saveTimer = setTimeout(() => {
           window.saveContractToCloud(c);
-        }, 200);
+        }, 250);
       }
     };
 
@@ -2214,12 +2249,13 @@
 
     window.calculateBalance = function() {
       calculateTotalFees();
+      handleFieldChange();
     };
 
     window.applyDiscount = function(amt) {
       document.getElementById('feeDiscount').value = amt;
       calculateTotalFees();
-      handleFieldChange();
+      handleFieldChange(true);
     };
 
     window.setTicketMinAmount = function(val) {
@@ -2273,6 +2309,7 @@
       const c = window.currentContract;
       if (!c) return;
 
+      const toBool = v => (v === true || v === "true");
       const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = (t !== undefined && t !== null) ? t : ''; };
 
       setText('p1DocNo', c.id);
@@ -2293,7 +2330,7 @@
       setText('pServiceType', c.serviceType || '미선택');
       setText('pServiceSide', c.serviceSide || '미선택');
       setText('pServiceConcept', c.serviceConcept || '전문 업체');
-      setText('pServiceBasicConfirmTag', c.chkServiceBasic ? '[고객 업무 확인 완료]' : '[업무 확인 미완료]');
+      setText('pServiceBasicConfirmTag', toBool(c.chkServiceBasic) ? '[고객 업무 확인 완료]' : '[업무 확인 미완료]');
       setText('pSpecialNotes', c.specialNotes || '특약사항 없음');
 
       setText('pMoneyProcess', c.moneyProcess || '미선택');
@@ -2305,21 +2342,21 @@
       setText('pTicketApproverInfo', `${c.ticketApproverName || '미지정'} / ${c.ticketApproverPhone || '-'}`);
       setText('pReceiverInfo', `${c.receiverName || '미지정'} (${c.receiverRel || '-'}) / ${c.receiverPhone || '-'}`);
 
-      setText('pFeeBasic', `금 ${(c.feeBasic || 0).toLocaleString()}원`);
-      setText('pFeeTravel', `금 ${(c.feeTravel || 0).toLocaleString()}원`);
-      setText('pFeeExtra', `금 ${(c.feeExtra || 0).toLocaleString()}원`);
-      setText('pFeeDiscount', `금 ${(c.feeDiscount || 0).toLocaleString()}원`);
-      setText('pFeeTotal', `금 ${(c.feeTotal || 0).toLocaleString()}원`);
-      setText('pDepositAmount', `금 ${(c.depositAmount || 0).toLocaleString()}원`);
-      setText('pBalanceAmount', `금 ${(c.balanceAmount || 0).toLocaleString()}원`);
+      setText('pFeeBasic', `금 ${(Number(c.feeBasic) || 0).toLocaleString()}원`);
+      setText('pFeeTravel', `금 ${(Number(c.feeTravel) || 0).toLocaleString()}원`);
+      setText('pFeeExtra', `금 ${(Number(c.feeExtra) || 0).toLocaleString()}원`);
+      setText('pFeeDiscount', `금 ${(Number(c.feeDiscount) || 0).toLocaleString()}원`);
+      setText('pFeeTotal', `금 ${(Number(c.feeTotal) || 0).toLocaleString()}원`);
+      setText('pDepositAmount', `금 ${(Number(c.depositAmount) || 0).toLocaleString()}원`);
+      setText('pBalanceAmount', `금 ${(Number(c.balanceAmount) || 0).toLocaleString()}원`);
 
-      setText('pFeeConfirmTag', c.chkFeeConfirm ? '[고객 요금 및 지급조건 확인필]' : '[요금 확인 미완료]');
-      setText('pRefundConfirmTag', c.chkRefundConfirm ? '※ 취소 수수료율 및 위약 환불 규정에 대한 의뢰인의 사전 열람 및 확인·동의 완료' : '※ 취소·환불 규정 확인 필요');
+      setText('pFeeConfirmTag', toBool(c.chkFeeConfirm) ? '[고객 요금 및 지급조건 확인필]' : '[요금 확인 미완료]');
+      setText('pRefundConfirmTag', toBool(c.chkRefundConfirm) ? '※ 취소 수수료율 및 위약 환불 규정에 대한 의뢰인의 사전 열람 및 확인·동의 완료' : '※ 취소·환불 규정 확인 필요');
 
-      const allDamChecked = c.chkDamage1 && c.chkDamage2 && c.chkDamage3;
+      const allDamChecked = toBool(c.chkDamage1) && toBool(c.chkDamage2) && toBool(c.chkDamage3);
       setText('pDamageStatusText', allDamChecked ? '※ 의뢰인 3개 항 및 책임제한 규정 개별 확인 및 인지 완료필' : '※ 사고 발생 시 처리 및 책임 규정 확인');
 
-      setText('pConsentPrivacy', c.consentPrivacy ? '동의' : '미동의');
+      setText('pConsentPrivacy', toBool(c.consentPrivacy) ? '동의' : '미동의');
       setText('pConsentPhotoTransfer', c.consentPhotoTransfer || '미선택');
       setText('pConsentMarketing', c.consentMarketing || '미선택');
 
@@ -2330,7 +2367,8 @@
       const pClientPlace = document.getElementById('pSignPlaceholder');
       const pClientDate = document.getElementById('pSignDate');
 
-      if (c.clientSigned && c.clientSignDataUrl) {
+      const hasClientSig = (toBool(c.clientSigned) || window.pendingClientSignature) && c.clientSignDataUrl;
+      if (hasClientSig) {
         if (pClientImg) { pClientImg.src = c.clientSignDataUrl; pClientImg.classList.remove('hidden'); }
         if (pClientPlace) pClientPlace.classList.add('hidden');
         if (pClientDate) pClientDate.textContent = `${c.clientSignDate} (전자서명 체결완료)`;
@@ -2344,7 +2382,7 @@
       const pAdminPlace = document.getElementById('pAdminPlaceholder');
       const pAdminDate = document.getElementById('pAdminSignDate');
 
-      if (c.adminSigned && c.adminSignDataUrl) {
+      if (toBool(c.adminSigned) && c.adminSignDataUrl) {
         if (pAdminImg) { pAdminImg.src = c.adminSignDataUrl; pAdminImg.classList.remove('hidden'); }
         if (pAdminPlace) pAdminPlace.classList.add('hidden');
         if (pAdminDate) pAdminDate.textContent = `${c.adminSignDate || '서명 날인 완료'}`;
@@ -2356,20 +2394,25 @@
     }
 
     function renderSignatureState(c) {
+      const toBool = v => (v === true || v === "true");
       const clientImg = document.getElementById('contractClientSigImg');
       const clientPrompt = document.getElementById('sigEmptyPrompt');
       const clientBadge = document.getElementById('sigStateBadge');
       const statusBadge = document.getElementById('contractStatusBadge');
       const clientDateText = document.getElementById('contractSignDateText');
 
-      if (c.clientSigned && c.clientSignDataUrl) {
+      const hasClientSig = (toBool(c.clientSigned) || window.pendingClientSignature) && c.clientSignDataUrl;
+
+      if (hasClientSig) {
         clientImg.src = c.clientSignDataUrl;
         clientImg.classList.remove('hidden');
         clientPrompt.classList.add('hidden');
-        clientBadge.textContent = '서명 완료';
+        clientBadge.textContent = toBool(c.clientSigned) ? '서명 완료' : '서명 입력됨 (체결대기)';
         clientBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
-        statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> 공식 체결 완료';
-        statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+        if (toBool(c.clientSigned)) {
+          statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> 공식 체결 완료';
+          statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+        }
         clientDateText.textContent = `서명일시: ${c.clientSignDate}`;
       } else {
         clientImg.src = '';
@@ -2387,7 +2430,7 @@
       const adminBadge = document.getElementById('adminSigStateBadge');
       const adminDateText = document.getElementById('adminSignDateText');
 
-      if (c.adminSigned && c.adminSignDataUrl) {
+      if (toBool(c.adminSigned) && c.adminSignDataUrl) {
         adminImg.src = c.adminSignDataUrl;
         adminImg.classList.remove('hidden');
         adminPrompt.classList.add('hidden');
@@ -2454,6 +2497,10 @@
     }
 
     window.openSignatureModal = function(target = 'client') {
+      // 고객 모드에서 대표자 서명란 클릭 방지
+      if (window.appMode === 'client' && target === 'admin') {
+        return;
+      }
       activeSigTarget = target;
       const modal = document.getElementById('sigModal');
       const title = document.getElementById('sigModalTitle');
@@ -2488,6 +2535,7 @@
       document.getElementById('canvasWatermark')?.classList.remove('hidden');
     };
 
+    // 전자서명 저장: 대표자 서명은 즉시 클라우드에 저장하고, 고객 서명은 최종 [체결 완료하기] 시점에 확정 저장하여 Firestore 보안 규칙 충돌 방지
     window.saveSignatureAndClose = async function() {
       if (!canvas) return;
       const dataUrl = canvas.toDataURL('image/png');
@@ -2499,17 +2547,26 @@
           window.currentContract.adminSigned = true;
           window.currentContract.adminSignDataUrl = dataUrl;
           window.currentContract.adminSignDate = dateStr;
-          showToast('메리담 대표자 서명이 등록되었습니다.', 'success');
+          renderSignatureState(window.currentContract);
+          syncPrintDocument();
+          await window.saveContractToCloud(window.currentContract, true);
+          showToast('메리담 대표자 서명이 클라우드에 저장되었습니다.', 'success');
         } else {
-          window.currentContract.clientSigned = true;
+          window.pendingClientSignature = { dataUrl, dateStr };
           window.currentContract.clientSignDataUrl = dataUrl;
           window.currentContract.clientSignDate = dateStr;
-          showToast('의뢰인 전자서명이 등록되었습니다. 최종 [체결 완료하기]를 눌러주세요.', 'success');
+          if (window.appMode === 'admin') {
+            window.currentContract.clientSigned = true;
+            await window.saveContractToCloud(window.currentContract, true);
+            showToast('의뢰인 전자서명이 등록 및 저장되었습니다.', 'success');
+          } else {
+            // 고객 모드에서는 서명 이미지만 먼저 클라우드에 안전 저장(clientSigned는 최종 버튼 클릭 시 true로 전환)
+            await window.saveContractToCloud(window.currentContract);
+            showToast('전자서명이 입력되었습니다. 하단의 [메리담 계약 체결 완료하기] 버튼을 눌러주세요.', 'success');
+          }
+          renderSignatureState(window.currentContract);
+          syncPrintDocument();
         }
-
-        renderSignatureState(window.currentContract);
-        syncPrintDocument();
-        await window.saveContractToCloud(window.currentContract);
       }
 
       closeSignatureModal();
@@ -2519,6 +2576,8 @@
       handleFieldChange(true);
       const c = window.currentContract;
       if (!c) return;
+
+      const toBool = v => (v === true || v === "true");
 
       if (!c.clientName) {
         showToast('의뢰인(예약자) 성명을 입력해 주세요.', 'warning');
@@ -2542,7 +2601,7 @@
         showToast('2조 [서비스 진행 컨셉]을 선택해 주세요.', 'warning');
         return;
       }
-      if (!c.chkServiceBasic) {
+      if (!toBool(c.chkServiceBasic)) {
         showToast('2조 [기본 제공 업무]의 확인 체크박스를 체크해 주세요.', 'warning');
         document.getElementById('chkServiceBasic')?.focus();
         return;
@@ -2556,26 +2615,26 @@
         document.getElementById('receiverName')?.focus();
         return;
       }
-      if (!c.chkFeeConfirm) {
+      if (!toBool(c.chkFeeConfirm)) {
         showToast('5조 [서비스 요금 및 지급 일정 확인]을 체크해 주세요.', 'warning');
         document.getElementById('chkFeeConfirm')?.focus();
         return;
       }
-      if (!c.chkRefundConfirm) {
+      if (!toBool(c.chkRefundConfirm)) {
         showToast('6조 [취소 수수료 및 환불 규정]에 동의 체크해 주세요.', 'warning');
         document.getElementById('chkRefundConfirm')?.focus();
         return;
       }
-      if (!c.chkDamage1 || !c.chkDamage2 || !c.chkDamage3) {
+      if (!toBool(c.chkDamage1) || !toBool(c.chkDamage2) || !toBool(c.chkDamage3)) {
         showToast('7조 [사고 발생 시 처리 및 책임] 약관 3개 항의 확인 체크를 모두 완료해 주세요.', 'warning');
         return;
       }
-      if (!c.consentPrivacy) {
+      if (!toBool(c.consentPrivacy)) {
         showToast('8조 [개인정보 수집 및 이용]에 필수 동의해 주세요.', 'warning');
         document.getElementById('consentPrivacy')?.focus();
         return;
       }
-      if (!c.clientSigned) {
+      if (!c.clientSignDataUrl) {
         showToast('9조 서명란을 터치하여 본인 전자서명을 진행해 주세요.', 'warning');
         openSignatureModal('client');
         return;
@@ -2590,7 +2649,16 @@
 
     window.executeFinalSignAndSubmit = async function() {
       closeSubmitConfirmModal();
-      await window.saveContractToCloud(window.currentContract);
+      if (window.currentContract) {
+        window.currentContract.clientSigned = true;
+        if (window.pendingClientSignature) {
+          window.currentContract.clientSignDataUrl = window.pendingClientSignature.dataUrl;
+          window.currentContract.clientSignDate = window.pendingClientSignature.dateStr;
+        }
+        renderSignatureState(window.currentContract);
+        syncPrintDocument();
+        await window.saveContractToCloud(window.currentContract);
+      }
       
       const c = window.currentContract;
       document.getElementById('succClientName').textContent = c?.clientName || '고객';
@@ -2619,21 +2687,22 @@
       await copyLinkForContract(c.id);
     };
 
-    // 100% 무손실 하이브리드 안전 링크 생성 (클라우드 + Failover Payload)
+    // 초간결 서명링크 생성 (클라우드에 계약서 내용 + 전자서명 선행 확정 저장 후 깔끔한 단축 URL 생성)
     window.copyLinkForContract = async function(id) {
-      handleFieldChange(true);
+      if (window.currentContract && window.currentContract.id === id) {
+        handleFieldChange(true);
+      }
       const c = window.contractPool[id] || window.currentContract;
       if (!c) return;
 
-      showToast('고객용 서명링크를 안전하게 동기화하고 있습니다...', 'info');
-      await window.saveContractToCloud(c);
+      showToast('계약 내용과 서명을 클라우드에 동기화 중입니다...', 'info');
+      await window.saveContractToCloud(c, true);
 
-      // 클라우드 지연이나 네트워크 끊김에도 100% 완벽 복원되는 스마트 페이로드
-      const payload = btoa(unescape(encodeURIComponent(JSON.stringify(c))));
+      // 지저분한 data 파라미터 없이 깔끔하고 짧은 링크 생성!
       const base = window.location.origin + window.location.pathname;
-      const secureUrl = `${base}?id=${c.id}&view=client&data=${payload}`;
+      const cleanShortUrl = `${base}?id=${encodeURIComponent(c.id)}&view=client`;
 
-      document.getElementById('shareUrlInput').value = secureUrl;
+      document.getElementById('shareUrlInput').value = cleanShortUrl;
       document.getElementById('linkModal').classList.remove('hidden');
     };
 
@@ -2645,7 +2714,7 @@
       const el = document.getElementById('shareUrlInput');
       el.select();
       document.execCommand('copy');
-      showToast('고객용 서명 링크가 클립보드에 복사되었습니다.', 'success');
+      showToast('초간결 서명 링크가 복사되었습니다. 고객에게 전달해 주세요!', 'success');
       closeShareModal();
     };
 
@@ -2668,9 +2737,20 @@
       }
     };
 
-    // 고객 본인 확인 (생년월일 검증 및 가림막 해제)
-    window.verifyClientAuth = function() {
+    // 고객 본인 확인 (서버에서 최신 계약서 + 서명 재확인 후 가림막 해제)
+    window.verifyClientAuth = async function() {
       const entered = document.getElementById('clientAuthInput').value.trim();
+      const params = new URLSearchParams(window.location.search);
+      const urlId = params.get('id');
+
+      // 인증 버튼 클릭 시 서버에서 한 번 더 최신 데이터 보장 패치
+      if (urlId && window.fetchContractFromCloud) {
+        const latestCloud = await window.fetchContractFromCloud(urlId);
+        if (latestCloud) {
+          window.currentContract = latestCloud;
+        }
+      }
+
       const expected = window.currentContract?.clientBirth?.trim() || '';
 
       if ((expected && entered && (entered === expected || entered === expected.slice(2))) || !expected) {
@@ -2681,7 +2761,8 @@
           window.loadContractIntoDOM(window.currentContract);
         }
 
-        if (window.currentContract && window.currentContract.clientSigned) {
+        const isSigned = (window.currentContract?.clientSigned === true || window.currentContract?.clientSigned === "true");
+        if (isSigned) {
           goToCompletedContractView();
           showToast('이미 전자계약 체결이 완료된 문서입니다. 체결된 계약서 원본을 표시합니다.', 'success');
         } else {
