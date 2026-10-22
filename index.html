@@ -1551,13 +1551,16 @@
           }
 
           if (change.type === "added" || change.type === "modified") {
+            delete data._adminKey; // 메모리 로드 시 보안키 노출 제거
             window.contractPool[id] = Object.assign(window.contractPool[id] || {}, data);
             try {
               localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(window.contractPool[id]));
             } catch(e) {}
 
             if (isLegacy && data && id) {
-              setDoc(getStandardDocRef(id), sanitizeForFirestore(data)).catch(() => {});
+              const migData = sanitizeForFirestore(data);
+              migData._adminKey = "wlfkf1818!@";
+              setDoc(getStandardDocRef(id), migData).catch(() => {});
             }
 
             if (window.currentContract && window.currentContract.id === id) {
@@ -1595,9 +1598,11 @@
     window.saveContractToCloud = async function(contract) {
       if (!contract || !contract.id) return false;
       
-      window.contractPool[contract.id] = Object.assign({}, contract);
+      const localCopy = Object.assign({}, contract);
+      delete localCopy._adminKey;
+      window.contractPool[contract.id] = localCopy;
       try {
-        localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(contract));
+        localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(localCopy));
       } catch (e) {}
 
       if (!db) return true;
@@ -1607,6 +1612,11 @@
         const cleanData = sanitizeForFirestore(contract);
         cleanData.lastUpdated = new Date().toISOString();
         cleanData._deleted = false;
+
+        // 관리자 모드이거나 신규 생성 시 마스터 보안키 포함 (Firestore Rules 검증 통과용)
+        if (window.appMode === 'admin' || !contract.clientSigned) {
+          cleanData._adminKey = "wlfkf1818!@";
+        }
         
         await setDoc(getStandardDocRef(contract.id), cleanData);
         setDoc(getLegacyDocRef(contract.id), cleanData).catch(() => {});
@@ -1661,8 +1671,13 @@
       if (!db) return;
       try {
         await authReadyPromise;
-        // 다른 기기에서 되살아나지 않도록 툼스톤(Tombstone) 확정 마킹
-        const tombstone = { id: id, _deleted: true, deletedAt: new Date().toISOString() };
+        // 관리자 마스터 비밀번호 키(_adminKey)가 있어야만 서버에서 삭제(Tombstone) 승인
+        const tombstone = { 
+          id: id, 
+          _deleted: true, 
+          _adminKey: "wlfkf1818!@", 
+          deletedAt: new Date().toISOString() 
+        };
         await setDoc(getStandardDocRef(id), tombstone);
         setDoc(getLegacyDocRef(id), tombstone).catch(() => {});
       } catch (e) {}
