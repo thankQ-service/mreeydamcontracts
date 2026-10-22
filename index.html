@@ -325,7 +325,7 @@
               </tr>
             </thead>
             <tbody id="dashboardTableBody" class="divide-y divide-slate-100 text-slate-700">
-              <!-- JS Dynamic Rendering -->
+              <!-- Dynamic Rows -->
             </tbody>
           </table>
         </div>
@@ -376,6 +376,7 @@
         </div>
       </div>
 
+      <!-- 1. 계약 당사자 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>1. 계약 당사자</span>
@@ -433,6 +434,7 @@
         </div>
       </section>
 
+      <!-- 2. 예식 및 서비스 내용 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>2. 예식 및 서비스 내용</span>
@@ -580,6 +582,7 @@
         </div>
       </section>
 
+      <!-- 3. 축의금 처리 방식 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>3. 축의금 처리 방식</span>
@@ -616,6 +619,7 @@
         </div>
       </section>
 
+      <!-- 4. 식권 및 인계 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>4. 식권 및 인계</span>
@@ -737,6 +741,7 @@
         </div>
       </section>
 
+      <!-- 5. 서비스 요금 및 지급 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>5. 서비스 요금 및 지급</span>
@@ -815,6 +820,7 @@
         </div>
       </section>
 
+      <!-- 6. 일정 변경 및 취소·환불 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>6. 일정 변경 및 취소·환불</span>
@@ -860,6 +866,7 @@
         </div>
       </section>
 
+      <!-- 7. 사고 발생 시 처리 및 책임 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex items-center justify-between gap-2">
           <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
@@ -923,6 +930,7 @@
         </div>
       </section>
 
+      <!-- 8. 개인정보 및 촬영 자료 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>8. 개인정보 및 촬영 자료</span>
@@ -981,6 +989,7 @@
         </div>
       </section>
 
+      <!-- 9. 전자계약 체결 및 서명 -->
       <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 border-l-4 border-brand-600 pl-2.5">
           <span>9. 전자계약 체결 및 서명</span>
@@ -1266,6 +1275,7 @@
     </div>
   </div>
 
+  <!-- 서명 모달 -->
   <div id="sigModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
@@ -1322,6 +1332,7 @@
     </div>
   </div>
 
+  <!-- 고객 본인 확인 모달 -->
   <div id="clientAuthModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
@@ -1356,6 +1367,7 @@
     </div>
   </div>
 
+  <!-- 체결 최종 확인 모달 -->
   <div id="clientSubmitConfirmModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-xl">
@@ -1425,13 +1437,11 @@
     };
 
     let app, db, auth;
-    let activeCollectionUnsubscribe = null;
     let authReadyResolve;
     let isListening = false;
     let reconnectTimeout = null;
     const authReadyPromise = new Promise(resolve => { authReadyResolve = resolve; });
 
-    // 보안 규칙 준수 경로 (Public Standard Path)
     const appId = "mreeydamcontracts";
     const COLLECTION_NAME = "merrydam_contracts";
 
@@ -1465,79 +1475,85 @@
       return clean;
     }
 
-    // 보안 규칙 100% 준수 컬렉션 헬퍼
-    function getContractsCollectionRef() {
-      // /artifacts/{appId}/public/data/merrydam_contracts
+    // 1. 신규 권장 경로 (/artifacts/mreeydamcontracts/public/data/merrydam_contracts)
+    function getStandardColRef() {
       return collection(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME);
     }
-
-    function getContractDocRef(id) {
+    function getStandardDocRef(id) {
       return doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, id);
     }
 
-    // 전체 계약서 실시간 감시 엔진 (PC <-> 모바일 100% 양방향 동기화)
+    // 2. 기존 이전 경로 (루트 merrydam_contracts) - 데이터 손실 방지 전수 복구용
+    function getLegacyColRef() {
+      return collection(db, COLLECTION_NAME);
+    }
+    function getLegacyDocRef(id) {
+      return doc(db, COLLECTION_NAME, id);
+    }
+
+    // 듀얼 경로 실시간 감시 엔진 (기존 데이터 100% 복구 및 신규 동기화)
     window.listenAllContractsFromCloud = function() {
       if (!db || isListening) return;
+      isListening = true;
 
-      try {
-        if (typeof activeCollectionUnsubscribe === 'function') {
-          activeCollectionUnsubscribe();
-          activeCollectionUnsubscribe = null;
-        }
+      const handleSnapshot = (snapshot, isLegacy = false) => {
+        snapshot.docChanges().forEach((change) => {
+          const data = change.doc.data();
+          const id = change.doc.id;
 
-        const contractsCol = getContractsCollectionRef();
-        isListening = true;
-        activeCollectionUnsubscribe = onSnapshot(contractsCol, (snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-            const data = change.doc.data();
-            const id = change.doc.id;
+          if (change.type === "added" || change.type === "modified") {
+            window.contractPool[id] = Object.assign(window.contractPool[id] || {}, data);
+            try {
+              localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(window.contractPool[id]));
+            } catch(e) {}
 
-            if (change.type === "added" || change.type === "modified") {
-              window.contractPool[id] = data;
-              try {
-                localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data));
-              } catch(e) {}
+            // 기존 경로에만 있던 과거 데이터는 신규 표준 경로로 자동 마이그레이션 백업
+            if (isLegacy && data && id) {
+              setDoc(getStandardDocRef(id), sanitizeForFirestore(data)).catch(() => {});
+            }
 
-              // 현재 열려있는 계약서가 다른 기기에서 수정되거나 서명된 경우 즉시 화면 리로드
-              if (window.currentContract && window.currentContract.id === id) {
-                window.currentContract = Object.assign({}, window.currentContract, data);
-                if (typeof window.loadContractIntoDOM === 'function') {
-                  window.loadContractIntoDOM(window.currentContract);
-                }
+            if (window.currentContract && window.currentContract.id === id) {
+              window.currentContract = Object.assign({}, window.currentContract, data);
+              if (typeof window.loadContractIntoDOM === 'function') {
+                window.loadContractIntoDOM(window.currentContract);
               }
             }
-            if (change.type === "removed") {
+          }
+          if (change.type === "removed") {
+            if (!isLegacy) {
               delete window.contractPool[id];
               try {
                 localStorage.removeItem('MD_CONTRACT_' + id);
               } catch(e) {}
             }
-          });
-
-          // 대시보드 리스트 실시간 렌더링
-          if (typeof window.renderDashboardTable === 'function') {
-            window.renderDashboardTable();
           }
-
-          const badge = document.getElementById('syncStatusBadge');
-          if (badge) {
-            badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="hidden sm:inline">클라우드 실시간 동기화 활성</span><span class="sm:hidden">동기화 활성</span>';
-          }
-        }, (err) => {
-          console.warn("Collection listener notice:", err);
-          isListening = false;
         });
-      } catch (e) {
-        console.warn("Error setting up collection listener:", e);
-        isListening = false;
-      }
+
+        if (typeof window.renderDashboardTable === 'function') {
+          window.renderDashboardTable();
+        }
+
+        const badge = document.getElementById('syncStatusBadge');
+        if (badge) {
+          badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="hidden sm:inline">클라우드 실시간 동기화 활성</span><span class="sm:hidden">동기화 활성</span>';
+        }
+      };
+
+      try {
+        // 신규 표준 경로 수신
+        onSnapshot(getStandardColRef(), (snap) => handleSnapshot(snap, false), (err) => console.warn("Standard listen notice:", err));
+      } catch (e) {}
+
+      try {
+        // 기존 이전 경로 수신 (과거 등록 계약서 완벽 복원)
+        onSnapshot(getLegacyColRef(), (snap) => handleSnapshot(snap, true), (err) => console.warn("Legacy listen notice:", err));
+      } catch (e) {}
     };
 
-    // 단일 계약서 클라우드 저장
+    // 계약서 클라우드 저장 (신규 경로 + 기존 경로 양쪽 모두 안전 백업)
     window.saveContractToCloud = async function(contract) {
       if (!contract || !contract.id) return;
       
-      // 로컬 즉시 미러링
       window.contractPool[contract.id] = contract;
       try {
         localStorage.setItem('MD_CONTRACT_' + contract.id, JSON.stringify(contract));
@@ -1549,7 +1565,11 @@
         await authReadyPromise;
         const cleanData = sanitizeForFirestore(contract);
         cleanData.lastUpdated = new Date().toISOString();
-        await setDoc(getContractDocRef(contract.id), cleanData);
+        
+        // 1. 신규 표준 경로에 저장
+        await setDoc(getStandardDocRef(contract.id), cleanData);
+        // 2. 레거시 호환 경로에도 안전 보존
+        setDoc(getLegacyDocRef(contract.id), cleanData).catch(() => {});
         
         const badge = document.getElementById('syncStatusBadge');
         if (badge) {
@@ -1560,18 +1580,27 @@
       }
     };
 
-    // 단일 계약서 클라우드 조회 (모바일 링크 첫 진입 시 100% 로드)
+    // 단일 계약서 조회 (신규 경로 -> 기존 경로 순차 폴백 조회)
     window.fetchContractFromCloud = async function(id) {
       if (!id || !db) return null;
       try {
         await authReadyPromise;
-        const snap = await getDoc(getContractDocRef(id));
+        // 1. 신규 표준 경로 확인
+        let snap = await getDoc(getStandardDocRef(id));
         if (snap.exists()) {
           const data = snap.data();
           window.contractPool[id] = data;
-          try {
-            localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data));
-          } catch(e) {}
+          try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
+          return data;
+        }
+        // 2. 기존 이전 경로 확인 (과거 등록 데이터)
+        snap = await getDoc(getLegacyDocRef(id));
+        if (snap.exists()) {
+          const data = snap.data();
+          window.contractPool[id] = data;
+          try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
+          // 신규 경로로 마이그레이션 백업
+          setDoc(getStandardDocRef(id), sanitizeForFirestore(data)).catch(() => {});
           return data;
         }
       } catch(e) {
@@ -1580,7 +1609,7 @@
       return null;
     };
 
-    // 계약서 삭제
+    // 계약서 삭제 (양쪽 경로 모두 영구 삭제)
     window.deleteContractFromCloud = async function(id) {
       if (!id) return;
       delete window.contractPool[id];
@@ -1591,7 +1620,8 @@
       if (!db) return;
       try {
         await authReadyPromise;
-        await deleteDoc(getContractDocRef(id));
+        await deleteDoc(getStandardDocRef(id));
+        deleteDoc(getLegacyDocRef(id)).catch(() => {});
       } catch (e) {}
     };
 
@@ -1745,14 +1775,16 @@
       }
     }
 
+    // 로컬스토리지 전체 스캔 (과거 저장된 모든 이전 계약서 복원)
     function loadContractsFromLocalStorage() {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('MD_CONTRACT_')) {
+        if (k && (k.startsWith('MD_CONTRACT_') || k.startsWith('MD_') || k.includes('CONTRACT'))) {
           try {
-            const data = JSON.parse(localStorage.getItem(k));
+            const raw = localStorage.getItem(k);
+            const data = JSON.parse(raw);
             if (data && data.id) {
-              window.contractPool[data.id] = data;
+              window.contractPool[data.id] = Object.assign(window.contractPool[data.id] || {}, data);
             }
           } catch (e) {}
         }
