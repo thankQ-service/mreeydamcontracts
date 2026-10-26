@@ -225,14 +225,14 @@
 
       <!-- 24시간 실시간 카운트다운 타이머 및 유효기간 안내 박스 -->
       <div id="clientTimerBox" class="p-3 bg-rose-50/90 border border-rose-200 rounded-2xl text-center space-y-1 shadow-xs">
-        <div class="inline-flex items-center justify-center gap-1.5 text-[11px] font-extrabold text-rose-700">
+        <div id="clientTimerBadge" class="inline-flex items-center justify-center gap-1.5 text-[11px] font-extrabold text-rose-700">
           <i class="fa-solid fa-clock-rotate-left animate-pulse"></i>
           <span>전자계약 체결 유효시간 안내</span>
         </div>
         <div id="clientCountdownDisplay" class="text-xl font-black font-mono text-rose-600 tracking-wider">
           23:59:59
         </div>
-        <p class="text-[10.5px] text-slate-600 font-medium leading-tight">
+        <p id="clientTimerDesc" class="text-[10.5px] text-slate-600 font-medium leading-tight">
           해당 전자계약서는 <b>24시간 안에 체결 유효</b>합니다.<br>유효시간 내 본인 확인 및 서명을 완료해 주세요.
         </p>
       </div>
@@ -242,11 +242,34 @@
         <span>클라우드에서 최신 계약서 정보를 불러오는 중...</span>
       </div>
 
+      <!-- 정상 유효시간 내 생년월일 입력 폼 -->
       <div id="clientAuthFormBox" class="space-y-2">
         <input type="password" id="clientAuthInput" maxlength="8" placeholder="예: 950101" class="w-full p-3.5 border-2 border-red-500 rounded-xl text-center text-lg font-black tracking-widest focus:outline-hidden focus:ring-4 focus:ring-red-100 bg-red-50/30">
         <button id="btnClientVerify" onclick="verifyClientAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/25 transition">
           계약서 열람 및 서명하기
         </button>
+      </div>
+
+      <!-- 24시간 만료 시 노출되는 계약 체결 종료 및 담당자 확인 안내 박스 -->
+      <div id="clientExpiredLockBox" class="hidden p-4 bg-slate-100 border-2 border-slate-300 rounded-2xl text-center space-y-3">
+        <div class="w-10 h-10 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center mx-auto text-base">
+          <i class="fa-solid fa-calendar-xmark"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="text-xs font-black text-slate-900">계약 체결 유효시간(24시간)이 종료되었습니다</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">
+            예식 스케줄 및 전담 인력 배정 확인을 위해 서명 링크가 만료되었습니다.<br>
+            <b>메리담 담당자에게 확인 및 연장</b>을 요청해 주세요.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <a href="tel:010-9300-5770" class="py-2.5 px-3 bg-slate-900 hover:bg-black text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition">
+            <i class="fa-solid fa-phone text-[10px]"></i> 전화 문의하기
+          </a>
+          <a href="sms:010-9300-5770?body=%5B%EB%A9%94%EB%A6%AC%EB%8B%B4%5D%20%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94%2C%20%EC%A0%84%EC%9E%90%EA%B3%84%EC%95%BD%EC%84%9C%20%EC%84%9C%EB%AA%85%20%EC%9C%A0%ED%9A%A8%EC%8B%9C%EA%B0%84%20%EC%97%B0%EC%9E%A5%20%EC%9A%94%EC%B2%AD%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4." class="py-2.5 px-3 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition">
+            <i class="fa-solid fa-comment-sms text-[10px]"></i> 연장 문자요청
+          </a>
+        </div>
       </div>
 
       <div class="pt-2 border-t border-slate-100">
@@ -1368,9 +1391,9 @@
       <div class="p-4 sm:p-5 space-y-3">
         <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 flex items-center gap-2">
           <i class="fa-solid fa-cloud-check text-emerald-600 text-sm shrink-0"></i>
-          <span><b>클라우드 저장 완료!</b> 작성하신 모든 계약 내용과 대표자 서명이 서버에 안전하게 저장되었습니다.</span>
+          <span><b>클라우드 저장 및 24시간 유효기간 갱신 완료!</b> 지금부터 24시간 동안 서명 링크가 유효하게 활성화되었습니다.</span>
         </div>
-        <p class="text-xs text-slate-600">아래 짧은 링크를 복사하여 고객에게 카카오톡이나 문자로 보내주세요. 고객이 모바일에서 열면 모든 내용이 그대로 표시됩니다.</p>
+        <p class="text-xs text-slate-600">아래 짧은 링크를 복사하여 고객에게 카카오톡이나 문자로 보내주세요. (만료된 고객도 이 버튼을 누르면 즉시 24시간 재연장됩니다.)</p>
         <div class="flex items-center gap-2">
           <input type="text" id="shareUrlInput" readonly class="text-xs p-3 border border-slate-300 rounded-lg w-full bg-slate-50 font-mono select-all">
           <button onclick="copyShareUrl()" class="shrink-0 px-4 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold shadow-xs">
@@ -1499,6 +1522,7 @@
     let isListening = false;
     const authReadyPromise = new Promise(resolve => { authReadyResolve = resolve; });
     window.authReadyPromise = authReadyPromise;
+    window.contractPool = window.contractPool || {};
 
     const appId = "mreeydamcontracts";
     const COLLECTION_NAME = "merrydam_contracts";
@@ -1558,6 +1582,7 @@
       isListening = true;
 
       const handleSnapshot = (snapshot, isLegacy = false) => {
+        window.contractPool = window.contractPool || {};
         snapshot.docChanges().forEach((change) => {
           const data = change.doc.data();
           const id = change.doc.id;
@@ -1735,21 +1760,46 @@
     let deletingTargetId = null;
     let clientCountdownInterval = null;
 
+    function isContractExpired(c) {
+      if (!c) return false;
+      // 이미 서명 완료된 계약서는 만료되지 않고 언제든 열람 가능
+      if (c.clientSigned === true || c.clientSigned === "true") return false;
+
+      let baseTimeMs = null;
+      const timeRef = c.linkSentAt || c.createdAt;
+      if (timeRef) {
+        const parsed = new Date(timeRef).getTime();
+        if (!isNaN(parsed)) baseTimeMs = parsed;
+      }
+
+      if (!baseTimeMs) return false;
+      const expireTimeMs = baseTimeMs + (24 * 60 * 60 * 1000);
+      return Date.now() >= expireTimeMs;
+    }
+
     function startClient24hCountdown() {
       if (clientCountdownInterval) clearInterval(clientCountdownInterval);
 
       const updateTimer = () => {
         const displayEl = document.getElementById('clientCountdownDisplay');
+        const authFormBox = document.getElementById('clientAuthFormBox');
+        const expiredLockBox = document.getElementById('clientExpiredLockBox');
+        const timerBox = document.getElementById('clientTimerBox');
+        const timerDesc = document.getElementById('clientTimerDesc');
         if (!displayEl) return;
 
-        // 이미 체결 완료된 계약서인 경우 표시 처리
+        // 1. 이미 체결 완료된 계약서인 경우: 만료 없이 언제든 본인 확인 후 열람 허용
         if (window.currentContract && (window.currentContract.clientSigned === true || window.currentContract.clientSigned === "true")) {
-          displayEl.textContent = "체결 완료 (유효)";
+          displayEl.textContent = "체결 완료 (상시 열람 가능)";
           displayEl.className = "text-base font-black text-emerald-600 tracking-wide";
+          if (timerBox) timerBox.className = "p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-1 shadow-xs";
+          if (timerDesc) timerDesc.innerHTML = "이미 공식 체결이 완료된 계약서입니다.<br>생년월일 입력 후 언제든 계약서 원본을 열람하실 수 있습니다.";
+          if (authFormBox) authFormBox.classList.remove('hidden');
+          if (expiredLockBox) expiredLockBox.classList.add('hidden');
           return;
         }
 
-        // 계약서 발송(생성 또는 링크 발급) 시각 기준 24시간 산출
+        // 2. 계약서 발송(링크 발급 또는 생성) 시각 기준 24시간 산출
         let baseTimeMs = null;
         if (window.currentContract) {
           const timeRef = window.currentContract.linkSentAt || window.currentContract.createdAt;
@@ -1774,12 +1824,21 @@
         const nowMs = Date.now();
         let diffSec = Math.floor((expireTimeMs - nowMs) / 1000);
 
+        // 3. 24시간 경과 시: 접속 차단 및 담당자 확인 안내 화면 노출
         if (diffSec <= 0) {
-          // 24시간 경과 시에도 서명 진행이 막히지 않도록 당일 자정 기준 실시간 카운트다운 유지
-          diffSec = 0;
-          displayEl.textContent = "00:00:00 (서명 가능)";
+          displayEl.textContent = "00:00:00 (유효시간 만료)";
+          displayEl.className = "text-base font-black font-mono text-slate-500 tracking-wider";
+          if (timerBox) timerBox.className = "p-3 bg-slate-100 border border-slate-300 rounded-2xl text-center space-y-1";
+          if (authFormBox) authFormBox.classList.add('hidden');
+          if (expiredLockBox) expiredLockBox.classList.remove('hidden');
+          clearInterval(clientCountdownInterval);
           return;
         }
+
+        // 4. 24시간 이내 정상 진행 중
+        if (authFormBox) authFormBox.classList.remove('hidden');
+        if (expiredLockBox) expiredLockBox.classList.add('hidden');
+        displayEl.className = "text-xl font-black font-mono text-rose-600 tracking-wider";
 
         const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
         const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
@@ -1851,6 +1910,7 @@
         adminSigned: false,
         adminSignDataUrl: '',
         adminSignDate: '',
+        linkSentAt: new Date().toISOString(),
         createdAt: new Date().toISOString()
       };
     }
@@ -2048,6 +2108,7 @@
 
       filtered.forEach(c => {
         const isSigned = (c.clientSigned === true || c.clientSigned === "true");
+        const isExpired = !isSigned && isContractExpired(c);
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition";
         tr.innerHTML = `
@@ -2064,12 +2125,14 @@
           <td class="p-3 text-center whitespace-nowrap">
             ${isSigned
               ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800">체결완료</span>'
-              : '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">서명대기</span>'}
+              : isExpired
+                ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">기한만료(연장가능)</span>'
+                : '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">서명대기</span>'}
           </td>
           <td class="p-3 text-center whitespace-nowrap">
             <div class="flex items-center justify-center gap-1.5">
               <button onclick="openContractDetail('${c.id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px]">열기</button>
-              <button onclick="copyLinkForContract('${c.id}')" class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px]">링크</button>
+              <button onclick="copyLinkForContract('${c.id}')" class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px]">${isExpired ? '24h연장/링크' : '링크'}</button>
               <button onclick="openDeleteModal('${c.id}')" class="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[11px]">삭제</button>
             </div>
           </td>
@@ -2763,7 +2826,7 @@
       await copyLinkForContract(c.id);
     };
 
-    // 초간결 서명링크 생성 (클라우드에 계약서 내용 + 전자서명 선행 확정 저장 후 깔끔한 단축 URL 생성)
+    // 초간결 서명링크 생성 (클라우드에 계약서 내용 + 전자서명 선행 확정 저장 & 24시간 유효기간 자동 리셋 연장)
     window.copyLinkForContract = async function(id) {
       if (window.currentContract && window.currentContract.id === id) {
         handleFieldChange(true);
@@ -2771,8 +2834,12 @@
       const c = window.contractPool[id] || window.currentContract;
       if (!c) return;
 
-      showToast('계약 내용과 서명을 클라우드에 동기화 중입니다...', 'info');
+      // 서명링크 발급/복사 시점 기준으로 24시간 타이머 새로 리셋 (만료된 고객도 즉시 24시간 연장됨)
+      c.linkSentAt = new Date().toISOString();
+
+      showToast('계약 내용 저장 및 24시간 유효기간을 갱신 중입니다...', 'info');
       await window.saveContractToCloud(c, true);
+      renderDashboardTable();
 
       // 지저분한 data 파라미터 없이 깔끔하고 짧은 링크 생성!
       const base = window.location.origin + window.location.pathname;
@@ -2819,12 +2886,19 @@
       const params = new URLSearchParams(window.location.search);
       const urlId = params.get('id');
 
-      // 인증 버튼 클릭 시 서버에서 한 번 더 최신 데이터 보장 패치
+      // 인증 버튼 클릭 시 서버에서 한 번 더 최신 데이터 보장 패치 (관리자가 방금 연장해줬을 수도 있으므로)
       if (urlId && window.fetchContractFromCloud) {
         const latestCloud = await window.fetchContractFromCloud(urlId);
         if (latestCloud) {
           window.currentContract = latestCloud;
         }
+      }
+
+      // 미체결 상태에서 24시간이 만료되었는지 서버 시간 기준으로 최종 확인
+      if (isContractExpired(window.currentContract)) {
+        startClient24hCountdown();
+        showToast('계약 체결 유효시간(24시간)이 종료되었습니다. 담당자에게 확인 부탁드립니다.', 'warning');
+        return;
       }
 
       const expected = window.currentContract?.clientBirth?.trim() || '';
