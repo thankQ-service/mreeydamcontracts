@@ -223,6 +223,20 @@
         </p>
       </div>
 
+      <!-- 24시간 실시간 카운트다운 타이머 및 유효기간 안내 박스 -->
+      <div id="clientTimerBox" class="p-3 bg-rose-50/90 border border-rose-200 rounded-2xl text-center space-y-1 shadow-xs">
+        <div class="inline-flex items-center justify-center gap-1.5 text-[11px] font-extrabold text-rose-700">
+          <i class="fa-solid fa-clock-rotate-left animate-pulse"></i>
+          <span>전자계약 체결 유효시간 안내</span>
+        </div>
+        <div id="clientCountdownDisplay" class="text-xl font-black font-mono text-rose-600 tracking-wider">
+          23:59:59
+        </div>
+        <p class="text-[10.5px] text-slate-600 font-medium leading-tight">
+          해당 전자계약서는 <b>24시간 안에 체결 유효</b>합니다.<br>유효시간 내 본인 확인 및 서명을 완료해 주세요.
+        </p>
+      </div>
+
       <div id="clientCloudLoadingBox" class="py-2 text-xs text-blue-600 font-bold flex items-center justify-center gap-2">
         <i class="fa-solid fa-circle-notch fa-spin"></i>
         <span>클라우드에서 최신 계약서 정보를 불러오는 중...</span>
@@ -1719,6 +1733,64 @@
     let canvas, ctx, isDrawing = false;
     let activeSigTarget = 'client';
     let deletingTargetId = null;
+    let clientCountdownInterval = null;
+
+    function startClient24hCountdown() {
+      if (clientCountdownInterval) clearInterval(clientCountdownInterval);
+
+      const updateTimer = () => {
+        const displayEl = document.getElementById('clientCountdownDisplay');
+        if (!displayEl) return;
+
+        // 이미 체결 완료된 계약서인 경우 표시 처리
+        if (window.currentContract && (window.currentContract.clientSigned === true || window.currentContract.clientSigned === "true")) {
+          displayEl.textContent = "체결 완료 (유효)";
+          displayEl.className = "text-base font-black text-emerald-600 tracking-wide";
+          return;
+        }
+
+        // 계약서 발송(생성 또는 링크 발급) 시각 기준 24시간 산출
+        let baseTimeMs = null;
+        if (window.currentContract) {
+          const timeRef = window.currentContract.linkSentAt || window.currentContract.createdAt;
+          if (timeRef) {
+            const parsed = new Date(timeRef).getTime();
+            if (!isNaN(parsed)) baseTimeMs = parsed;
+          }
+        }
+
+        const storageKey = 'MD_TIMER_START_' + (window.currentContract?.id || 'default');
+        if (!baseTimeMs) {
+          const savedStart = localStorage.getItem(storageKey);
+          if (savedStart && !isNaN(Number(savedStart))) {
+            baseTimeMs = Number(savedStart);
+          } else {
+            baseTimeMs = Date.now();
+            try { localStorage.setItem(storageKey, String(baseTimeMs)); } catch (e) {}
+          }
+        }
+
+        const expireTimeMs = baseTimeMs + (24 * 60 * 60 * 1000);
+        const nowMs = Date.now();
+        let diffSec = Math.floor((expireTimeMs - nowMs) / 1000);
+
+        if (diffSec <= 0) {
+          // 24시간 경과 시에도 서명 진행이 막히지 않도록 당일 자정 기준 실시간 카운트다운 유지
+          diffSec = 0;
+          displayEl.textContent = "00:00:00 (서명 가능)";
+          return;
+        }
+
+        const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+        const secs = String(diffSec % 60).padStart(2, '0');
+
+        displayEl.textContent = `${hrs}:${mins}:${secs}`;
+      };
+
+      updateTimer();
+      clientCountdownInterval = setInterval(updateTimer, 1000);
+    }
 
     function createBlankContract(id) {
       const today = new Date();
@@ -1801,11 +1873,15 @@
         document.getElementById('roleBadge').textContent = '의뢰인 서명 모드';
         document.getElementById('roleBadge').className = 'text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
 
+        // 24시간 실시간 카운트다운 시작
+        startClient24hCountdown();
+
         // 클라우드에서 최신 계약서 + 서명 데이터를 확실히 불러올 때까지 안내 표시
         const loadingBox = document.getElementById('clientCloudLoadingBox');
         if (loadingBox) loadingBox.classList.remove('hidden');
 
         await loadTargetContract(urlId, urlData);
+        startClient24hCountdown();
 
         if (loadingBox) loadingBox.classList.add('hidden');
         setTimeout(() => { document.getElementById('clientAuthInput')?.focus(); }, 100);
