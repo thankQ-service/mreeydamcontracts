@@ -250,6 +250,25 @@
         </button>
       </div>
 
+      <!-- 삭제된 문서(링크) 접근 시 노출되는 완전 차단 안내 박스 -->
+      <div id="clientDeletedLockBox" class="hidden p-4 bg-slate-100 border-2 border-slate-300 rounded-2xl text-center space-y-3">
+        <div class="w-10 h-10 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center mx-auto text-base">
+          <i class="fa-solid fa-ban"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="text-xs font-black text-slate-900">존재하지 않거나 삭제된 전자계약서입니다</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">
+            본 전자계약서는 관리자에 의해 삭제 또는 파기되었습니다.<br>
+            관련 문의 사항은 메리담 고객센터로 연락해 주세요.
+          </p>
+        </div>
+        <div class="pt-1">
+          <a href="tel:010-9300-5770" class="w-full py-2.5 px-3 bg-slate-900 hover:bg-black text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition">
+            <i class="fa-solid fa-phone text-[10px]"></i> 메리담 고객센터 문의하기
+          </a>
+        </div>
+      </div>
+
       <!-- 24시간 만료 시 노출되는 계약 체결 종료 및 담당자 확인 안내 박스 -->
       <div id="clientExpiredLockBox" class="hidden p-4 bg-slate-100 border-2 border-slate-300 rounded-2xl text-center space-y-3">
         <div class="w-10 h-10 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center mx-auto text-base">
@@ -2012,25 +2031,47 @@
       if (window.fetchContractFromCloud) {
         const cloudData = await window.fetchContractFromCloud(id);
         if (cloudData) {
-          contractData = cloudData;
-          window.contractPool[id] = contractData;
+          if (cloudData._deleted === true || cloudData._deleted === "true") {
+            contractData = { _deleted: true };
+          } else {
+            contractData = cloudData;
+            window.contractPool[id] = contractData;
+          }
         }
       }
 
-      // 2순위: 혹시 구버전 긴 링크로 들어온 경우 백업 페이로드 병합
+      // 2순위: 구버전 백업 페이로드 확인
       if (!contractData && dataPayload) {
         try {
           const parsed = JSON.parse(decodeURIComponent(escape(atob(dataPayload))));
           if (parsed && parsed.id === id) {
-            contractData = parsed;
-            window.contractPool[id] = parsed;
+            if (parsed._deleted === true || parsed._deleted === "true") {
+              contractData = { _deleted: true };
+            } else {
+              contractData = parsed;
+              window.contractPool[id] = parsed;
+            }
           }
         } catch (e) {}
       }
 
       // 3순위: 로컬 스토리지 확인
       if (!contractData && window.contractPool[id]) {
-        contractData = window.contractPool[id];
+        const localObj = window.contractPool[id];
+        if (localObj._deleted === true || localObj._deleted === "true") {
+          contractData = { _deleted: true };
+        } else {
+          contractData = localObj;
+        }
+      }
+
+      // 만약 계약서가 삭제된 상태(_deleted)라면 생년월일 입력 및 타이머를 숨기고 삭제 차단 박스 노출
+      if (contractData && (contractData._deleted === true || contractData._deleted === "true")) {
+        document.getElementById('clientTimerBox')?.classList.add('hidden');
+        document.getElementById('clientAuthFormBox')?.classList.add('hidden');
+        document.getElementById('clientExpiredLockBox')?.classList.add('hidden');
+        document.getElementById('clientDeletedLockBox')?.classList.remove('hidden');
+        return null;
       }
 
       if (!contractData) {
