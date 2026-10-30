@@ -34,9 +34,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- PDF Generation Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- PDF Generation Libraries (초기 로딩 블로킹 방지를 위해 defer 적용) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     body {
@@ -1545,22 +1545,31 @@
 
     const appId = "mreeydamcontracts";
     const COLLECTION_NAME = "merrydam_contracts";
+    const initUrlParams = new URLSearchParams(window.location.search);
+    const isClientDirectMode = (initUrlParams.get('view') === 'client' && !!initUrlParams.get('id'));
+    const directClientId = initUrlParams.get('id');
 
     try {
       app = initializeApp(firebaseConfig);
       db = initializeFirestore(app, {
-        experimentalForceLongPolling: true
+        experimentalAutoDetectLongPolling: true
       });
       auth = getAuth(app);
       
       signInAnonymously(auth).then((cred) => {
         window.isFirebaseAuthReady = true;
         authReadyResolve(cred.user);
-        window.listenAllContractsFromCloud();
+        if (isClientDirectMode && directClientId) {
+          window.listenSingleContractForClient(directClientId);
+        } else {
+          window.listenAllContractsFromCloud();
+        }
       }).catch((err) => {
         console.warn("Firebase Auth Notice (Fallback mode):", err);
         authReadyResolve(null);
-        window.listenAllContractsFromCloud();
+        if (!isClientDirectMode) {
+          window.listenAllContractsFromCloud();
+        }
       });
     } catch (e) {
       console.warn("Firebase Init Notice:", e);
@@ -1595,6 +1604,39 @@
     function getLegacyDocRef(id) {
       return doc(db, COLLECTION_NAME, id);
     }
+
+    // 고객 모드 전용 초경량 단일 문서 실시간 감시 (전체 리스트 다운로드 생략으로 로딩 속도 극대화 및 실시간 해지/삭제 즉시 차단)
+    window.listenSingleContractForClient = function(id) {
+      if (!db || !id) return;
+      try {
+        onSnapshot(getStandardDocRef(id), (snap) => {
+          if (!snap.exists()) return;
+          const data = snap.data();
+          if (data && (data._deleted === true || data._deleted === "true")) {
+            delete window.contractPool[id];
+            try { localStorage.removeItem('MD_CONTRACT_' + id); } catch(e) {}
+            window.isCurrentContractDeleted = true;
+            if (typeof window.showDeletedContractLock === 'function') {
+              window.showDeletedContractLock();
+            }
+            return;
+          }
+          delete data._adminKey;
+          window.contractPool[id] = Object.assign(window.contractPool[id] || {}, data);
+          if (window.currentContract && window.currentContract.id === id) {
+            const tempSig = window.pendingClientSignature;
+            window.currentContract = Object.assign({}, window.currentContract, data);
+            if (tempSig && !window.currentContract.clientSigned) {
+              window.currentContract.clientSignDataUrl = tempSig.dataUrl;
+              window.currentContract.clientSignDate = tempSig.dateStr;
+            }
+            if (typeof window.loadContractIntoDOM === 'function' && !window.isUserTyping) {
+              window.loadContractIntoDOM(window.currentContract);
+            }
+          }
+        }, (err) => console.warn("Client single doc listen notice:", err));
+      } catch (e) {}
+    };
 
     window.listenAllContractsFromCloud = function() {
       if (!db || isListening) return;
@@ -1701,39 +1743,50 @@
       }
     };
 
-    // 모바일 접속 시 캐시 무시하고 파이어베이스 서버에서 최신 데이터(PC 작성본 + 전자서명) 직통 로드
+    // 모바일 접속 시 병렬 초고속 조회 + 삭제된 계약서(_deleted) 명확히 판별하여 반환
     window.fetchContractFromCloud = async function(id) {
       if (!id) return null;
       try {
         await authReadyPromise;
         if (db) {
-          let snap = null;
-          try {
-            snap = await getDocFromServer(getStandardDocRef(id));
-          } catch (err) {
-            snap = await getDoc(getStandardDocRef(id));
-          }
-          if (snap && snap.exists()) {
-            const data = snap.data();
-            if (data._deleted === true || data._deleted === "true") return null;
-            delete data._adminKey;
-            window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
-            try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
-            return data;
-          }
+          const fetchRef = async (ref) => {
+            try {
+              return await getDocFromServer(ref);
+            } catch (err) {
+              return await getDoc(ref);
+            }
+          };
 
-          try {
-            snap = await getDocFromServer(getLegacyDocRef(id));
-          } catch (err) {
-            snap = await getDoc(getLegacyDocRef(id));
-          }
-          if (snap && snap.exists()) {
-            const data = snap.data();
-            if (data._deleted === true || data._deleted === "true") return null;
-            delete data._adminKey;
-            window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
-            try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
-            return data;
+          const [stdSnap, legSnap] = await Promise.all([
+            fetchRef(getStandardDocRef(id)),
+            fetchRef(getLegacyDocRef(id))
+          ]);
+
+          const checkSnap = (snap) => {
+            if (snap && snap.exists()) {
+              const data = snap.data();
+              if (data._deleted === true || data._deleted === "true") {
+                delete window.contractPool[id];
+                try { localStorage.removeItem('MD_CONTRACT_' + id); } catch(e) {}
+                return { id: id, _deleted: true };
+              }
+              delete data._adminKey;
+              window.contractPool[id] = Object.assign({}, window.contractPool[id] || {}, data);
+              try { localStorage.setItem('MD_CONTRACT_' + id, JSON.stringify(data)); } catch(e) {}
+              return data;
+            }
+            return null;
+          };
+
+          const stdResult = checkSnap(stdSnap);
+          if (stdResult) return stdResult;
+
+          const legResult = checkSnap(legSnap);
+          if (legResult) return legResult;
+
+          // 서버에 문서 자체가 아예 존재하지 않는 경우 (고객 모드에서는 미존재 처리)
+          if (window.appMode === 'client') {
+            return { id: id, _notFound: true };
           }
         }
       } catch(e) {
@@ -1773,11 +1826,29 @@
     window.pendingClientSignature = null;
     window.appMode = 'admin';
     window.isUserTyping = false;
+    window.isCurrentContractDeleted = false;
     let currentMainView = 'dashboard';
     let canvas, ctx, isDrawing = false;
     let activeSigTarget = 'client';
     let deletingTargetId = null;
     let clientCountdownInterval = null;
+
+    // 삭제되거나 해지된 계약서 링크 접속 시 즉시 완전 차단 화면 전환
+    window.showDeletedContractLock = function() {
+      window.isCurrentContractDeleted = true;
+      if (clientCountdownInterval) {
+        clearInterval(clientCountdownInterval);
+        clientCountdownInterval = null;
+      }
+      document.body.classList.remove('completed-contract-view');
+      document.getElementById('completedViewBanner')?.classList.add('hidden');
+      document.getElementById('clientShieldOverlay')?.classList.remove('hidden');
+      document.getElementById('clientCloudLoadingBox')?.classList.add('hidden');
+      document.getElementById('clientTimerBox')?.classList.add('hidden');
+      document.getElementById('clientAuthFormBox')?.classList.add('hidden');
+      document.getElementById('clientExpiredLockBox')?.classList.add('hidden');
+      document.getElementById('clientDeletedLockBox')?.classList.remove('hidden');
+    };
 
     function isContractExpired(c) {
       if (!c) return false;
@@ -1798,8 +1869,17 @@
 
     function startClient24hCountdown() {
       if (clientCountdownInterval) clearInterval(clientCountdownInterval);
+      if (window.isCurrentContractDeleted) {
+        window.showDeletedContractLock();
+        return;
+      }
 
       const updateTimer = () => {
+        if (window.isCurrentContractDeleted) {
+          clearInterval(clientCountdownInterval);
+          window.showDeletedContractLock();
+          return;
+        }
         const displayEl = document.getElementById('clientCountdownDisplay');
         const authFormBox = document.getElementById('clientAuthFormBox');
         const expiredLockBox = document.getElementById('clientExpiredLockBox');
@@ -1934,7 +2014,11 @@
       };
     }
 
-    window.onload = async function() {
+    let appInitialized = false;
+    async function initMerryDamApp() {
+      if (appInitialized) return;
+      appInitialized = true;
+
       initCanvas();
       loadContractsFromLocalStorage();
       bindEnterKeyEvents();
@@ -1952,18 +2036,20 @@
         document.getElementById('roleBadge').textContent = '의뢰인 서명 모드';
         document.getElementById('roleBadge').className = 'text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200';
 
-        // 24시간 실시간 카운트다운 시작
-        startClient24hCountdown();
-
-        // 클라우드에서 최신 계약서 + 서명 데이터를 확실히 불러올 때까지 안내 표시
+        // 클라우드에서 최신 계약서 + 삭제 여부를 초고속으로 조회
         const loadingBox = document.getElementById('clientCloudLoadingBox');
         if (loadingBox) loadingBox.classList.remove('hidden');
 
-        await loadTargetContract(urlId, urlData);
-        startClient24hCountdown();
-
+        const loaded = await loadTargetContract(urlId, urlData);
         if (loadingBox) loadingBox.classList.add('hidden');
-        setTimeout(() => { document.getElementById('clientAuthInput')?.focus(); }, 100);
+
+        if (!loaded || window.isCurrentContractDeleted) {
+          window.showDeletedContractLock();
+          return;
+        }
+
+        startClient24hCountdown();
+        setTimeout(() => { document.getElementById('clientAuthInput')?.focus(); }, 50);
       } else {
         window.appMode = 'admin';
         document.getElementById('clientShieldOverlay')?.classList.add('hidden');
@@ -1974,7 +2060,13 @@
           switchMainView('dashboard');
         }
       }
-    };
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMerryDamApp);
+    } else {
+      initMerryDamApp();
+    }
 
     function bindEnterKeyEvents() {
       const adminPassInput = document.getElementById('adminPassInput');
@@ -2031,7 +2123,7 @@
       if (window.fetchContractFromCloud) {
         const cloudData = await window.fetchContractFromCloud(id);
         if (cloudData) {
-          if (cloudData._deleted === true || cloudData._deleted === "true") {
+          if (cloudData._deleted === true || cloudData._deleted === "true" || cloudData._notFound === true) {
             contractData = { _deleted: true };
           } else {
             contractData = cloudData;
@@ -2065,12 +2157,12 @@
         }
       }
 
-      // 만약 계약서가 삭제된 상태(_deleted)라면 생년월일 입력 및 타이머를 숨기고 삭제 차단 박스 노출
-      if (contractData && (contractData._deleted === true || contractData._deleted === "true")) {
-        document.getElementById('clientTimerBox')?.classList.add('hidden');
-        document.getElementById('clientAuthFormBox')?.classList.add('hidden');
-        document.getElementById('clientExpiredLockBox')?.classList.add('hidden');
-        document.getElementById('clientDeletedLockBox')?.classList.remove('hidden');
+      // 만약 계약서가 삭제된 상태(_deleted)이거나 고객 모드에서 존재하지 않는 문서라면 즉시 완전 차단
+      if (
+        (contractData && (contractData._deleted === true || contractData._deleted === "true")) ||
+        (!contractData && window.appMode === 'client')
+      ) {
+        window.showDeletedContractLock();
         return null;
       }
 
@@ -2923,16 +3015,24 @@
 
     // 고객 본인 확인 (서버에서 최신 계약서 + 서명 재확인 후 가림막 해제)
     window.verifyClientAuth = async function() {
+      if (window.isCurrentContractDeleted) {
+        window.showDeletedContractLock();
+        return;
+      }
+
       const entered = document.getElementById('clientAuthInput').value.trim();
       const params = new URLSearchParams(window.location.search);
       const urlId = params.get('id');
 
-      // 인증 버튼 클릭 시 서버에서 한 번 더 최신 데이터 보장 패치 (관리자가 방금 연장해줬을 수도 있으므로)
+      // 인증 버튼 클릭 시 서버에서 한 번 더 최신 데이터 보장 패치 (삭제/해지 여부 및 연장 여부 실시간 재검증)
       if (urlId && window.fetchContractFromCloud) {
         const latestCloud = await window.fetchContractFromCloud(urlId);
-        if (latestCloud) {
-          window.currentContract = latestCloud;
+        if (!latestCloud || latestCloud._deleted === true || latestCloud._deleted === "true" || latestCloud._notFound === true) {
+          window.showDeletedContractLock();
+          showToast('삭제되었거나 유효하지 않은 계약서입니다.', 'warning');
+          return;
         }
+        window.currentContract = latestCloud;
       }
 
       // 미체결 상태에서 24시간이 만료되었는지 서버 시간 기준으로 최종 확인
