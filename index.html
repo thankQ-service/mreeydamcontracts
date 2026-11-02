@@ -385,6 +385,71 @@
         </div>
       </div>
 
+      <!-- 체결 완료 예식 스케줄 달력 (캘린더 관리) -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-3.5 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-calendar-check text-base"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-extrabold text-slate-900">체결 완료 예식 스케줄 달력</h2>
+                <span id="calMonthCountBadge" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800">이달 확정 0건</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">전자서명 체결이 완료된 확정 예식 일정만 달력에 시간순으로 표시됩니다.</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-1.5">
+            <button type="button" onclick="changeCalendarMonth(-1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 flex items-center justify-center transition" title="이전 달">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <span id="calCurrentMonthTitle" class="px-3 py-1.5 text-sm sm:text-base font-black text-slate-900 min-w-[110px] text-center">2026년 11월</span>
+            <button type="button" onclick="changeCalendarMonth(1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 flex items-center justify-center transition" title="다음 달">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+            <button type="button" onclick="goCalendarToday()" class="ml-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+              오늘
+            </button>
+          </div>
+        </div>
+
+        <div class="p-2.5 sm:p-4">
+          <!-- 요일 헤더 -->
+          <div class="grid grid-cols-7 text-center text-[11px] sm:text-xs font-extrabold pb-2 border-b border-slate-200">
+            <div class="text-rose-600">일</div>
+            <div class="text-slate-600">월</div>
+            <div class="text-slate-600">화</div>
+            <div class="text-slate-600">수</div>
+            <div class="text-slate-600">목</div>
+            <div class="text-slate-600">금</div>
+            <div class="text-blue-600">토</div>
+          </div>
+
+          <!-- 달력 날짜 그리드 -->
+          <div id="scheduleCalendarGrid" class="grid grid-cols-7 gap-1 sm:gap-1.5 pt-1.5">
+            <!-- Dynamic Calendar Cells -->
+          </div>
+
+          <!-- 선택한 날짜의 상세 예식 스케줄 패널 -->
+          <div id="selectedDateScheduleBox" class="hidden mt-3 pt-3 border-t border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+              <h3 id="selectedDateTitle" class="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-clock text-emerald-600"></i>
+                <span>선택 일자 확정 스케줄</span>
+              </h3>
+              <button type="button" onclick="closeSelectedDateSchedule()" class="text-[11px] text-slate-400 hover:text-slate-600 font-bold">
+                닫기 <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div id="selectedDateList" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <!-- Selected Day Schedule Cards -->
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-3.5 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -1832,6 +1897,9 @@
     let activeSigTarget = 'client';
     let deletingTargetId = null;
     let clientCountdownInterval = null;
+    let calendarYear = new Date().getFullYear();
+    let calendarMonth = new Date().getMonth();
+    let selectedCalendarDate = null;
 
     // 삭제되거나 해지된 계약서 링크 접속 시 즉시 완전 차단 화면 전환
     window.showDeletedContractLock = function() {
@@ -2234,6 +2302,8 @@
       document.getElementById('statWaitingCount').textContent = waiting;
       document.getElementById('statTotalAmount').textContent = totalSum.toLocaleString() + '원';
 
+      renderScheduleCalendar();
+
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">등록된 계약서가 없습니다. [+ 새 계약서]를 눌러 작성해 보세요.</td></tr>`;
         return;
@@ -2272,6 +2342,174 @@
         `;
         tbody.appendChild(tr);
       });
+    };
+
+    window.changeCalendarMonth = function(offset) {
+      calendarMonth += offset;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      } else if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      selectedCalendarDate = null;
+      renderScheduleCalendar();
+    };
+
+    window.goCalendarToday = function() {
+      const now = new Date();
+      calendarYear = now.getFullYear();
+      calendarMonth = now.getMonth();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      selectedCalendarDate = `${yyyy}-${mm}-${dd}`;
+      renderScheduleCalendar();
+    };
+
+    window.selectCalendarDate = function(dateStr) {
+      selectedCalendarDate = (selectedCalendarDate === dateStr) ? null : dateStr;
+      renderScheduleCalendar();
+    };
+
+    window.closeSelectedDateSchedule = function() {
+      selectedCalendarDate = null;
+      document.getElementById('selectedDateScheduleBox')?.classList.add('hidden');
+    };
+
+    window.renderScheduleCalendar = function() {
+      const grid = document.getElementById('scheduleCalendarGrid');
+      const titleEl = document.getElementById('calCurrentMonthTitle');
+      const countBadge = document.getElementById('calMonthCountBadge');
+      if (!grid || !titleEl) return;
+
+      titleEl.textContent = `${calendarYear}년 ${calendarMonth + 1}월`;
+
+      // 체결 완료된 계약서만 필터링하여 날짜별로 그룹화 (예식시간 오름차순 정렬)
+      const signedList = Object.values(window.contractPool).filter(c =>
+        c && !c._deleted && (c.clientSigned === true || c.clientSigned === "true") && c.weddingDate
+      );
+
+      const scheduleByDate = {};
+      let monthSignedCount = 0;
+      const monthPrefix = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-`;
+
+      signedList.forEach(c => {
+        const dStr = c.weddingDate.trim();
+        if (!scheduleByDate[dStr]) scheduleByDate[dStr] = [];
+        scheduleByDate[dStr].push(c);
+        if (dStr.startsWith(monthPrefix)) {
+          monthSignedCount++;
+        }
+      });
+
+      Object.keys(scheduleByDate).forEach(dStr => {
+        scheduleByDate[dStr].sort((a, b) => (a.weddingTime || '99:99').localeCompare(b.weddingTime || '99:99'));
+      });
+
+      if (countBadge) {
+        countBadge.textContent = `이달 확정 ${monthSignedCount}건`;
+      }
+
+      const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
+      const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+      const todayObj = new Date();
+      const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+
+      grid.innerHTML = '';
+
+      // 첫 주 빈 칸 채우기
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'min-h-[68px] sm:min-h-[92px] bg-slate-50/50 rounded-lg border border-transparent';
+        grid.appendChild(emptyCell);
+      }
+
+      // 날짜 셀 렌더링
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+        const items = scheduleByDate[dateStr] || [];
+        const isToday = (dateStr === todayStr);
+        const isSelected = (dateStr === selectedCalendarDate);
+
+        let dayColor = 'text-slate-700';
+        if (dayOfWeek === 0) dayColor = 'text-rose-600';
+        else if (dayOfWeek === 6) dayColor = 'text-blue-600';
+
+        const cell = document.createElement('div');
+        cell.onclick = () => selectCalendarDate(dateStr);
+        cell.className = `min-h-[68px] sm:min-h-[92px] p-1 sm:p-1.5 rounded-xl border transition cursor-pointer flex flex-col justify-between ${
+          isSelected
+            ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20'
+            : items.length > 0
+              ? 'border-emerald-200 bg-emerald-50/20 hover:border-emerald-400'
+              : 'border-slate-200/80 bg-white hover:bg-slate-50'
+        }`;
+
+        const topRow = `
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] sm:text-xs font-extrabold ${dayColor} ${isToday ? 'bg-slate-900 text-white px-1.5 py-0.5 rounded-md' : ''}">${day}</span>
+            ${items.length > 0 ? `<span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.2 rounded-full bg-emerald-600 text-white">${items.length}건</span>` : ''}
+          </div>
+        `;
+
+        let badgesHtml = '<div class="mt-1 space-y-1 overflow-hidden">';
+        items.slice(0, 3).forEach(item => {
+          badgesHtml += `
+            <div onclick="event.stopPropagation(); openContractDetail('${item.id}')" class="px-1.5 py-0.5 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-950 text-[9.5px] sm:text-[10.5px] font-bold truncate transition" title="${item.weddingTime || ''} ${item.clientName || ''} (${item.weddingHall || ''})">
+              <span class="font-extrabold">${item.weddingTime || '미정'}</span> ${item.clientName || '미입력'}
+            </div>
+          `;
+        });
+        if (items.length > 3) {
+          badgesHtml += `<div class="text-[9px] text-emerald-700 font-extrabold text-center">+${items.length - 3}건 더보기</div>`;
+        }
+        badgesHtml += '</div>';
+
+        cell.innerHTML = topRow + badgesHtml;
+        grid.appendChild(cell);
+      }
+
+      // 선택된 날짜의 상세 스케줄 박스 업데이트
+      const detailBox = document.getElementById('selectedDateScheduleBox');
+      const detailTitle = document.getElementById('selectedDateTitle');
+      const detailList = document.getElementById('selectedDateList');
+
+      if (selectedCalendarDate && detailBox && detailList) {
+        const dayItems = scheduleByDate[selectedCalendarDate] || [];
+        detailBox.classList.remove('hidden');
+        detailTitle.innerHTML = `<i class="fa-solid fa-calendar-day text-emerald-600"></i> <span>${selectedCalendarDate} 확정 예식 스케줄 (${dayItems.length}건)</span>`;
+
+        if (dayItems.length === 0) {
+          detailList.innerHTML = `<div class="sm:col-span-2 p-4 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-200">선택하신 날짜에 체결 완료된 예식 일정이 없습니다.</div>`;
+        } else {
+          detailList.innerHTML = dayItems.map(item => `
+            <div class="p-3 rounded-xl border border-emerald-200 bg-emerald-50/40 flex items-center justify-between gap-2">
+              <div class="min-w-0 space-y-0.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-black">${item.weddingTime || '시간미정'}</span>
+                  <span class="font-extrabold text-xs text-slate-900 truncate">${item.clientName || '성명미입력'} 고객님</span>
+                  <span class="text-[10px] font-bold text-brand-700">(${item.serviceType || '유형미정'} · ${item.serviceSide || '-'})</span>
+                </div>
+                <div class="text-[11px] text-slate-600 truncate">
+                  <i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>${item.weddingHall || '예식장 미입력'} | 도착: <b>${item.arriveTime || '-'}</b>
+                </div>
+                <div class="text-[10.5px] text-slate-500 truncate">
+                  연락처: ${item.clientPhone || '-'} / 인계자: ${item.receiverName || '-'} (${item.receiverRel || '-'})
+                </div>
+              </div>
+              <button type="button" onclick="openContractDetail('${item.id}')" class="shrink-0 px-3 py-2 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-bold transition">
+                계약서 열기
+              </button>
+            </div>
+          `).join('');
+        }
+      } else if (detailBox) {
+        detailBox.classList.add('hidden');
+      }
     };
 
     window.createNewContractDraft = async function() {
