@@ -269,29 +269,17 @@
         </div>
       </div>
 
-      <!-- 24시간 만료 시 노출되는 계약 체결 종료 및 담당자 확인 안내 박스 -->
-      <div id="clientExpiredLockBox" class="hidden p-4 bg-slate-100 border-2 border-slate-300 rounded-2xl text-center space-y-3">
-        <div class="w-10 h-10 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center mx-auto text-base">
-          <i class="fa-solid fa-calendar-xmark"></i>
-        </div>
-        <div class="space-y-1">
-          <h4 class="text-xs font-black text-slate-900">계약 체결 유효시간(24시간)이 종료되었습니다</h4>
-          <p class="text-[11px] text-slate-600 leading-relaxed">
-            예식 스케줄 및 전담 인력 배정 확인을 위해 서명 링크가 만료되었습니다.<br>
-            <b>메리담 담당자에게 확인 및 연장</b>을 요청해 주세요.
-          </p>
-        </div>
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <a href="tel:010-9300-5770" class="py-2.5 px-3 bg-slate-900 hover:bg-black text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition">
-            <i class="fa-solid fa-phone text-[10px]"></i> 전화 문의하기
+      <div class="pt-2 border-t border-slate-100 space-y-2.5">
+        <div class="flex items-center justify-center gap-2">
+          <a href="https://blog.naver.com/merrydam2026" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#03C75A]/10 hover:bg-[#03C75A]/20 text-[#02a64b] border border-[#03C75A]/30 text-[11px] font-extrabold transition">
+            <span class="w-4 h-4 rounded-xs bg-[#03C75A] text-white text-[9px] font-black inline-flex items-center justify-center">N</span>
+            <span>메리담 블로그</span>
           </a>
-          <a href="sms:010-9300-5770?body=%5B%EB%A9%94%EB%A6%AC%EB%8B%B4%5D%20%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94%2C%20%EC%A0%84%EC%9E%90%EA%B3%84%EC%95%BD%EC%84%9C%20%EC%84%9C%EB%AA%85%20%EC%9C%A0%ED%9A%A8%EC%8B%9C%EA%B0%84%20%EC%97%B0%EC%9E%A5%20%EC%9A%94%EC%B2%AD%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4." class="py-2.5 px-3 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition">
-            <i class="fa-solid fa-comment-sms text-[10px]"></i> 연장 문자요청
+          <a href="https://www.instagram.com/merrydam2026/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 text-pink-600 border border-pink-200 text-[11px] font-extrabold transition">
+            <i class="fa-brands fa-instagram text-xs"></i>
+            <span>메리담 인스타그램</span>
           </a>
         </div>
-      </div>
-
-      <div class="pt-2 border-t border-slate-100">
         <p class="text-[10.5px] text-slate-400">
           <i class="fa-solid fa-lock text-[9px] mr-0.5"></i> 대외비 문서로서 본인 인증 후 안전하게 로드됩니다.
         </p>
@@ -310,7 +298,19 @@
               관리자 모드
             </span>
           </div>
-          <p class="text-[11px] text-slate-500 hidden sm:block truncate">프리미엄 축의대 대행 전문 전자계약 체결 솔루션</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <p class="text-[11px] text-slate-500 hidden sm:block truncate">프리미엄 축의대 대행 전문 전자계약 체결 솔루션</p>
+            <div class="flex items-center gap-1 shrink-0">
+              <a href="https://blog.naver.com/merrydam2026" target="_blank" rel="noopener noreferrer" title="메리담 네이버 블로그 바로가기" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#03C75A]/10 hover:bg-[#03C75A]/20 text-[#02a64b] text-[10px] font-extrabold border border-[#03C75A]/30 transition">
+                <span class="w-3.5 h-3.5 rounded-xs bg-[#03C75A] text-white text-[8.5px] font-black inline-flex items-center justify-center">N</span>
+                <span class="hidden md:inline">블로그</span>
+              </a>
+              <a href="https://www.instagram.com/merrydam2026/" target="_blank" rel="noopener noreferrer" title="메리담 인스타그램 바로가기" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-pink-50 hover:bg-pink-100 text-pink-600 text-[10px] font-extrabold border border-pink-200 transition">
+                <i class="fa-brands fa-instagram text-[11px]"></i>
+                <span class="hidden md:inline">인스타그램</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -549,6 +549,18 @@
               <div><b class="text-slate-800">사업자등록번호:</b> 764-29-02122</div>
               <div><b class="text-slate-800">연락처:</b> 010-9300-5770</div>
               <div class="sm:col-span-2"><b class="text-slate-800">주소:</b> 인천광역시 미추홀구 수봉로 48</div>
+            </div>
+            <div class="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-2">
+              <a href="https://blog.naver.com/merrydam2026" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white hover:bg-[#03C75A]/10 text-slate-700 hover:text-[#02a64b] border border-slate-200 hover:border-[#03C75A]/40 text-[11px] font-bold shadow-2xs transition">
+                <span class="w-4 h-4 rounded-xs bg-[#03C75A] text-white text-[9px] font-black inline-flex items-center justify-center">N</span>
+                <span>메리담 블로그</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400"></i>
+              </a>
+              <a href="https://www.instagram.com/merrydam2026/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white hover:bg-pink-50 text-slate-700 hover:text-pink-600 border border-slate-200 hover:border-pink-300 text-[11px] font-bold shadow-2xs transition">
+                <i class="fa-brands fa-instagram text-pink-600 text-sm"></i>
+                <span>메리담 인스타그램</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400"></i>
+              </a>
             </div>
           </div>
 
@@ -1225,6 +1237,25 @@
           </button>
         </div>
       </section>
+    </div>
+
+    <!-- 하단 공식 SNS 채널 바로가기 푸터 -->
+    <div class="max-w-4xl mx-auto mt-8 pt-5 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div class="text-center sm:text-left">
+        <span class="font-extrabold text-slate-700">메리담(MerryDam) 공식 채널</span>
+        <span class="mx-1.5 text-slate-300">|</span>
+        <span class="text-[11px]">실제 예식 후기와 현장 진행 모습을 확인해 보세요.</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="https://blog.naver.com/merrydam2026" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#03C75A]/10 text-slate-800 border border-slate-200 hover:border-[#03C75A] text-xs font-extrabold shadow-2xs transition">
+          <span class="w-4 h-4 rounded-xs bg-[#03C75A] text-white text-[9.5px] font-black inline-flex items-center justify-center">N</span>
+          <span>메리담 블로그</span>
+        </a>
+        <a href="https://www.instagram.com/merrydam2026/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-pink-50 text-slate-800 border border-slate-200 hover:border-pink-400 text-xs font-extrabold shadow-2xs transition">
+          <i class="fa-brands fa-instagram text-pink-600 text-sm"></i>
+          <span>메리담 인스타그램</span>
+        </a>
+      </div>
     </div>
   </main>
 
