@@ -383,6 +383,42 @@
         </div>
       </div>
 
+      <!-- 관리자 전용 실시간 입금 정산 요약 (계약금 완납 / 잔금 완납 / 총 수금 / 잔여 미수금) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div class="bg-blue-50/70 p-3.5 sm:p-4 rounded-xl border border-blue-200 shadow-xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[11px] sm:text-xs font-bold text-blue-700">계약금 완납</span>
+            <i class="fa-solid fa-circle-check text-blue-500 text-xs"></i>
+          </div>
+          <span id="statDepositPaidAmount" class="text-lg sm:text-xl font-black text-blue-900 mt-1 block truncate">0원</span>
+          <span id="statDepositPaidCount" class="text-[10.5px] font-semibold text-blue-700/80 mt-0.5 block">완납 0건 · 미납 0건</span>
+        </div>
+        <div class="bg-emerald-50/70 p-3.5 sm:p-4 rounded-xl border border-emerald-200 shadow-xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[11px] sm:text-xs font-bold text-emerald-700">잔금 완납</span>
+            <i class="fa-solid fa-coins text-emerald-500 text-xs"></i>
+          </div>
+          <span id="statBalancePaidAmount" class="text-lg sm:text-xl font-black text-emerald-900 mt-1 block truncate">0원</span>
+          <span id="statBalancePaidCount" class="text-[10.5px] font-semibold text-emerald-700/80 mt-0.5 block">완납 0건 · 미납 0건</span>
+        </div>
+        <div class="bg-indigo-50/70 p-3.5 sm:p-4 rounded-xl border border-indigo-200 shadow-xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[11px] sm:text-xs font-bold text-indigo-700">총 수금 누계</span>
+            <i class="fa-solid fa-wallet text-indigo-500 text-xs"></i>
+          </div>
+          <span id="statTotalPaidAmount" class="text-lg sm:text-xl font-black text-indigo-900 mt-1 block truncate">0원</span>
+          <span class="text-[10.5px] font-semibold text-indigo-700/80 mt-0.5 block">계약금 + 잔금 완납 합계</span>
+        </div>
+        <div class="bg-rose-50/70 p-3.5 sm:p-4 rounded-xl border border-rose-200 shadow-xs">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[11px] sm:text-xs font-bold text-rose-700">잔여 미수금 (잔액)</span>
+            <i class="fa-solid fa-hourglass-half text-rose-500 text-xs"></i>
+          </div>
+          <span id="statTotalUnpaidAmount" class="text-lg sm:text-xl font-black text-rose-800 mt-1 block truncate">0원</span>
+          <span id="statUnpaidBreakdown" class="text-[10.5px] font-semibold text-rose-700/80 mt-0.5 block truncate">계약금 0원 · 잔금 0원</span>
+        </div>
+      </div>
+
       <!-- 체결 완료 예식 스케줄 달력 (캘린더 관리) -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-3.5 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -466,13 +502,14 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse min-w-[580px]">
+          <table class="w-full text-left text-xs border-collapse min-w-[680px]">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
               <tr>
                 <th class="p-3">문서번호</th>
                 <th class="p-3">의뢰인(예약자)</th>
                 <th class="p-3">예식일시 / 장소</th>
                 <th class="p-3 text-right">최종 금액</th>
+                <th class="p-3 text-center">입금 현황 (관리자)</th>
                 <th class="p-3 text-center">체결 상태</th>
                 <th class="p-3 text-center">관리 작업</th>
               </tr>
@@ -2106,6 +2143,8 @@
         feeTotal: 300000,
         depositAmount: FIXED_DEPOSIT_AMOUNT,
         balanceAmount: 200000,
+        depositPaid: false,
+        balancePaid: false,
         depositDueDate: '계약 체결 후 24시간 이내',
         balanceDueDate: '예식 3일 전까지',
         consentPrivacy: false,
@@ -2406,12 +2445,49 @@
       let waiting = 0;
       let totalSum = 0;
 
+      // 입금 정산 요약 집계 변수 (계약금/잔금 완납 및 미수 잔액)
+      let depositPaidSum = 0;
+      let depositPaidCount = 0;
+      let depositUnpaidSum = 0;
+      let depositUnpaidCount = 0;
+      let balancePaidSum = 0;
+      let balancePaidCount = 0;
+      let balanceUnpaidSum = 0;
+      let balanceUnpaidCount = 0;
+
       tbody.innerHTML = '';
 
       const filtered = list.filter(c => {
         const isSigned = (c.clientSigned === true || c.clientSigned === "true");
         if (isSigned) signed++; else waiting++;
-        totalSum += (Number(c.feeTotal) || 0);
+
+        const feeTotal = Number(c.feeTotal) || 0;
+        totalSum += feeTotal;
+
+        const rawDeposit = (c.depositAmount !== undefined && c.depositAmount !== '' && !isNaN(Number(c.depositAmount)))
+          ? Number(c.depositAmount)
+          : FIXED_DEPOSIT_AMOUNT;
+        const effectiveDeposit = Math.min(feeTotal, Math.max(0, rawDeposit));
+        const effectiveBalance = Math.max(0, feeTotal - effectiveDeposit);
+
+        const isDepositPaid = (c.depositPaid === true || c.depositPaid === "true");
+        const isBalancePaid = (c.balancePaid === true || c.balancePaid === "true");
+
+        if (isDepositPaid) {
+          depositPaidSum += effectiveDeposit;
+          depositPaidCount++;
+        } else {
+          depositUnpaidSum += effectiveDeposit;
+          depositUnpaidCount++;
+        }
+
+        if (isBalancePaid) {
+          balancePaidSum += effectiveBalance;
+          balancePaidCount++;
+        } else {
+          balanceUnpaidSum += effectiveBalance;
+          balanceUnpaidCount++;
+        }
 
         if (!q) return true;
         return (c.clientName && c.clientName.toLowerCase().includes(q)) ||
@@ -2420,21 +2496,39 @@
                (c.id && c.id.toLowerCase().includes(q));
       });
 
+      const totalPaidSum = depositPaidSum + balancePaidSum;
+      const totalUnpaidSum = depositUnpaidSum + balanceUnpaidSum;
+
       document.getElementById('statTotalCount').textContent = total;
       document.getElementById('statSignedCount').textContent = signed;
       document.getElementById('statWaitingCount').textContent = waiting;
       document.getElementById('statTotalAmount').textContent = totalSum.toLocaleString() + '원';
 
+      // 상단 입금 정산 요약 카드 업데이트
+      const setElText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+      setElText('statDepositPaidAmount', depositPaidSum.toLocaleString() + '원');
+      setElText('statDepositPaidCount', `완납 ${depositPaidCount}건 · 미납 ${depositUnpaidCount}건`);
+      setElText('statBalancePaidAmount', balancePaidSum.toLocaleString() + '원');
+      setElText('statBalancePaidCount', `완납 ${balancePaidCount}건 · 미납 ${balanceUnpaidCount}건`);
+      setElText('statTotalPaidAmount', totalPaidSum.toLocaleString() + '원');
+      setElText('statTotalUnpaidAmount', totalUnpaidSum.toLocaleString() + '원');
+      setElText('statUnpaidBreakdown', `계약금 ${depositUnpaidSum.toLocaleString()}원 · 잔금 ${balanceUnpaidSum.toLocaleString()}원`);
+
       renderScheduleCalendar();
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">등록된 계약서가 없습니다. [+ 새 계약서]를 눌러 작성해 보세요.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">등록된 계약서가 없습니다. [+ 새 계약서]를 눌러 작성해 보세요.</td></tr>`;
         return;
       }
 
       filtered.forEach(c => {
         const isSigned = (c.clientSigned === true || c.clientSigned === "true");
         const isExpired = !isSigned && isContractExpired(c);
+        const isDepositPaid = (c.depositPaid === true || c.depositPaid === "true");
+        const isBalancePaid = (c.balancePaid === true || c.balancePaid === "true");
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition";
         tr.innerHTML = `
@@ -2448,6 +2542,24 @@
             <span class="text-[11px] text-slate-500 block truncate max-w-[140px]">${c.weddingHall || '예식장 미입력'}</span>
           </td>
           <td class="p-3 text-right font-black text-brand-700 whitespace-nowrap">금 ${(Number(c.feeTotal) || 0).toLocaleString()}원</td>
+          <td class="p-3 text-center whitespace-nowrap">
+            <div class="flex items-center justify-center gap-1.5">
+              <button type="button" onclick="togglePaymentStatus('${c.id}', 'depositPaid')" title="클릭하여 계약금 완납 상태 변경" class="px-2 py-1 rounded-full text-[10.5px] font-extrabold border transition cursor-pointer ${
+                isDepositPaid
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs hover:bg-blue-700'
+                  : 'bg-white text-slate-400 border-slate-300 hover:border-blue-400 hover:text-blue-600'
+              }">
+                ${isDepositPaid ? '<i class="fa-solid fa-check text-[9px] mr-0.5"></i>계약금 완납' : '계약금 미납'}
+              </button>
+              <button type="button" onclick="togglePaymentStatus('${c.id}', 'balancePaid')" title="클릭하여 잔금 완납 상태 변경" class="px-2 py-1 rounded-full text-[10.5px] font-extrabold border transition cursor-pointer ${
+                isBalancePaid
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs hover:bg-emerald-700'
+                  : 'bg-white text-slate-400 border-slate-300 hover:border-emerald-400 hover:text-emerald-600'
+              }">
+                ${isBalancePaid ? '<i class="fa-solid fa-check text-[9px] mr-0.5"></i>잔금 완납' : '잔금 미납'}
+              </button>
+            </div>
+          </td>
           <td class="p-3 text-center whitespace-nowrap">
             ${isSigned
               ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800">체결완료</span>'
@@ -2465,6 +2577,30 @@
         `;
         tbody.appendChild(tr);
       });
+    };
+
+    // 관리자 전용 계약금/잔금 완납 원클릭 상태 변경 및 클라우드 즉시 동기화
+    window.togglePaymentStatus = async function(id, field) {
+      if (window.appMode !== 'admin') return;
+      const c = window.contractPool[id];
+      if (!c) return;
+
+      const prevState = (c[field] === true || c[field] === "true");
+      const nextState = !prevState;
+      c[field] = nextState;
+
+      if (window.currentContract && window.currentContract.id === id) {
+        window.currentContract[field] = nextState;
+      }
+
+      renderDashboardTable();
+      await window.saveContractToCloud(c, true);
+
+      const label = field === 'depositPaid' ? '계약금' : '잔금';
+      showToast(
+        `${c.clientName || c.id} 건의 [${label} ${nextState ? '완납' : '미납'}] 처리가 클라우드에 저장되었습니다.`,
+        nextState ? 'success' : 'info'
+      );
     };
 
     window.changeCalendarMonth = function(offset) {
