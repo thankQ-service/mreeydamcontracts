@@ -98,7 +98,7 @@
         display: none;
       }
       body.completed-contract-view #interactiveAppView,
-      body.completed-contract-view header .admin-only {
+      body.completed-contract-view header {
         display: none !important;
       }
       body.completed-contract-view #printOfficialDoc {
@@ -127,7 +127,7 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      #interactiveAppView, #adminPassModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #deleteConfirmModal, #depositEditModal, #clientShieldOverlay, header {
+      #interactiveAppView, #adminPassModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #deleteConfirmModal, #depositEditModal, #buddyManualEditModal, #buddySection, #partnerMemoModal, #clientShieldOverlay, header {
         display: none !important;
       }
       #printOfficialDoc {
@@ -341,6 +341,10 @@
         <button id="btnSwitchView" onclick="toggleMainView()" class="admin-only px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition">
           <i class="fa-solid fa-list-check text-slate-500"></i>
           <span id="txtSwitchView" class="hidden sm:inline">계약서 목록</span>
+        </button>
+        <button id="btnBuddyView" onclick="openBuddyManagementView()" class="admin-only px-2.5 sm:px-3 py-1.5 rounded-lg border border-purple-300 bg-purple-50 hover:bg-purple-100 text-xs font-bold text-purple-800 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-ticket text-purple-600"></i>
+          <span class="hidden sm:inline">짝꿍코드 관리</span>
         </button>
         <button onclick="createNewContractDraft()" class="admin-only px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
           <i class="fa-solid fa-plus"></i>
@@ -568,6 +572,198 @@
             </thead>
             <tbody id="dashboardTableBody" class="divide-y divide-slate-100 text-slate-700">
               <!-- Dynamic Rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUDDY CODE MANAGEMENT SECTION (관리자 전용 짝꿍코드 통합 관리 페이지) -->
+    <div id="buddySection" class="hidden admin-only space-y-4 sm:space-y-6">
+      <!-- 상단 타이틀 및 주요 액션 바 -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-purple-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 text-lg">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-base sm:text-lg font-black text-slate-900">메리담 짝꿍코드 통합 관리</h2>
+              <span class="px-2 py-0.5 rounded-full text-[10.5px] font-extrabold bg-purple-100 text-purple-800">관리자 전용</span>
+              <span id="buddyNextCodeBadge" class="px-2 py-0.5 rounded-full text-[10.5px] font-mono font-extrabold bg-slate-900 text-white">다음 자동번호: MERRY0019</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              신규 계약 시 <b>MERRY0019</b>부터 자동 순번 발급 · 기존 고객 코드 수기 등록 · 추천인/신규 각 10,000원 (추천 횟수 무제한 · 예식 후 1년 유지)
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+          <button type="button" onclick="switchMainView('dashboard')" class="px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-left text-[11px]"></i> 대시보드
+          </button>
+          <button type="button" onclick="bulkGenerateMissingBuddyCodes()" class="px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
+            <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i> 미발급 일괄생성
+          </button>
+          <button type="button" onclick="copyBuddyGuideMessage('')" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
+            <i class="fa-regular fa-copy text-[11px]"></i> 안내문 복사
+          </button>
+          <button type="button" onclick="exportBuddyCsv()" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
+            <i class="fa-solid fa-file-excel text-[11px]"></i> 엑셀(CSV)
+          </button>
+        </div>
+      </div>
+
+      <!-- 짝꿍코드 핵심 지표 요약 카드 4종 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-bold text-purple-700 block">총 발급 짝꿍코드</span>
+          <span id="buddyStatTotalCodes" class="text-xl sm:text-2xl font-black text-slate-900 mt-1 block">0개</span>
+          <span id="buddyStatCodeBreakdown" class="text-[10.5px] text-slate-500 mt-0.5 block">계약 0건 · 수기 0건</span>
+        </div>
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-bold text-blue-700 block">짝꿍코드 사용 건수</span>
+          <span id="buddyStatUsedCount" class="text-xl sm:text-2xl font-black text-blue-700 mt-1 block">0건</span>
+          <span id="buddyStatUsedBreakdown" class="text-[10.5px] text-slate-500 mt-0.5 block">체결완료 0건 · 대기 0건</span>
+        </div>
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-bold text-emerald-700 block">추천 인정 누적</span>
+          <span id="buddyStatRefCount" class="text-xl sm:text-2xl font-black text-emerald-700 mt-1 block">0회</span>
+          <span id="buddyStatTopReferrer" class="text-[10.5px] text-slate-500 mt-0.5 block truncate">최다 추천: -</span>
+        </div>
+        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-purple-200 bg-purple-50/40 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-bold text-rose-700 block">총 짝꿍 할인·혜택</span>
+          <span id="buddyStatTotalDiscount" class="text-lg sm:text-2xl font-black text-rose-700 mt-1 block truncate">0원</span>
+          <span id="buddyStatDiscountBreakdown" class="text-[10.5px] text-slate-500 mt-0.5 block truncate">사용 0원 · 추천 0원</span>
+        </div>
+      </div>
+
+      <!-- 기존 고객 짝꿍코드 수기 등록 카드 (MERRY0001 ~ MERRY0018 등 기존 발급분 등록) -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-pen-to-square text-purple-600"></i>
+              <span>기존 짝꿍코드 수기 등록 (MERRY0001 ~ MERRY0018 등 기존 고객)</span>
+            </h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              시스템 도입 전 이미 발급해 드린 기존 짝꿍코드를 수기로 등록해 두면 신규 계약 시 추천인 자동 매칭 및 1년 유효기간 관리가 가능합니다.
+            </p>
+          </div>
+          <button type="button" onclick="fillNextAutoCodeInManual()" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 text-[11px] font-bold transition">
+            다음 자동번호 채우기
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 text-xs">
+          <div>
+            <label class="block text-[10.5px] font-bold text-slate-600 mb-1">짝꿍코드 <span class="text-rose-500">*</span></label>
+            <input type="text" id="manualBuddyCodeInput" placeholder="예: MERRY0001" class="w-full p-2.5 border border-slate-300 rounded-lg font-mono font-bold uppercase focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-[10.5px] font-bold text-slate-600 mb-1">고객명 <span class="text-rose-500">*</span></label>
+            <input type="text" id="manualBuddyNameInput" placeholder="홍길동" class="w-full p-2.5 border border-slate-300 rounded-lg font-semibold focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-[10.5px] font-bold text-slate-600 mb-1">연락처</label>
+            <input type="tel" id="manualBuddyPhoneInput" oninput="formatPhoneNumber(this)" maxlength="13" placeholder="010-0000-0000" class="w-full p-2.5 border border-slate-300 rounded-lg focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-[10.5px] font-bold text-slate-600 mb-1">예식일자 (1년 유효 기준)</label>
+            <input type="date" id="manualBuddyWeddingDateInput" class="w-full p-2.5 border border-slate-300 rounded-lg focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-[10.5px] font-bold text-slate-600 mb-1">메모 / 환급계좌</label>
+            <input type="text" id="manualBuddyMemoInput" placeholder="기존 엑셀 고객 등" class="w-full p-2.5 border border-slate-300 rounded-lg focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div class="flex items-end">
+            <button type="button" onclick="registerManualBuddyCode()" class="w-full py-2.5 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-plus"></i> 수기 등록
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 할인 단가 정책 및 안내문 미리보기 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5 text-xs">
+          <div class="font-extrabold text-slate-900 flex items-center justify-between">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-sliders text-purple-600"></i> 짝꿍 할인 정책 설정</span>
+            <span class="text-[10.5px] text-emerald-700 font-bold">추천 횟수 무제한 · 예식 후 1년 유지</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <label class="block text-[10.5px] font-bold text-slate-600 mb-1">신규 고객 사용 할인 (원)</label>
+              <input type="text" inputmode="numeric" id="buddyPolicyUseAmt" value="10,000" oninput="formatMoneyInput(this); updateBuddyPolicyFromUI()" class="w-full font-black text-slate-900 bg-transparent focus:outline-hidden">
+            </div>
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <label class="block text-[10.5px] font-bold text-slate-600 mb-1">추천인 1건당 추가할인 (원)</label>
+              <input type="text" inputmode="numeric" id="buddyPolicyRefAmt" value="10,000" oninput="formatMoneyInput(this); updateBuddyPolicyFromUI()" class="w-full font-black text-slate-900 bg-transparent focus:outline-hidden">
+            </div>
+          </div>
+          <label class="flex items-center gap-2 pt-1 cursor-pointer select-none">
+            <input type="checkbox" id="buddyPolicySignedOnly" checked onchange="updateBuddyPolicyFromUI()" class="w-4 h-4 accent-purple-600 rounded">
+            <span class="text-[11px] font-bold text-slate-700">추천받은 신규 고객이 [체결완료]된 건만 추천인 할인으로 인정 (권장)</span>
+          </label>
+        </div>
+
+        <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-200 shadow-xs space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-black text-purple-950">🤍 메리담 짝꿍코드 운영 안내 (고객 발송용)</span>
+            <button type="button" onclick="copyBuddyGuideMessage('')" class="px-2.5 py-1 rounded-md bg-purple-600 hover:bg-purple-700 text-white text-[10.5px] font-bold transition">
+              원문 복사
+            </button>
+          </div>
+          <div class="text-[11px] text-slate-700 leading-relaxed whitespace-pre-line bg-white/90 p-2.5 rounded-xl border border-purple-100 max-h-32 overflow-y-auto">🤍 메리담 짝꿍코드 운영 안내
+
+- 짝꿍코드는 메리담 서비스를 이용한 고객에게 부여됩니다.
+- 기존 고객은 본인 예식 종료일로부터 1년간 추천인 혜택을 유지할 수 있습니다.
+- 추천받은 신규 고객이 계약을 완료하면 추천인과 신규 고객 모두 각 10,000원의 할인 혜택을 받을 수 있습니다.
+- 추천 횟수에는 제한이 없습니다.
+- 신규 고객은 반드시 계약금 입금 전 짝꿍코드를 등록해야 합니다.
+- 계약 취소 시 해당 할인 혜택은 적용되지 않습니다.
+  (계약 취소 시 소개하신 분 할인금액까지 계약금에서 차감될 수 있으니 양해 부탁드립니다.)
+- 할인 혜택은 타 이벤트와 중복 적용되지 않을 수 있으며, 운영 정책에 따라 변경될 수 있습니다.</div>
+        </div>
+      </div>
+
+      <!-- 통합 짝꿍코드 발급·사용·추천 내역 테이블 -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-3.5 sm:p-5 border-b border-slate-200 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900">짝꿍코드 발급 · 사용 · 추천 · 할인 통합 현황</h3>
+              <p class="text-xs text-slate-500 mt-0.5">발급 코드, 사용한 코드, 추천받은 내역, 할인 금액 및 정산 상태를 한눈에 확인합니다.</p>
+            </div>
+            <div class="relative w-full sm:w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+              <input type="text" id="buddySearchInput" oninput="renderBuddyManagementView()" placeholder="고객명, 연락처, 코드 검색" class="text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-300 w-full focus:outline-hidden focus:border-purple-500">
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+            <button type="button" id="buddyFilterAll" onclick="setBuddyFilter('all')" class="px-3 py-1.5 rounded-full font-bold bg-slate-900 text-white transition">전체 보기</button>
+            <button type="button" id="buddyFilterUsed" onclick="setBuddyFilter('used')" class="px-3 py-1.5 rounded-full font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">코드 사용 고객</button>
+            <button type="button" id="buddyFilterReferred" onclick="setBuddyFilter('referred')" class="px-3 py-1.5 rounded-full font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">추천 실적 보유</button>
+            <button type="button" id="buddyFilterManual" onclick="setBuddyFilter('manual')" class="px-3 py-1.5 rounded-full font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">수기 등록 코드</button>
+            <button type="button" id="buddyFilterPending" onclick="setBuddyFilter('pending')" class="px-3 py-1.5 rounded-full font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">추천 정산 대기</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse min-w-[920px]">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+              <tr>
+                <th class="p-3">고객 / 예식일 (1년 유지)</th>
+                <th class="p-3">부여된 짝꿍코드</th>
+                <th class="p-3">사용한 짝꿍코드 (추천인)</th>
+                <th class="p-3">추천받은 내역 (신규 고객)</th>
+                <th class="p-3 text-right">짝꿍 할인·혜택</th>
+                <th class="p-3">정산 상태 / 메모</th>
+                <th class="p-3 text-center">관리</th>
+              </tr>
+            </thead>
+            <tbody id="buddyTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- Dynamic Buddy Rows -->
             </tbody>
           </table>
         </div>
@@ -1038,6 +1234,60 @@
           <button type="button" onclick="applyDiscount(20000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">짝꿍 2만</button>
           <button type="button" onclick="applyDiscount(30000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">후기 3만</button>
           <button type="button" onclick="applyDiscount(0)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-300">초기화</button>
+        </div>
+
+        <!-- 관리자 전용 짝꿍코드 자동생성 · 수기입력 · 할인 연동 박스 (고객 화면 비노출) -->
+        <div class="admin-only p-3.5 bg-purple-50/70 border border-purple-200 rounded-xl space-y-3 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="font-extrabold text-purple-950 flex items-center gap-1.5">
+              <i class="fa-solid fa-ticket text-purple-600"></i>
+              <span>짝꿍코드 관리 및 추가할인 연동 (관리자 전용 · 고객 비노출)</span>
+            </span>
+            <button type="button" onclick="openBuddyManagementView()" class="text-[11px] font-extrabold text-purple-700 hover:text-purple-900 underline underline-offset-2">
+              짝꿍코드 통합 관리 페이지 →
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- 내 짝꿍코드 (자동생성 + 수기 수정 가능) -->
+            <div class="p-2.5 bg-white border border-purple-200 rounded-lg space-y-1.5">
+              <div class="flex items-center justify-between gap-1">
+                <label class="text-[11px] font-bold text-slate-700">1. 부여된 내 짝꿍코드 (자동생성 · 수기수정 가능)</label>
+                <button type="button" onclick="regenerateCurrentBuddyCode()" class="text-[10px] font-bold text-purple-700 hover:underline">자동생성</button>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <input type="text" id="buddyCodeInput" oninput="handleBuddyInputChange()" placeholder="MERRY0019" class="flex-1 p-2 border border-slate-300 rounded-md font-mono font-black text-purple-900 uppercase bg-purple-50/40 focus:outline-hidden focus:border-purple-500">
+                <button type="button" onclick="copyCurrentContractBuddyGuide()" class="shrink-0 px-2.5 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold transition">
+                  안내문 복사
+                </button>
+              </div>
+            </div>
+
+            <!-- 사용한 짝꿍코드 (추천인 코드 입력) -->
+            <div class="p-2.5 bg-white border border-purple-200 rounded-lg space-y-1.5">
+              <label class="block text-[11px] font-bold text-slate-700">2. 사용한 짝꿍코드 (소개받은 추천인 코드)</label>
+              <input type="text" id="usedBuddyCodeInput" list="buddyCodeDatalist" oninput="handleBuddyInputChange()" placeholder="예: MERRY0001 또는 MERRY0019" class="w-full p-2 border border-slate-300 rounded-md font-mono font-bold uppercase focus:outline-hidden focus:border-purple-500">
+              <datalist id="buddyCodeDatalist"></datalist>
+              <div id="usedBuddyMatchStatus" class="text-[10.5px] font-semibold text-slate-500">
+                추천인 코드를 입력하면 자동 매칭됩니다. (신규 10,000원 할인)
+              </div>
+            </div>
+          </div>
+
+          <!-- 추천받은 현황 및 5조 할인 자동 반영 바 -->
+          <div class="p-2.5 bg-white border border-purple-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="space-y-0.5">
+              <div id="contractBuddyReferralSummary" class="text-[11px] font-bold text-slate-700">
+                추천받은 내역: 0건 (추천 추가할인 0원)
+              </div>
+              <div id="contractBuddyTotalDiscountSummary" class="text-[11px] font-extrabold text-purple-800">
+                짝꿍 총 예상 할인액: 0원 (사용할인 0원 + 추천할인 0원)
+              </div>
+            </div>
+            <button type="button" onclick="applyBuddyDiscountToContract()" class="shrink-0 px-3 py-2 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-bold shadow-xs transition">
+              5조 할인금액에 자동 반영
+            </button>
+          </div>
         </div>
 
         <div class="p-3.5 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl flex items-center justify-between">
@@ -1710,6 +1960,60 @@
     </div>
   </div>
 
+  <!-- 관리자 전용 짝꿍코드 수기 수정 / 삭제 확인 모달 -->
+  <div id="buddyManualEditModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 border border-purple-100 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between">
+        <h3 id="buddyEditModalTitle" class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-ticket text-purple-600"></i>
+          <span>짝꿍코드 정보 수정</span>
+        </h3>
+        <button type="button" onclick="closeBuddyEditModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">짝꿍코드 <span class="text-rose-500">*</span></label>
+          <input type="text" id="buddyEditCode" class="w-full p-2.5 border-2 border-purple-400 rounded-xl font-mono font-black uppercase text-purple-900 focus:outline-hidden">
+        </div>
+        <div id="buddyEditExtraFields" class="space-y-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">고객명</label>
+            <input type="text" id="buddyEditName" class="w-full p-2.5 border border-slate-300 rounded-xl font-semibold focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">연락처</label>
+            <input type="tel" id="buddyEditPhone" oninput="formatPhoneNumber(this)" maxlength="13" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-hidden focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">예식일자</label>
+            <input type="date" id="buddyEditWeddingDate" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-hidden focus:border-purple-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">메모 / 정산 계좌</label>
+          <input type="text" id="buddyEditMemo" placeholder="환급 계좌, 특이사항 등" class="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-hidden focus:border-purple-500">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-1">
+        <button type="button" id="btnDeleteManualBuddy" onclick="deleteManualBuddyFromModal()" class="hidden px-3 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold">
+          삭제
+        </button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button type="button" onclick="closeBuddyEditModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+            취소
+          </button>
+          <button type="button" onclick="saveBuddyEditModal()" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-500/20">
+            저장
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 체결 최종 확인 모달 -->
   <div id="clientSubmitConfirmModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
@@ -1761,6 +2065,28 @@
     </div>
   </div>
 
+  <!-- 관리자 전용 짝꿍코드 정산 메모 수정 모달 -->
+  <div id="partnerMemoModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4 border border-purple-200 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-note-sticky text-purple-600"></i> 짝꿍 정산 메모 (관리자 전용)
+        </h3>
+        <button type="button" onclick="closePartnerMemoModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+      <div class="space-y-2">
+        <p id="partnerMemoTargetLabel" class="text-xs font-bold text-purple-800">-</p>
+        <textarea id="partnerMemoModalInput" rows="3" placeholder="예: 추천 2건 추가할인 4만원 잔금 차감 완료 / 환급계좌 국민 123-..." class="w-full p-2.5 border border-slate-300 focus:border-purple-500 rounded-xl text-xs focus:outline-hidden"></textarea>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="closePartnerMemoModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">취소</button>
+        <button type="button" onclick="savePartnerMemoModal()" class="w-1/2 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-sm">메모 저장</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 토스트 알림 컨테이너 -->
   <div id="toastContainer" class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 space-y-2 pointer-events-none max-w-[90vw] sm:max-w-md"></div>
 
@@ -1785,9 +2111,11 @@
     const authReadyPromise = new Promise(resolve => { authReadyResolve = resolve; });
     window.authReadyPromise = authReadyPromise;
     window.contractPool = window.contractPool || {};
+    window.manualBuddyPool = window.manualBuddyPool || {};
 
     const appId = "mreeydamcontracts";
     const COLLECTION_NAME = "merrydam_contracts";
+    const MANUAL_BUDDY_COLLECTION = "merrydam_buddy_manual";
     const initUrlParams = new URLSearchParams(window.location.search);
     const isClientDirectMode = (initUrlParams.get('view') === 'client' && !!initUrlParams.get('id'));
     const directClientId = initUrlParams.get('id');
@@ -1846,6 +2174,12 @@
     }
     function getLegacyDocRef(id) {
       return doc(db, COLLECTION_NAME, id);
+    }
+    function getManualBuddyColRef() {
+      return collection(db, 'artifacts', appId, 'public', 'data', MANUAL_BUDDY_COLLECTION);
+    }
+    function getManualBuddyDocRef(id) {
+      return doc(db, 'artifacts', appId, 'public', 'data', MANUAL_BUDDY_COLLECTION, id);
     }
 
     // 고객 모드 전용 초경량 단일 문서 실시간 감시 (전체 리스트 다운로드 생략으로 로딩 속도 극대화 및 실시간 해지/삭제 즉시 차단)
@@ -1932,6 +2266,12 @@
         if (typeof window.renderDashboardTable === 'function') {
           window.renderDashboardTable();
         }
+        if (typeof window.renderBuddyManagementView === 'function') {
+          window.renderBuddyManagementView();
+        }
+        if (typeof window.renderContractBuddyPanel === 'function') {
+          window.renderContractBuddyPanel();
+        }
 
         const badge = document.getElementById('syncStatusBadge');
         if (badge) {
@@ -1945,6 +2285,83 @@
 
       try {
         onSnapshot(getLegacyColRef(), (snap) => handleSnapshot(snap, true), (err) => console.warn("Legacy listen notice:", err));
+      } catch (e) {}
+
+      // 수기 등록 기존 짝꿍코드 실시간 동기화 리스너
+      try {
+        onSnapshot(getManualBuddyColRef(), (snap) => {
+          window.manualBuddyPool = window.manualBuddyPool || {};
+          snap.docChanges().forEach((change) => {
+            const data = change.doc.data();
+            const id = change.doc.id;
+            if (data && (data._deleted === true || data._deleted === "true")) {
+              delete window.manualBuddyPool[id];
+              try { localStorage.removeItem('MD_BUDDY_MANUAL_' + id); } catch (e) {}
+              return;
+            }
+            if (change.type === "added" || change.type === "modified") {
+              delete data._adminKey;
+              window.manualBuddyPool[id] = Object.assign(window.manualBuddyPool[id] || {}, data);
+              try {
+                localStorage.setItem('MD_BUDDY_MANUAL_' + id, JSON.stringify(window.manualBuddyPool[id]));
+              } catch (e) {}
+            }
+            if (change.type === "removed") {
+              delete window.manualBuddyPool[id];
+              try { localStorage.removeItem('MD_BUDDY_MANUAL_' + id); } catch (e) {}
+            }
+          });
+          if (typeof window.renderBuddyManagementView === 'function') {
+            window.renderBuddyManagementView();
+          }
+          if (typeof window.renderContractBuddyPanel === 'function') {
+            window.renderContractBuddyPanel();
+          }
+        }, (err) => console.warn("Manual buddy listen notice:", err));
+      } catch (e) {}
+    };
+
+    // 수기 등록 기존 짝꿍코드 클라우드 저장 및 삭제
+    window.saveManualBuddyToCloud = async function(item) {
+      if (!item || !item.id) return false;
+      const localCopy = Object.assign({}, item);
+      delete localCopy._adminKey;
+      window.manualBuddyPool[item.id] = localCopy;
+      try {
+        localStorage.setItem('MD_BUDDY_MANUAL_' + item.id, JSON.stringify(localCopy));
+      } catch (e) {}
+
+      if (!db) return true;
+      try {
+        await authReadyPromise;
+        const cleanData = sanitizeForFirestore(item);
+        cleanData.lastUpdated = new Date().toISOString();
+        cleanData._deleted = false;
+        cleanData._adminKey = "wlfkf1818!@";
+        await setDoc(getManualBuddyDocRef(item.id), cleanData);
+        return true;
+      } catch (e) {
+        console.warn("Manual Buddy Cloud Save Notice:", e);
+        return false;
+      }
+    };
+
+    window.deleteManualBuddyFromCloud = async function(id) {
+      if (!id) return;
+      delete window.manualBuddyPool[id];
+      try {
+        localStorage.removeItem('MD_BUDDY_MANUAL_' + id);
+      } catch (e) {}
+
+      if (!db) return;
+      try {
+        await authReadyPromise;
+        await setDoc(getManualBuddyDocRef(id), {
+          id: id,
+          _deleted: true,
+          _adminKey: "wlfkf1818!@",
+          deletedAt: new Date().toISOString()
+        });
       } catch (e) {}
     };
 
@@ -2064,9 +2481,23 @@
     const MASTER_ADMIN_PASS = "wlfkf1818!@";
     const FIXED_DEPOSIT_AMOUNT = 100000;
     const MERRYDAM_STAMP_URL = "https://i.postimg.cc/2SytvsQT/11111111111.png";
+    const BUDDY_CODE_PREFIX = "MERRY";
+    const BUDDY_CODE_START_NUM = 19; // MERRY0019부터 자동 순번 발급
+    const BUDDY_GUIDE_TEXT = `🤍 메리담 짝꿍코드 운영 안내
+
+- 짝꿍코드는 메리담 서비스를 이용한 고객에게 부여됩니다.
+- 기존 고객은 본인 예식 종료일로부터 1년간 추천인 혜택을 유지할 수 있습니다.
+- 추천받은 신규 고객이 계약을 완료하면 추천인과 신규 고객 모두 각 10,000원의 할인 혜택을 받을 수 있습니다.
+- 추천 횟수에는 제한이 없습니다.
+- 신규 고객은 반드시 계약금 입금 전 짝꿍코드를 등록해야 합니다.
+- 계약 취소 시 해당 할인 혜택은 적용되지 않습니다.
+  (계약 취소 시 소개하신 분 할인금액까지 계약금에서 차감될 수 있으니 양해 부탁드립니다.)
+- 할인 혜택은 타 이벤트와 중복 적용되지 않을 수 있으며, 운영 정책에 따라 변경될 수 있습니다.`;
+
     let isAdminAuthenticated = false;
     let isClientAuthenticated = false;
     window.contractPool = window.contractPool || {};
+    window.manualBuddyPool = window.manualBuddyPool || {};
     window.currentContract = null;
     window.pendingClientSignature = null;
     window.appMode = 'admin';
@@ -2081,6 +2512,13 @@
     let calendarMonth = new Date().getMonth();
     let selectedCalendarDate = null;
     let activePaymentPanel = null;
+    let buddyFilterMode = 'all';
+    let buddyEditingTarget = null;
+    let buddyPolicy = {
+      useDiscount: 10000,
+      refDiscount: 10000,
+      signedOnly: true
+    };
 
     // 삭제되거나 해지된 계약서 링크 접속 시 즉시 완전 차단 화면 전환
     window.showDeletedContractLock = function() {
@@ -2260,9 +2698,208 @@
         adminSigned: true,
         adminSignDataUrl: MERRYDAM_STAMP_URL,
         adminSignDate: '공식 사업자 도장 날인 유효',
+        buddyCode: generateNextBuddyCode(),
+        usedBuddyCode: '',
+        buddyPayoutStatus: 'pending',
+        buddyMemo: '',
         linkSentAt: new Date().toISOString(),
         createdAt: new Date().toISOString()
       };
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function copyTextToClipboard(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {}
+      ta.remove();
+    }
+
+    // MERRY0019부터 중복 없는 다음 순번 짝꿍코드 자동 생성
+    function generateNextBuddyCode() {
+      const usedSet = new Set();
+      let maxNum = BUDDY_CODE_START_NUM - 1; // 18 -> 첫 자동발급 MERRY0019
+
+      const inspectCode = (code) => {
+        const norm = String(code || '').trim().toUpperCase();
+        if (!norm) return;
+        usedSet.add(norm);
+        const match = norm.match(/^MERRY(\d+)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (!isNaN(num) && num > maxNum) maxNum = num;
+        }
+      };
+
+      Object.values(window.contractPool || {}).forEach(c => {
+        if (c && !c._deleted) inspectCode(c.buddyCode);
+      });
+      Object.values(window.manualBuddyPool || {}).forEach(m => {
+        if (m && !m._deleted) inspectCode(m.buddyCode);
+      });
+
+      let nextNum = maxNum + 1;
+      let candidate = `${BUDDY_CODE_PREFIX}${String(nextNum).padStart(4, '0')}`;
+      while (usedSet.has(candidate)) {
+        nextNum++;
+        candidate = `${BUDDY_CODE_PREFIX}${String(nextNum).padStart(4, '0')}`;
+      }
+      return candidate;
+    }
+
+    function loadManualBuddyFromLocalStorage() {
+      try {
+        window.manualBuddyPool = window.manualBuddyPool || {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith('MD_BUDDY_MANUAL_')) continue;
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
+          try {
+            const parsed = JSON.parse(raw);
+            if (!parsed || !parsed.id) continue;
+            if (parsed._deleted === true || parsed._deleted === "true") {
+              localStorage.removeItem(key);
+              continue;
+            }
+            delete parsed._adminKey;
+            window.manualBuddyPool[parsed.id] = Object.assign({}, window.manualBuddyPool[parsed.id] || {}, parsed);
+          } catch (err) {}
+        }
+        const savedPolicy = localStorage.getItem('MD_BUDDY_POLICY');
+        if (savedPolicy) {
+          const p = JSON.parse(savedPolicy);
+          if (p && typeof p === 'object') {
+            buddyPolicy.useDiscount = parseMoney(p.useDiscount ?? 10000);
+            buddyPolicy.refDiscount = parseMoney(p.refDiscount ?? 10000);
+            buddyPolicy.signedOnly = p.signedOnly !== false;
+          }
+        }
+      } catch (e) {}
+    }
+
+    function getOneYearExpiryInfo(weddingDateStr) {
+      if (!weddingDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(weddingDateStr.trim())) {
+        return { expiryStr: '', expired: false, label: '예식일 미정 (유효)' };
+      }
+      const parts = weddingDateStr.trim().split('-').map(n => parseInt(n, 10));
+      const expDate = new Date(parts[0] + 1, parts[1] - 1, parts[2], 23, 59, 59);
+      const expiryStr = `${parts[0] + 1}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+      const expired = Date.now() > expDate.getTime();
+      return {
+        expiryStr,
+        expired,
+        label: expired ? `~${expiryStr} 기간만료` : `~${expiryStr} 유지중`
+      };
+    }
+
+    function buildBuddyDirectory() {
+      const codeMap = {};
+      const entries = [];
+
+      Object.values(window.contractPool || {}).forEach(c => {
+        if (!c || c._deleted) return;
+        const normCode = String(c.buddyCode || '').trim().toUpperCase();
+        const entry = {
+          source: 'contract',
+          id: c.id,
+          name: c.clientName || '성명 미입력',
+          phone: c.clientPhone || '-',
+          weddingDate: c.weddingDate || '',
+          buddyCode: normCode,
+          usedBuddyCode: String(c.usedBuddyCode || '').trim().toUpperCase(),
+          clientSigned: (c.clientSigned === true || c.clientSigned === "true"),
+          payoutStatus: c.buddyPayoutStatus || 'pending',
+          memo: c.buddyMemo || '',
+          createdAt: c.createdAt || '',
+          raw: c
+        };
+        entries.push(entry);
+        if (normCode && !codeMap[normCode]) {
+          codeMap[normCode] = entry;
+        }
+      });
+
+      Object.values(window.manualBuddyPool || {}).forEach(m => {
+        if (!m || m._deleted) return;
+        const normCode = String(m.buddyCode || '').trim().toUpperCase();
+        const entry = {
+          source: 'manual',
+          id: m.id,
+          name: m.name || '기존 고객',
+          phone: m.phone || '-',
+          weddingDate: m.weddingDate || '',
+          buddyCode: normCode,
+          usedBuddyCode: '',
+          clientSigned: true,
+          payoutStatus: m.payoutStatus || 'pending',
+          memo: m.memo || '',
+          createdAt: m.createdAt || '',
+          raw: m
+        };
+        entries.push(entry);
+        if (normCode && !codeMap[normCode]) {
+          codeMap[normCode] = entry;
+        }
+      });
+
+      // 추천받은 내역 매핑 (계약 고객이 사용한 코드 기준)
+      const referralsByCode = {};
+      entries.forEach(e => {
+        if (e.source !== 'contract' || !e.usedBuddyCode) return;
+        const owner = codeMap[e.usedBuddyCode];
+        // 자기 자신의 코드 사용 방지
+        if (owner && owner.id === e.id) return;
+        if (!referralsByCode[e.usedBuddyCode]) referralsByCode[e.usedBuddyCode] = [];
+        referralsByCode[e.usedBuddyCode].push(e);
+      });
+
+      entries.forEach(e => {
+        const expInfo = getOneYearExpiryInfo(e.weddingDate);
+        e.expiryInfo = expInfo;
+
+        const usedCode = e.usedBuddyCode;
+        const referrer = usedCode ? codeMap[usedCode] : null;
+        e.isSelfReferral = !!(usedCode && e.buddyCode && usedCode === e.buddyCode);
+        e.matchedReferrer = (!e.isSelfReferral && referrer) ? referrer : null;
+        e.useDiscount = (e.source === 'contract' && usedCode && !e.isSelfReferral)
+          ? buddyPolicy.useDiscount
+          : 0;
+
+        const allRefs = (e.buddyCode && referralsByCode[e.buddyCode]) ? referralsByCode[e.buddyCode] : [];
+        const creditedRefs = allRefs.filter(ref => {
+          if (buddyPolicy.signedOnly && !ref.clientSigned) return false;
+          // 예식 종료일로부터 1년 이내 사용 여부 체크 (계약 생성일 기준)
+          if (expInfo.expiryStr && ref.createdAt) {
+            const refDateStr = String(ref.createdAt).slice(0, 10);
+            if (refDateStr > expInfo.expiryStr) return false;
+          }
+          return true;
+        });
+
+        e.allReferrals = allRefs;
+        e.creditedReferrals = creditedRefs;
+        e.refDiscount = creditedRefs.length * buddyPolicy.refDiscount;
+        e.totalBuddyBenefit = e.useDiscount + e.refDiscount;
+      });
+
+      return { entries, codeMap, referralsByCode };
     }
 
     // 전화번호 입력 시 하이픈(-) 자동 삽입
@@ -2380,6 +3017,7 @@
 
       initCanvas();
       loadContractsFromLocalStorage();
+      loadManualBuddyFromLocalStorage();
       bindEnterKeyEvents();
 
       const params = new URLSearchParams(window.location.search);
@@ -2542,23 +3180,48 @@
     }
 
     window.toggleMainView = function() {
+      if (currentMainView === 'buddy') {
+        switchMainView('dashboard');
+        return;
+      }
       switchMainView(currentMainView === 'dashboard' ? 'form' : 'dashboard');
+    };
+
+    window.openBuddyManagementView = function() {
+      if (window.appMode !== 'admin') return;
+      switchMainView('buddy');
     };
 
     function switchMainView(view) {
       currentMainView = view;
       const dSection = document.getElementById('dashboardSection');
       const fSection = document.getElementById('contractFormSection');
+      const bSection = document.getElementById('buddySection');
       const txtSwitch = document.getElementById('txtSwitchView');
+      const btnBuddy = document.getElementById('btnBuddyView');
+
+      dSection?.classList.add('hidden');
+      fSection?.classList.add('hidden');
+      bSection?.classList.add('hidden');
+
+      if (btnBuddy) {
+        if (view === 'buddy') {
+          btnBuddy.className = 'admin-only px-2.5 sm:px-3 py-1.5 rounded-lg border border-purple-700 bg-purple-600 text-xs font-bold text-white flex items-center gap-1.5 shadow-xs transition';
+        } else {
+          btnBuddy.className = 'admin-only px-2.5 sm:px-3 py-1.5 rounded-lg border border-purple-300 bg-purple-50 hover:bg-purple-100 text-xs font-bold text-purple-800 flex items-center gap-1.5 transition';
+        }
+      }
 
       if (view === 'dashboard') {
-        dSection.classList.remove('hidden');
-        fSection.classList.add('hidden');
+        dSection?.classList.remove('hidden');
         if (txtSwitch) txtSwitch.textContent = '현재 계약서 작성';
         renderDashboardTable();
+      } else if (view === 'buddy') {
+        bSection?.classList.remove('hidden');
+        if (txtSwitch) txtSwitch.textContent = '계약서 목록';
+        renderBuddyManagementView();
       } else {
-        dSection.classList.add('hidden');
-        fSection.classList.remove('hidden');
+        fSection?.classList.remove('hidden');
         if (txtSwitch) txtSwitch.textContent = '계약서 목록';
         if (!window.currentContract) {
           createNewContractDraft();
@@ -2654,6 +3317,9 @@
 
       renderPaymentDetailPanel();
       renderScheduleCalendar();
+      if (currentMainView === 'buddy') {
+        renderBuddyManagementView();
+      }
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">등록된 계약서가 없습니다. [+ 새 계약서]를 눌러 작성해 보세요.</td></tr>`;
@@ -2674,10 +3340,13 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition";
         tr.innerHTML = `
-          <td class="p-3 font-mono font-bold text-slate-900">${c.id}</td>
+          <td class="p-3 font-mono font-bold text-slate-900">
+            <div>${c.id}</div>
+            ${c.buddyCode ? `<span class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-purple-50 border border-purple-200 text-purple-700 text-[10px] font-mono font-extrabold">${escapeHtml(c.buddyCode)}</span>` : ''}
+          </td>
           <td class="p-3">
-            <span class="font-extrabold text-slate-900">${c.clientName || '성명 미입력'}</span>
-            <span class="text-[11px] text-slate-400 block">${c.clientPhone || '-'}</span>
+            <span class="font-extrabold text-slate-900 block">${escapeHtml(c.clientName || '성명 미입력')}</span>
+            <span class="text-[11px] text-slate-500 block">${escapeHtml(c.clientPhone || '-')}</span>
           </td>
           <td class="p-3">
             <span class="font-semibold text-slate-800">${c.weddingDate || '일자 미정'} ${c.weddingTime || ''}</span>
@@ -3291,6 +3960,12 @@
         : FIXED_DEPOSIT_AMOUNT;
       setVal('depositAmount', formatMoneyStr(savedDeposit));
 
+      if (window.appMode === 'admin') {
+        setVal('buddyCodeInput', c.buddyCode || '');
+        setVal('usedBuddyCodeInput', c.usedBuddyCode || '');
+        renderContractBuddyPanel();
+      }
+
       applyClientFieldLocks();
       calculateTotalFees();
       renderSignatureState(c);
@@ -3361,6 +4036,13 @@
       c.consentPhotoTransfer = getRadio('consentPhotoTransfer');
       c.consentMarketing = getRadio('consentMarketing');
 
+      if (window.appMode === 'admin') {
+        const bCodeEl = document.getElementById('buddyCodeInput');
+        const uCodeEl = document.getElementById('usedBuddyCodeInput');
+        if (bCodeEl) c.buddyCode = bCodeEl.value.trim().toUpperCase();
+        if (uCodeEl) c.usedBuddyCode = uCodeEl.value.trim().toUpperCase();
+      }
+
       document.getElementById('displayClientName').textContent = c.clientName || '성명 미입력';
       document.getElementById('displayClientPhone').textContent = c.clientPhone || '-';
 
@@ -3423,6 +4105,611 @@
       document.getElementById('feeDiscount').value = formatMoneyStr(amt);
       calculateTotalFees();
       handleFieldChange(true);
+    };
+
+    // ==================== 관리자 전용 짝꿍코드 관리 기능 일체 ====================
+
+    window.handleBuddyInputChange = function() {
+      if (window.appMode !== 'admin' || !window.currentContract) return;
+      const bEl = document.getElementById('buddyCodeInput');
+      const uEl = document.getElementById('usedBuddyCodeInput');
+      if (bEl) {
+        const v = bEl.value.toUpperCase().replace(/\s+/g, '');
+        if (bEl.value !== v) bEl.value = v;
+        window.currentContract.buddyCode = v;
+      }
+      if (uEl) {
+        const v = uEl.value.toUpperCase().replace(/\s+/g, '');
+        if (uEl.value !== v) uEl.value = v;
+        window.currentContract.usedBuddyCode = v;
+      }
+      renderContractBuddyPanel();
+      handleFieldChange();
+    };
+
+    window.regenerateCurrentBuddyCode = function() {
+      if (window.appMode !== 'admin' || !window.currentContract) return;
+      const newCode = generateNextBuddyCode();
+      window.currentContract.buddyCode = newCode;
+      const bEl = document.getElementById('buddyCodeInput');
+      if (bEl) bEl.value = newCode;
+      renderContractBuddyPanel();
+      handleFieldChange(true);
+      showToast(`짝꿍코드 [${newCode}]가 자동 생성되었습니다.`, 'success');
+    };
+
+    window.renderContractBuddyPanel = function() {
+      if (window.appMode !== 'admin') return;
+      const c = window.currentContract;
+      const { entries, codeMap } = buildBuddyDirectory();
+
+      // 자동완성 datalist 갱신 (계약 고객 + 기존 수기등록 고객 전체)
+      const datalist = document.getElementById('buddyCodeDatalist');
+      if (datalist) {
+        datalist.innerHTML = entries
+          .filter(e => e.buddyCode && (!c || e.id !== c.id))
+          .map(e => `<option value="${escapeHtml(e.buddyCode)}">${escapeHtml(e.name)} (${e.source === 'manual' ? '기존수기' : '계약'} · ${escapeHtml(e.weddingDate || '일자미정')})</option>`)
+          .join('');
+      }
+
+      if (!c) return;
+      const myCode = String(c.buddyCode || '').trim().toUpperCase();
+      const usedCode = String(c.usedBuddyCode || '').trim().toUpperCase();
+      const matchEl = document.getElementById('usedBuddyMatchStatus');
+      const refEl = document.getElementById('contractBuddyReferralSummary');
+      const totEl = document.getElementById('contractBuddyTotalDiscountSummary');
+
+      let useDisc = 0;
+      if (!usedCode) {
+        if (matchEl) {
+          matchEl.className = 'text-[10.5px] font-semibold text-slate-500';
+          matchEl.textContent = `추천인 코드를 입력하면 자동 매칭됩니다. (신규 ${buddyPolicy.useDiscount.toLocaleString()}원 할인)`;
+        }
+      } else if (myCode && usedCode === myCode) {
+        if (matchEl) {
+          matchEl.className = 'text-[10.5px] font-extrabold text-rose-600';
+          matchEl.textContent = '⚠️ 본인 짝꿍코드는 셀프 추천으로 사용할 수 없습니다.';
+        }
+      } else {
+        const owner = codeMap[usedCode];
+        useDisc = buddyPolicy.useDiscount;
+        if (owner) {
+          const exp = getOneYearExpiryInfo(owner.weddingDate);
+          if (exp.expired) {
+            if (matchEl) {
+              matchEl.className = 'text-[10.5px] font-bold text-amber-700';
+              matchEl.textContent = `⚠️ 추천인 매칭: ${owner.name} (${exp.label}) — 예식 후 1년 경과 확인 필요`;
+            }
+          } else {
+            if (matchEl) {
+              matchEl.className = 'text-[10.5px] font-extrabold text-emerald-700';
+              matchEl.textContent = `✓ 추천인 매칭 완료: ${owner.name} (${owner.source === 'manual' ? '기존수기' : '계약'} · ${exp.label}) · ${useDisc.toLocaleString()}원 할인`;
+            }
+          }
+        } else {
+          if (matchEl) {
+            matchEl.className = 'text-[10.5px] font-bold text-amber-700';
+            matchEl.textContent = `미등록 코드(${usedCode}) 입력됨 — 기존 고객이라면 [짝꿍코드 관리]에서 수기 등록해 주세요.`;
+          }
+        }
+      }
+
+      const myEntry = entries.find(e => e.source === 'contract' && e.id === c.id);
+      const refCount = myEntry ? myEntry.creditedReferrals.length : 0;
+      const totalRefCount = myEntry ? myEntry.allReferrals.length : 0;
+      const refDisc = refCount * buddyPolicy.refDiscount;
+      const totalDisc = useDisc + refDisc;
+
+      if (refEl) {
+        const names = myEntry && myEntry.allReferrals.length > 0
+          ? ' — ' + myEntry.allReferrals.map(r => `${r.name}${r.clientSigned ? '(체결)' : '(대기)'}`).join(', ')
+          : '';
+        refEl.textContent = `추천받은 내역: 인정 ${refCount}건 / 전체 ${totalRefCount}건 (추천 추가할인 ${refDisc.toLocaleString()}원)${names}`;
+      }
+      if (totEl) {
+        totEl.textContent = `짝꿍 총 예상 할인액: ${totalDisc.toLocaleString()}원 (사용할인 ${useDisc.toLocaleString()}원 + 추천할인 ${refDisc.toLocaleString()}원)`;
+      }
+    };
+
+    window.applyBuddyDiscountToContract = function() {
+      if (window.appMode !== 'admin' || !window.currentContract) return;
+      const c = window.currentContract;
+      const { entries } = buildBuddyDirectory();
+      const myEntry = entries.find(e => e.source === 'contract' && e.id === c.id);
+      const totalBuddyDisc = myEntry ? myEntry.totalBuddyBenefit : 0;
+      document.getElementById('feeDiscount').value = formatMoneyStr(totalBuddyDisc);
+      calculateTotalFees();
+      handleFieldChange(true);
+      showToast(`짝꿍 할인 합계 ${totalBuddyDisc.toLocaleString()}원이 5조 할인 금액에 반영되었습니다.`, 'success');
+    };
+
+    window.copyCurrentContractBuddyGuide = function() {
+      const code = document.getElementById('buddyCodeInput')?.value?.trim().toUpperCase() || '';
+      copyBuddyGuideMessage(code);
+    };
+
+    window.copyBuddyGuideMessage = function(code) {
+      const cleanCode = String(code || '').trim().toUpperCase();
+      const msg = cleanCode
+        ? `[고객님 전용 메리담 짝꿍코드: ${cleanCode}]\n\n${BUDDY_GUIDE_TEXT}`
+        : BUDDY_GUIDE_TEXT;
+      copyTextToClipboard(msg);
+      showToast(
+        cleanCode
+          ? `짝꿍코드 [${cleanCode}] 포함 안내문이 복사되었습니다.`
+          : '메리담 짝꿍코드 운영 안내문 원문이 복사되었습니다.',
+        'success'
+      );
+    };
+
+    window.fillNextAutoCodeInManual = function() {
+      const el = document.getElementById('manualBuddyCodeInput');
+      if (el) {
+        el.value = generateNextBuddyCode();
+        el.focus();
+      }
+    };
+
+    window.updateBuddyPolicyFromUI = function() {
+      buddyPolicy.useDiscount = parseMoney(document.getElementById('buddyPolicyUseAmt')?.value);
+      buddyPolicy.refDiscount = parseMoney(document.getElementById('buddyPolicyRefAmt')?.value);
+      buddyPolicy.signedOnly = !!document.getElementById('buddyPolicySignedOnly')?.checked;
+      try {
+        localStorage.setItem('MD_BUDDY_POLICY', JSON.stringify(buddyPolicy));
+      } catch (e) {}
+      renderBuddyManagementView();
+      renderContractBuddyPanel();
+    };
+
+    window.setBuddyFilter = function(mode) {
+      buddyFilterMode = mode;
+      const map = {
+        all: 'buddyFilterAll',
+        used: 'buddyFilterUsed',
+        referred: 'buddyFilterReferred',
+        manual: 'buddyFilterManual',
+        pending: 'buddyFilterPending'
+      };
+      Object.entries(map).forEach(([k, id]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        if (k === mode) {
+          btn.className = 'px-3 py-1.5 rounded-full font-bold bg-slate-900 text-white transition';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-full font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+        }
+      });
+      renderBuddyManagementView();
+    };
+
+    window.registerManualBuddyCode = async function() {
+      if (window.appMode !== 'admin') return;
+      const codeEl = document.getElementById('manualBuddyCodeInput');
+      const nameEl = document.getElementById('manualBuddyNameInput');
+      const phoneEl = document.getElementById('manualBuddyPhoneInput');
+      const dateEl = document.getElementById('manualBuddyWeddingDateInput');
+      const memoEl = document.getElementById('manualBuddyMemoInput');
+
+      const code = (codeEl?.value || '').trim().toUpperCase().replace(/\s+/g, '');
+      const name = (nameEl?.value || '').trim();
+      const phone = (phoneEl?.value || '').trim();
+      const weddingDate = (dateEl?.value || '').trim();
+      const memo = (memoEl?.value || '').trim();
+
+      if (!code) {
+        showToast('등록할 짝꿍코드(예: MERRY0001)를 입력해 주세요.', 'warning');
+        codeEl?.focus();
+        return;
+      }
+      if (!name) {
+        showToast('고객명을 입력해 주세요.', 'warning');
+        nameEl?.focus();
+        return;
+      }
+
+      const { codeMap } = buildBuddyDirectory();
+      if (codeMap[code]) {
+        showToast(`이미 등록된 짝꿍코드입니다. (${code} - ${codeMap[code].name})`, 'warning');
+        codeEl?.focus();
+        return;
+      }
+
+      const newItem = {
+        id: 'MB-' + Date.now() + '-' + Math.floor(100 + Math.random() * 900),
+        buddyCode: code,
+        name: name,
+        phone: phone,
+        weddingDate: weddingDate,
+        memo: memo,
+        payoutStatus: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      await window.saveManualBuddyToCloud(newItem);
+      if (codeEl) codeEl.value = '';
+      if (nameEl) nameEl.value = '';
+      if (phoneEl) phoneEl.value = '';
+      if (dateEl) dateEl.value = '';
+      if (memoEl) memoEl.value = '';
+
+      renderBuddyManagementView();
+      renderContractBuddyPanel();
+      showToast(`기존 짝꿍코드 [${code}] (${name} 님)가 수기 등록되었습니다.`, 'success');
+    };
+
+    window.bulkGenerateMissingBuddyCodes = async function() {
+      if (window.appMode !== 'admin') return;
+      const targets = Object.values(window.contractPool || {})
+        .filter(c => c && !c._deleted && !String(c.buddyCode || '').trim())
+        .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+      if (targets.length === 0) {
+        showToast('모든 계약서에 이미 짝꿍코드가 발급되어 있습니다.', 'info');
+        return;
+      }
+
+      for (const c of targets) {
+        c.buddyCode = generateNextBuddyCode();
+        await window.saveContractToCloud(c, true);
+      }
+
+      renderDashboardTable();
+      renderBuddyManagementView();
+      renderContractBuddyPanel();
+      showToast(`미발급 계약서 ${targets.length}건에 짝꿍코드가 순차 자동 발급되었습니다.`, 'success');
+    };
+
+    window.toggleBuddyPayoutStatus = async function(source, id) {
+      if (window.appMode !== 'admin') return;
+      const order = ['pending', 'applied', 'refunded'];
+      const labels = { pending: '정산대기', applied: '잔금반영', refunded: '환급완료' };
+
+      if (source === 'contract') {
+        const c = window.contractPool[id];
+        if (!c) return;
+        const idx = order.indexOf(c.buddyPayoutStatus || 'pending');
+        const next = order[(idx + 1) % order.length];
+        c.buddyPayoutStatus = next;
+        await window.saveContractToCloud(c, true);
+        renderBuddyManagementView();
+        showToast(`${c.clientName || c.id} 추천 정산 상태가 [${labels[next]}]로 변경되었습니다.`, 'success');
+      } else {
+        const m = window.manualBuddyPool[id];
+        if (!m) return;
+        const idx = order.indexOf(m.payoutStatus || 'pending');
+        const next = order[(idx + 1) % order.length];
+        m.payoutStatus = next;
+        await window.saveManualBuddyToCloud(m);
+        renderBuddyManagementView();
+        showToast(`${m.name || m.buddyCode} 추천 정산 상태가 [${labels[next]}]로 변경되었습니다.`, 'success');
+      }
+    };
+
+    window.openBuddyEditModal = function(source, id) {
+      if (window.appMode !== 'admin') return;
+      buddyEditingTarget = { source, id };
+      const titleEl = document.getElementById('buddyEditModalTitle');
+      const codeEl = document.getElementById('buddyEditCode');
+      const extraBox = document.getElementById('buddyEditExtraFields');
+      const nameEl = document.getElementById('buddyEditName');
+      const phoneEl = document.getElementById('buddyEditPhone');
+      const dateEl = document.getElementById('buddyEditWeddingDate');
+      const memoEl = document.getElementById('buddyEditMemo');
+      const delBtn = document.getElementById('btnDeleteManualBuddy');
+
+      if (source === 'contract') {
+        const c = window.contractPool[id];
+        if (!c) return;
+        if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-ticket text-purple-600"></i> <span>계약서 짝꿍코드 수기 수정 (${escapeHtml(c.clientName || c.id)})</span>`;
+        if (codeEl) codeEl.value = c.buddyCode || '';
+        if (memoEl) memoEl.value = c.buddyMemo || '';
+        extraBox?.classList.add('hidden');
+        delBtn?.classList.add('hidden');
+      } else {
+        const m = window.manualBuddyPool[id];
+        if (!m) return;
+        if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-ticket text-purple-600"></i> <span>수기 등록 짝꿍코드 수정</span>`;
+        if (codeEl) codeEl.value = m.buddyCode || '';
+        if (nameEl) nameEl.value = m.name || '';
+        if (phoneEl) phoneEl.value = m.phone || '';
+        if (dateEl) dateEl.value = m.weddingDate || '';
+        if (memoEl) memoEl.value = m.memo || '';
+        extraBox?.classList.remove('hidden');
+        delBtn?.classList.remove('hidden');
+      }
+
+      document.getElementById('buddyManualEditModal')?.classList.remove('hidden');
+      setTimeout(() => { codeEl?.focus(); }, 60);
+    };
+
+    window.closeBuddyEditModal = function() {
+      buddyEditingTarget = null;
+      document.getElementById('buddyManualEditModal')?.classList.add('hidden');
+    };
+
+    window.saveBuddyEditModal = async function() {
+      if (!buddyEditingTarget) return;
+      const { source, id } = buddyEditingTarget;
+      const newCode = (document.getElementById('buddyEditCode')?.value || '').trim().toUpperCase().replace(/\s+/g, '');
+      const newMemo = (document.getElementById('buddyEditMemo')?.value || '').trim();
+
+      if (!newCode) {
+        showToast('짝꿍코드를 입력해 주세요.', 'warning');
+        return;
+      }
+
+      const { codeMap } = buildBuddyDirectory();
+      if (codeMap[newCode] && codeMap[newCode].id !== id) {
+        showToast(`이미 다른 고객(${codeMap[newCode].name})에게 사용 중인 코드입니다.`, 'warning');
+        return;
+      }
+
+      if (source === 'contract') {
+        const c = window.contractPool[id];
+        if (c) {
+          c.buddyCode = newCode;
+          c.buddyMemo = newMemo;
+          if (window.currentContract && window.currentContract.id === id) {
+            window.currentContract.buddyCode = newCode;
+            window.currentContract.buddyMemo = newMemo;
+            const bEl = document.getElementById('buddyCodeInput');
+            if (bEl) bEl.value = newCode;
+          }
+          await window.saveContractToCloud(c, true);
+        }
+      } else {
+        const m = window.manualBuddyPool[id];
+        if (m) {
+          m.buddyCode = newCode;
+          m.name = (document.getElementById('buddyEditName')?.value || '').trim() || m.name;
+          m.phone = (document.getElementById('buddyEditPhone')?.value || '').trim();
+          m.weddingDate = (document.getElementById('buddyEditWeddingDate')?.value || '').trim();
+          m.memo = newMemo;
+          await window.saveManualBuddyToCloud(m);
+        }
+      }
+
+      closeBuddyEditModal();
+      renderDashboardTable();
+      renderBuddyManagementView();
+      renderContractBuddyPanel();
+      showToast(`짝꿍코드 [${newCode}] 정보가 저장되었습니다.`, 'success');
+    };
+
+    window.deleteManualBuddyFromModal = async function() {
+      if (!buddyEditingTarget || buddyEditingTarget.source !== 'manual') return;
+      const targetId = buddyEditingTarget.id;
+      const targetCode = window.manualBuddyPool[targetId]?.buddyCode || '';
+      closeBuddyEditModal();
+      await window.deleteManualBuddyFromCloud(targetId);
+      renderBuddyManagementView();
+      renderContractBuddyPanel();
+      showToast(`수기 등록 코드 [${targetCode}]가 삭제되었습니다.`, 'info');
+    };
+
+    window.renderBuddyManagementView = function() {
+      const tbody = document.getElementById('buddyTableBody');
+      if (!tbody) return;
+
+      // 정책 입력창 동기화
+      const useInput = document.getElementById('buddyPolicyUseAmt');
+      const refInput = document.getElementById('buddyPolicyRefAmt');
+      const signedChk = document.getElementById('buddyPolicySignedOnly');
+      if (useInput && document.activeElement !== useInput) useInput.value = formatMoneyStr(buddyPolicy.useDiscount);
+      if (refInput && document.activeElement !== refInput) refInput.value = formatMoneyStr(buddyPolicy.refDiscount);
+      if (signedChk) signedChk.checked = buddyPolicy.signedOnly;
+
+      const nextBadge = document.getElementById('buddyNextCodeBadge');
+      if (nextBadge) nextBadge.textContent = `다음 자동번호: ${generateNextBuddyCode()}`;
+
+      const { entries } = buildBuddyDirectory();
+
+      // KPI 집계
+      let contractCodeCnt = 0;
+      let manualCodeCnt = 0;
+      let usedSignedCnt = 0;
+      let usedWaitCnt = 0;
+      let totalRefCredited = 0;
+      let totalUseDiscount = 0;
+      let totalRefDiscount = 0;
+      let topRefEntry = null;
+
+      entries.forEach(e => {
+        if (e.buddyCode) {
+          if (e.source === 'manual') manualCodeCnt++;
+          else contractCodeCnt++;
+        }
+        if (e.source === 'contract' && e.usedBuddyCode && !e.isSelfReferral) {
+          if (e.clientSigned) usedSignedCnt++;
+          else usedWaitCnt++;
+          totalUseDiscount += e.useDiscount;
+        }
+        if (e.creditedReferrals.length > 0) {
+          totalRefCredited += e.creditedReferrals.length;
+          totalRefDiscount += e.refDiscount;
+          if (!topRefEntry || e.creditedReferrals.length > topRefEntry.creditedReferrals.length) {
+            topRefEntry = e;
+          }
+        }
+      });
+
+      const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setT('buddyStatTotalCodes', `${contractCodeCnt + manualCodeCnt}개`);
+      setT('buddyStatCodeBreakdown', `계약 ${contractCodeCnt}건 · 수기 ${manualCodeCnt}건`);
+      setT('buddyStatUsedCount', `${usedSignedCnt + usedWaitCnt}건`);
+      setT('buddyStatUsedBreakdown', `체결완료 ${usedSignedCnt}건 · 대기 ${usedWaitCnt}건`);
+      setT('buddyStatRefCount', `${totalRefCredited}회`);
+      setT('buddyStatTopReferrer', topRefEntry ? `최다 추천: ${topRefEntry.name} (${topRefEntry.creditedReferrals.length}회)` : '최다 추천: 아직 없음');
+      setT('buddyStatTotalDiscount', `${(totalUseDiscount + totalRefDiscount).toLocaleString()}원`);
+      setT('buddyStatDiscountBreakdown', `사용 ${totalUseDiscount.toLocaleString()}원 · 추천 ${totalRefDiscount.toLocaleString()}원`);
+
+      const q = (document.getElementById('buddySearchInput')?.value || '').trim().toLowerCase();
+
+      const filtered = entries
+        .filter(e => {
+          if (buddyFilterMode === 'used' && !e.usedBuddyCode) return false;
+          if (buddyFilterMode === 'referred' && e.allReferrals.length === 0) return false;
+          if (buddyFilterMode === 'manual' && e.source !== 'manual') return false;
+          if (buddyFilterMode === 'pending' && !(e.refDiscount > 0 && e.payoutStatus === 'pending')) return false;
+
+          if (!q) return true;
+          return (e.name && e.name.toLowerCase().includes(q)) ||
+                 (e.phone && e.phone.toLowerCase().includes(q)) ||
+                 (e.buddyCode && e.buddyCode.toLowerCase().includes(q)) ||
+                 (e.usedBuddyCode && e.usedBuddyCode.toLowerCase().includes(q)) ||
+                 (e.memo && e.memo.toLowerCase().includes(q));
+        })
+        .sort((a, b) => {
+          // 코드 번호 역순 또는 최근 등록순 정렬
+          if (b.creditedReferrals.length !== a.creditedReferrals.length) {
+            return b.creditedReferrals.length - a.creditedReferrals.length;
+          }
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">조건에 해당하는 짝꿍코드 내역이 없습니다.</td></tr>`;
+        return;
+      }
+
+      const payoutMap = {
+        pending: { label: '정산대기', cls: 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200' },
+        applied: { label: '✓ 잔금반영', cls: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' },
+        refunded: { label: '✓ 환급완료', cls: 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700' }
+      };
+
+      tbody.innerHTML = filtered.map(e => {
+        const expBadge = e.expiryInfo.expired
+          ? `<span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-bold">${escapeHtml(e.expiryInfo.label)}</span>`
+          : `<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">${escapeHtml(e.expiryInfo.label)}</span>`;
+
+        const sourceBadge = e.source === 'manual'
+          ? '<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 text-[9.5px] font-extrabold">기존수기</span>'
+          : (e.clientSigned
+              ? '<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9.5px] font-extrabold">체결완료</span>'
+              : '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[9.5px] font-bold">서명대기</span>');
+
+        let usedHtml = '<span class="text-slate-300">-</span>';
+        if (e.usedBuddyCode) {
+          if (e.isSelfReferral) {
+            usedHtml = `<span class="font-mono font-bold text-rose-600">${escapeHtml(e.usedBuddyCode)}</span><span class="block text-[10px] text-rose-600 font-bold">⚠️ 셀프추천 불가</span>`;
+          } else if (e.matchedReferrer) {
+            usedHtml = `<span class="font-mono font-extrabold text-blue-700">${escapeHtml(e.usedBuddyCode)}</span><span class="block text-[10.5px] text-slate-600">추천인: <b>${escapeHtml(e.matchedReferrer.name)}</b></span>`;
+          } else {
+            usedHtml = `<span class="font-mono font-bold text-amber-700">${escapeHtml(e.usedBuddyCode)}</span><span class="block text-[10px] text-amber-600">미등록 추천코드</span>`;
+          }
+        }
+
+        let refsHtml = '<span class="text-slate-300">추천 실적 없음</span>';
+        if (e.allReferrals.length > 0) {
+          const chips = e.allReferrals.map(r => `
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${r.clientSigned ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+              ${escapeHtml(r.name)} (${r.clientSigned ? '체결' : '대기'})
+            </span>
+          `).join(' ');
+          refsHtml = `
+            <div class="text-[11px] font-extrabold text-emerald-700 mb-1">인정 ${e.creditedReferrals.length}건 / 전체 ${e.allReferrals.length}건</div>
+            <div class="flex flex-wrap gap-1">${chips}</div>
+          `;
+        }
+
+        const pMeta = payoutMap[e.payoutStatus] || payoutMap.pending;
+        const payoutHtml = e.refDiscount > 0
+          ? `<button type="button" onclick="toggleBuddyPayoutStatus('${e.source}', '${escapeHtml(e.id)}')" class="px-2 py-1 rounded-md border text-[10.5px] font-extrabold transition cursor-pointer ${pMeta.cls}">${pMeta.label}</button>`
+          : '<span class="text-[10.5px] text-slate-400">해당없음</span>';
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3">
+              <div class="flex items-center gap-1.5">
+                ${sourceBadge}
+                <span class="font-extrabold text-slate-900">${escapeHtml(e.name)}</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(e.phone)}</div>
+              <div class="mt-1 flex flex-wrap items-center gap-1">
+                <span class="text-[10.5px] text-slate-600">${escapeHtml(e.weddingDate || '예식일 미정')}</span>
+                ${expBadge}
+              </div>
+            </td>
+            <td class="p-3 whitespace-nowrap">
+              ${e.buddyCode
+                ? `<div class="flex items-center gap-1.5">
+                     <span class="px-2 py-1 rounded-md bg-purple-100 text-purple-900 font-mono font-black text-xs">${escapeHtml(e.buddyCode)}</span>
+                     <button type="button" onclick="copyBuddyGuideMessage('${escapeHtml(e.buddyCode)}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-black text-white text-[10px] font-bold transition" title="안내문 복사">안내문</button>
+                   </div>`
+                : `<span class="text-slate-400 text-[11px]">미발급</span>`}
+            </td>
+            <td class="p-3">${usedHtml}</td>
+            <td class="p-3 max-w-[220px]">${refsHtml}</td>
+            <td class="p-3 text-right whitespace-nowrap">
+              <div class="font-black text-rose-700 text-xs">${e.totalBuddyBenefit.toLocaleString()}원</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">
+                사용 ${e.useDiscount.toLocaleString()} / 추천 ${e.refDiscount.toLocaleString()}
+              </div>
+            </td>
+            <td class="p-3">
+              <div class="flex flex-col items-start gap-1">
+                ${payoutHtml}
+                ${e.memo ? `<span class="text-[10.5px] text-slate-600 max-w-[150px] truncate" title="${escapeHtml(e.memo)}">${escapeHtml(e.memo)}</span>` : ''}
+              </div>
+            </td>
+            <td class="p-3 text-center whitespace-nowrap">
+              <div class="flex items-center justify-center gap-1">
+                <button type="button" onclick="openBuddyEditModal('${e.source}', '${escapeHtml(e.id)}')" class="px-2 py-1 rounded bg-purple-50 hover:bg-purple-100 text-purple-800 font-bold text-[11px]">수정</button>
+                ${e.source === 'contract'
+                  ? `<button type="button" onclick="openContractDetail('${escapeHtml(e.id)}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px]">계약서</button>`
+                  : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.exportBuddyCsv = function() {
+      const { entries } = buildBuddyDirectory();
+      const headers = [
+        '구분', '문서ID', '고객명', '연락처', '예식일자', '추천유효기한',
+        '부여된 짝꿍코드', '사용한 짝꿍코드', '매칭 추천인',
+        '추천 인정건수', '추천 전체건수', '추천받은 고객목록',
+        '코드사용 할인(원)', '추천 추가할인(원)', '총 짝꿍할인(원)',
+        '추천 정산상태', '메모'
+      ];
+      const payoutLabel = { pending: '정산대기', applied: '잔금반영', refunded: '환급완료' };
+      const escCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+
+      const rows = entries.map(e => [
+        e.source === 'manual' ? '기존수기' : (e.clientSigned ? '계약(체결완료)' : '계약(서명대기)'),
+        e.id,
+        e.name,
+        e.phone,
+        e.weddingDate || '',
+        e.expiryInfo.label,
+        e.buddyCode || '',
+        e.usedBuddyCode || '',
+        e.matchedReferrer ? e.matchedReferrer.name : '',
+        e.creditedReferrals.length,
+        e.allReferrals.length,
+        e.allReferrals.map(r => `${r.name}(${r.clientSigned ? '체결' : '대기'})`).join(', '),
+        e.useDiscount,
+        e.refDiscount,
+        e.totalBuddyBenefit,
+        e.refDiscount > 0 ? (payoutLabel[e.payoutStatus] || '정산대기') : '해당없음',
+        e.memo || ''
+      ].map(escCsv).join(','));
+
+      const csvContent = '\uFEFF' + [headers.map(escCsv).join(','), ...rows].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `메리담_짝꿍코드_관리내역_${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('짝꿍코드 통합 내역이 엑셀(CSV) 파일로 다운로드되었습니다.', 'success');
     };
 
     window.setTicketMinAmount = function(val) {
