@@ -127,7 +127,7 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      #interactiveAppView, #adminPassModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #deleteConfirmModal, #clientShieldOverlay, header {
+      #interactiveAppView, #adminPassModal, #linkModal, #sigModal, #toastContainer, #clientSubmitConfirmModal, #clientSubmitSuccessModal, #deleteConfirmModal, #depositEditModal, #clientShieldOverlay, header {
         display: none !important;
       }
       #printOfficialDoc {
@@ -248,6 +248,28 @@
         <button id="btnClientVerify" onclick="verifyClientAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/25 transition">
           계약서 열람 및 서명하기
         </button>
+      </div>
+
+      <!-- 24시간 유효기간 만료 시 노출되는 차단 및 담당자 문의 박스 -->
+      <div id="clientExpiredLockBox" class="hidden p-4 bg-rose-50 border-2 border-rose-300 rounded-2xl text-center space-y-3">
+        <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-base">
+          <i class="fa-solid fa-hourglass-end"></i>
+        </div>
+        <div class="space-y-1">
+          <h4 class="text-xs font-black text-rose-900">계약 체결 유효시간(24시간)이 종료되었습니다</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">
+            예식 스케줄 및 전담 인력 배정 확인을 위해 링크가 만료되었습니다.<br>
+            담당자에게 연락해 주시면 즉시 연장해 드리겠습니다.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5 pt-1">
+          <a href="tel:010-9300-5770" class="py-2.5 px-2 bg-slate-900 hover:bg-black text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1 shadow-xs transition">
+            <i class="fa-solid fa-phone text-[10px]"></i> 전화 문의
+          </a>
+          <a href="sms:010-9300-5770?body=%EB%A9%94%EB%A6%AC%EB%8B%B4%20%EC%A0%84%EC%9E%90%EA%B3%84%EC%95%BD%EC%84%9C%2024%EC%8B%9C%EA%B0%84%20%EC%9C%A0%ED%9A%A8%EA%B8%B0%EA%B0%84%20%EC%97%B0%EC%9E%A5%20%EC%9A%94%EC%B2%AD%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4." class="py-2.5 px-2 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-xl flex items-center justify-center gap-1 shadow-xs transition">
+            <i class="fa-solid fa-comment-sms text-[10px]"></i> 연장 문자요청
+          </a>
+        </div>
       </div>
 
       <!-- 삭제된 문서(링크) 접근 시 노출되는 완전 차단 안내 박스 -->
@@ -384,38 +406,68 @@
       </div>
 
       <!-- 관리자 전용 실시간 입금 정산 요약 (계약금 완납 / 잔금 완납 / 총 수금 / 잔여 미수금) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-        <div class="bg-blue-50/70 p-3.5 sm:p-4 rounded-xl border border-blue-200 shadow-xs">
-          <div class="flex items-center justify-between gap-1">
-            <span class="text-[11px] sm:text-xs font-bold text-blue-700">계약금 완납</span>
-            <i class="fa-solid fa-circle-check text-blue-500 text-xs"></i>
+      <div class="space-y-2.5">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <div id="cardPayDeposit" onclick="togglePaymentListPanel('depositPaid')" class="bg-blue-50/70 hover:bg-blue-100/70 p-3.5 sm:p-4 rounded-xl border border-blue-200 shadow-xs cursor-pointer transition select-none">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[11px] sm:text-xs font-bold text-blue-700">계약금 완납</span>
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600">
+                <span>리스트</span>
+                <i id="chevPayDeposit" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+              </span>
+            </div>
+            <span id="statDepositPaidAmount" class="text-lg sm:text-xl font-black text-blue-900 mt-1 block truncate">0원</span>
+            <span id="statDepositPaidCount" class="text-[10.5px] font-semibold text-blue-700/80 mt-0.5 block">완납 0건 · 미납 0건</span>
           </div>
-          <span id="statDepositPaidAmount" class="text-lg sm:text-xl font-black text-blue-900 mt-1 block truncate">0원</span>
-          <span id="statDepositPaidCount" class="text-[10.5px] font-semibold text-blue-700/80 mt-0.5 block">완납 0건 · 미납 0건</span>
+          <div id="cardPayBalance" onclick="togglePaymentListPanel('balancePaid')" class="bg-emerald-50/70 hover:bg-emerald-100/70 p-3.5 sm:p-4 rounded-xl border border-emerald-200 shadow-xs cursor-pointer transition select-none">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[11px] sm:text-xs font-bold text-emerald-700">잔금 완납</span>
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                <span>리스트</span>
+                <i id="chevPayBalance" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+              </span>
+            </div>
+            <span id="statBalancePaidAmount" class="text-lg sm:text-xl font-black text-emerald-900 mt-1 block truncate">0원</span>
+            <span id="statBalancePaidCount" class="text-[10.5px] font-semibold text-emerald-700/80 mt-0.5 block">완납 0건 · 미납 0건</span>
+          </div>
+          <div id="cardPayTotal" onclick="togglePaymentListPanel('totalPaid')" class="bg-indigo-50/70 hover:bg-indigo-100/70 p-3.5 sm:p-4 rounded-xl border border-indigo-200 shadow-xs cursor-pointer transition select-none">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[11px] sm:text-xs font-bold text-indigo-700">총 수금 누계</span>
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600">
+                <span>리스트</span>
+                <i id="chevPayTotal" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+              </span>
+            </div>
+            <span id="statTotalPaidAmount" class="text-lg sm:text-xl font-black text-indigo-900 mt-1 block truncate">0원</span>
+            <span class="text-[10.5px] font-semibold text-indigo-700/80 mt-0.5 block">계약금 + 잔금 완납 합계</span>
+          </div>
+          <div id="cardPayUnpaid" onclick="togglePaymentListPanel('unpaid')" class="bg-rose-50/70 hover:bg-rose-100/70 p-3.5 sm:p-4 rounded-xl border border-rose-200 shadow-xs cursor-pointer transition select-none">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[11px] sm:text-xs font-bold text-rose-700">잔여 미수금 (잔액)</span>
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600">
+                <span>리스트</span>
+                <i id="chevPayUnpaid" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+              </span>
+            </div>
+            <span id="statTotalUnpaidAmount" class="text-lg sm:text-xl font-black text-rose-800 mt-1 block truncate">0원</span>
+            <span id="statUnpaidBreakdown" class="text-[10.5px] font-semibold text-rose-700/80 mt-0.5 block truncate">계약금 0원 · 잔금 0원</span>
+          </div>
         </div>
-        <div class="bg-emerald-50/70 p-3.5 sm:p-4 rounded-xl border border-emerald-200 shadow-xs">
-          <div class="flex items-center justify-between gap-1">
-            <span class="text-[11px] sm:text-xs font-bold text-emerald-700">잔금 완납</span>
-            <i class="fa-solid fa-coins text-emerald-500 text-xs"></i>
+
+        <!-- 클릭 시 펼쳐지는 입금 상태별 상세 계약 리스트 패널 -->
+        <div id="paymentDetailDrawer" class="hidden bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden">
+          <div id="paymentDrawerHeader" class="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-2 bg-slate-50">
+            <div class="flex items-center gap-2 min-w-0">
+              <span id="paymentDrawerTitle" class="text-xs sm:text-sm font-black text-slate-900 truncate">입금 내역 리스트</span>
+              <span id="paymentDrawerBadge" class="px-2 py-0.5 rounded-full text-[10.5px] font-extrabold bg-blue-100 text-blue-800 shrink-0">0건 · 0원</span>
+            </div>
+            <button type="button" onclick="closePaymentListPanel()" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-[11px] font-bold text-slate-600 shrink-0 transition">
+              접기 <i class="fa-solid fa-chevron-up ml-0.5 text-[10px]"></i>
+            </button>
           </div>
-          <span id="statBalancePaidAmount" class="text-lg sm:text-xl font-black text-emerald-900 mt-1 block truncate">0원</span>
-          <span id="statBalancePaidCount" class="text-[10.5px] font-semibold text-emerald-700/80 mt-0.5 block">완납 0건 · 미납 0건</span>
-        </div>
-        <div class="bg-indigo-50/70 p-3.5 sm:p-4 rounded-xl border border-indigo-200 shadow-xs">
-          <div class="flex items-center justify-between gap-1">
-            <span class="text-[11px] sm:text-xs font-bold text-indigo-700">총 수금 누계</span>
-            <i class="fa-solid fa-wallet text-indigo-500 text-xs"></i>
+          <div id="paymentDrawerBody" class="divide-y divide-slate-100 max-h-[340px] overflow-y-auto">
+            <!-- Dynamic Payment List Rows -->
           </div>
-          <span id="statTotalPaidAmount" class="text-lg sm:text-xl font-black text-indigo-900 mt-1 block truncate">0원</span>
-          <span class="text-[10.5px] font-semibold text-indigo-700/80 mt-0.5 block">계약금 + 잔금 완납 합계</span>
-        </div>
-        <div class="bg-rose-50/70 p-3.5 sm:p-4 rounded-xl border border-rose-200 shadow-xs">
-          <div class="flex items-center justify-between gap-1">
-            <span class="text-[11px] sm:text-xs font-bold text-rose-700">잔여 미수금 (잔액)</span>
-            <i class="fa-solid fa-hourglass-half text-rose-500 text-xs"></i>
-          </div>
-          <span id="statTotalUnpaidAmount" class="text-lg sm:text-xl font-black text-rose-800 mt-1 block truncate">0원</span>
-          <span id="statUnpaidBreakdown" class="text-[10.5px] font-semibold text-rose-700/80 mt-0.5 block truncate">계약금 0원 · 잔금 0원</span>
         </div>
       </div>
 
@@ -998,7 +1050,13 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-            <span class="font-bold text-slate-700 block mb-1">계약금 (예약금 · 10만원 고정)</span>
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="font-bold text-slate-700">계약금 (예약금 · 기본 10만원)</span>
+              <button type="button" onclick="openDepositEditModal()" class="admin-only px-2 py-0.5 rounded-md bg-slate-800 hover:bg-black text-white text-[10.5px] font-bold flex items-center gap-1 shadow-2xs transition cursor-pointer">
+                <i class="fa-solid fa-lock text-[9px]"></i>
+                <span>계약금 수정하기</span>
+              </button>
+            </div>
             <div class="flex items-center gap-2">
               <input type="text" id="depositAmount" value="100,000" readonly tabindex="-1" class="admin-editable p-2 border border-slate-200 rounded-md font-bold w-1/2 bg-slate-100 text-slate-900 pointer-events-none select-none">
               <span class="text-[11px] text-slate-500">기한: 24시간 이내</span>
@@ -1607,6 +1665,51 @@
     </div>
   </div>
 
+  <!-- 관리자 전용 계약금 수정 모달 (비밀번호 2차 확인) -->
+  <div id="depositEditModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+      <div class="text-center">
+        <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto text-xl mb-3">
+          <i class="fa-solid fa-coins"></i>
+        </div>
+        <h3 class="text-base font-extrabold text-slate-900">계약금 금액 수정 (관리자)</h3>
+        <p id="depositEditTargetInfo" class="text-xs text-slate-500 mt-1">
+          기본 계약금은 100,000원입니다. 예외 건의 계약금을 변경하려면 비밀번호와 금액을 입력해 주세요.
+        </p>
+      </div>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">변경할 계약금 (원)</label>
+          <input type="text" inputmode="numeric" id="depositEditAmountInput" oninput="formatMoneyInput(this); updateDepositModalPreview()" placeholder="예: 50,000 또는 150,000" class="w-full p-3 border-2 border-brand-500 rounded-xl text-right text-sm font-black text-slate-900 focus:outline-hidden">
+          <div class="grid grid-cols-4 gap-1.5 mt-2">
+            <button type="button" onclick="setDepositModalPreset(50000)" class="py-1.5 rounded-lg bg-slate-100 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 text-[11px] font-bold transition">5만원</button>
+            <button type="button" onclick="setDepositModalPreset(100000)" class="py-1.5 rounded-lg bg-slate-100 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 text-[11px] font-bold transition">10만원</button>
+            <button type="button" onclick="setDepositModalPreset(150000)" class="py-1.5 rounded-lg bg-slate-100 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 text-[11px] font-bold transition">15만원</button>
+            <button type="button" onclick="setDepositModalPreset(200000)" class="py-1.5 rounded-lg bg-slate-100 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 text-[11px] font-bold transition">20만원</button>
+          </div>
+          <div id="depositEditBalancePreview" class="mt-2 p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] font-bold text-blue-900 text-center">
+            변경 후 예상 잔금: 200,000원
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">관리자 마스터 비밀번호</label>
+          <input type="password" id="depositEditPassInput" placeholder="비밀번호 입력" class="w-full p-3 border-2 border-slate-300 focus:border-brand-500 rounded-xl text-center text-xs font-bold focus:outline-hidden">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" onclick="closeDepositEditModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+          취소
+        </button>
+        <button type="button" onclick="confirmExecuteDepositEdit()" class="w-1/2 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20">
+          수정 저장하기
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 체결 최종 확인 모달 -->
   <div id="clientSubmitConfirmModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 sm:p-6 text-center space-y-4">
@@ -1977,6 +2080,7 @@
     let calendarYear = new Date().getFullYear();
     let calendarMonth = new Date().getMonth();
     let selectedCalendarDate = null;
+    let activePaymentPanel = null;
 
     // 삭제되거나 해지된 계약서 링크 접속 시 즉시 완전 차단 화면 전환
     window.showDeletedContractLock = function() {
@@ -2222,25 +2326,51 @@
       handleFieldChange(true);
     };
 
-    // 고객 모드에서 관리자 전용(요금·계약금·예식일시 등) 항목 수정 원천 차단
+    // 고객 모드에서 관리자 전용 항목(예식 정보, 요금, 계약금 등) 수정 원천 차단
     function applyClientFieldLocks() {
       const isClient = (window.appMode === 'client');
       document.querySelectorAll('.admin-editable').forEach(el => {
         if (el.id === 'depositAmount') {
           el.readOnly = true;
-          el.tabIndex = -1;
           return;
         }
         if (isClient) {
           el.readOnly = true;
-          el.tabIndex = -1;
-          el.classList.add('pointer-events-none', 'bg-slate-100/80', 'text-slate-600');
+          el.setAttribute('tabindex', '-1');
+          el.classList.add('bg-slate-100', 'text-slate-600', 'pointer-events-none', 'select-none');
         } else {
           el.readOnly = false;
-          el.tabIndex = 0;
-          el.classList.remove('pointer-events-none', 'bg-slate-100/80', 'text-slate-600');
+          el.removeAttribute('tabindex');
+          el.classList.remove('bg-slate-100', 'text-slate-600', 'pointer-events-none', 'select-none');
         }
       });
+    }
+
+    // 브라우저 로컬스토리지에 캐시된 기존 계약서 안전 복구 (삭제된 문서는 제외)
+    function loadContractsFromLocalStorage() {
+      try {
+        window.contractPool = window.contractPool || {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith('MD_CONTRACT_')) continue;
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
+          try {
+            const parsed = JSON.parse(raw);
+            if (!parsed || !parsed.id) continue;
+            if (parsed._deleted === true || parsed._deleted === "true") {
+              localStorage.removeItem(key);
+              continue;
+            }
+            delete parsed._adminKey;
+            window.contractPool[parsed.id] = Object.assign({}, window.contractPool[parsed.id] || {}, parsed);
+          } catch (parseErr) {
+            console.warn('LocalStorage contract parse skipped:', key, parseErr);
+          }
+        }
+      } catch (e) {
+        console.warn('LocalStorage load notice:', e);
+      }
     }
 
     let appInitialized = false;
@@ -2328,20 +2458,25 @@
           }
         });
       }
-    }
 
-    function loadContractsFromLocalStorage() {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('MD_CONTRACT_')) {
-          try {
-            const raw = localStorage.getItem(k);
-            const data = JSON.parse(raw);
-            if (data && data.id && data._deleted !== true && data._deleted !== "true") {
-              window.contractPool[data.id] = Object.assign(window.contractPool[data.id] || {}, data);
-            }
-          } catch (e) {}
-        }
+      const depositEditPassInput = document.getElementById('depositEditPassInput');
+      if (depositEditPassInput) {
+        depositEditPassInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            confirmExecuteDepositEdit();
+          }
+        });
+      }
+
+      const depositEditAmountInput = document.getElementById('depositEditAmountInput');
+      if (depositEditAmountInput) {
+        depositEditAmountInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('depositEditPassInput')?.focus();
+          }
+        });
       }
     }
 
@@ -2517,6 +2652,7 @@
       setElText('statTotalUnpaidAmount', totalUnpaidSum.toLocaleString() + '원');
       setElText('statUnpaidBreakdown', `계약금 ${depositUnpaidSum.toLocaleString()}원 · 잔금 ${balanceUnpaidSum.toLocaleString()}원`);
 
+      renderPaymentDetailPanel();
       renderScheduleCalendar();
 
       if (filtered.length === 0) {
@@ -2529,6 +2665,12 @@
         const isExpired = !isSigned && isContractExpired(c);
         const isDepositPaid = (c.depositPaid === true || c.depositPaid === "true");
         const isBalancePaid = (c.balancePaid === true || c.balancePaid === "true");
+        const feeTotal = Number(c.feeTotal) || 0;
+        const rawDeposit = (c.depositAmount !== undefined && c.depositAmount !== '' && !isNaN(Number(c.depositAmount)))
+          ? Number(c.depositAmount)
+          : FIXED_DEPOSIT_AMOUNT;
+        const effectiveDeposit = Math.min(feeTotal, Math.max(0, rawDeposit));
+        const effectiveBalance = Math.max(0, feeTotal - effectiveDeposit);
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition";
         tr.innerHTML = `
@@ -2541,22 +2683,25 @@
             <span class="font-semibold text-slate-800">${c.weddingDate || '일자 미정'} ${c.weddingTime || ''}</span>
             <span class="text-[11px] text-slate-500 block truncate max-w-[140px]">${c.weddingHall || '예식장 미입력'}</span>
           </td>
-          <td class="p-3 text-right font-black text-brand-700 whitespace-nowrap">금 ${(Number(c.feeTotal) || 0).toLocaleString()}원</td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <span class="font-black text-brand-700 block">금 ${feeTotal.toLocaleString()}원</span>
+            <span class="text-[10px] text-slate-400 font-medium block">계약 ${effectiveDeposit.toLocaleString()} / 잔 ${effectiveBalance.toLocaleString()}</span>
+          </td>
           <td class="p-3 text-center whitespace-nowrap">
-            <div class="flex items-center justify-center gap-1.5">
-              <button type="button" onclick="togglePaymentStatus('${c.id}', 'depositPaid')" title="클릭하여 계약금 완납 상태 변경" class="px-2 py-1 rounded-full text-[10.5px] font-extrabold border transition cursor-pointer ${
+            <div class="flex items-center justify-center gap-1">
+              <button type="button" onclick="togglePaymentStatus('${c.id}', 'depositPaid')" class="px-2 py-1 rounded-md text-[10.5px] font-extrabold border transition cursor-pointer ${
                 isDepositPaid
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs hover:bg-blue-700'
-                  : 'bg-white text-slate-400 border-slate-300 hover:border-blue-400 hover:text-blue-600'
+                  ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+                  : 'bg-white text-slate-500 border-slate-300 hover:border-blue-400 hover:text-blue-600'
               }">
-                ${isDepositPaid ? '<i class="fa-solid fa-check text-[9px] mr-0.5"></i>계약금 완납' : '계약금 미납'}
+                ${isDepositPaid ? '✓ 계약금 완납' : '계약금 미납'}
               </button>
-              <button type="button" onclick="togglePaymentStatus('${c.id}', 'balancePaid')" title="클릭하여 잔금 완납 상태 변경" class="px-2 py-1 rounded-full text-[10.5px] font-extrabold border transition cursor-pointer ${
+              <button type="button" onclick="togglePaymentStatus('${c.id}', 'balancePaid')" class="px-2 py-1 rounded-md text-[10.5px] font-extrabold border transition cursor-pointer ${
                 isBalancePaid
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs hover:bg-emerald-700'
-                  : 'bg-white text-slate-400 border-slate-300 hover:border-emerald-400 hover:text-emerald-600'
+                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  : 'bg-white text-slate-500 border-slate-300 hover:border-emerald-400 hover:text-emerald-600'
               }">
-                ${isBalancePaid ? '<i class="fa-solid fa-check text-[9px] mr-0.5"></i>잔금 완납' : '잔금 미납'}
+                ${isBalancePaid ? '✓ 잔금 완납' : '잔금 미납'}
               </button>
             </div>
           </td>
@@ -2601,6 +2746,179 @@
         `${c.clientName || c.id} 건의 [${label} ${nextState ? '완납' : '미납'}] 처리가 클라우드에 저장되었습니다.`,
         nextState ? 'success' : 'info'
       );
+    };
+
+    // 상단 입금 정산 카드 클릭 시 해당 리스트 펼치기/접기
+    window.togglePaymentListPanel = function(panelType) {
+      activePaymentPanel = (activePaymentPanel === panelType) ? null : panelType;
+      renderPaymentDetailPanel();
+    };
+
+    window.closePaymentListPanel = function() {
+      activePaymentPanel = null;
+      renderPaymentDetailPanel();
+    };
+
+    window.renderPaymentDetailPanel = function() {
+      const drawer = document.getElementById('paymentDetailDrawer');
+      const header = document.getElementById('paymentDrawerHeader');
+      const titleEl = document.getElementById('paymentDrawerTitle');
+      const badgeEl = document.getElementById('paymentDrawerBadge');
+      const bodyEl = document.getElementById('paymentDrawerBody');
+      if (!drawer || !bodyEl) return;
+
+      const cardConfigs = {
+        depositPaid: { cardId: 'cardPayDeposit', chevId: 'chevPayDeposit', ring: ['ring-2', 'ring-blue-500', 'border-blue-500'] },
+        balancePaid: { cardId: 'cardPayBalance', chevId: 'chevPayBalance', ring: ['ring-2', 'ring-emerald-500', 'border-emerald-500'] },
+        totalPaid: { cardId: 'cardPayTotal', chevId: 'chevPayTotal', ring: ['ring-2', 'ring-indigo-500', 'border-indigo-500'] },
+        unpaid: { cardId: 'cardPayUnpaid', chevId: 'chevPayUnpaid', ring: ['ring-2', 'ring-rose-500', 'border-rose-500'] }
+      };
+
+      Object.entries(cardConfigs).forEach(([key, cfg]) => {
+        const card = document.getElementById(cfg.cardId);
+        const chev = document.getElementById(cfg.chevId);
+        if (card) {
+          if (activePaymentPanel === key) card.classList.add(...cfg.ring);
+          else card.classList.remove(...cfg.ring);
+        }
+        if (chev) {
+          if (activePaymentPanel === key) chev.classList.add('rotate-180');
+          else chev.classList.remove('rotate-180');
+        }
+      });
+
+      if (!activePaymentPanel) {
+        drawer.classList.add('hidden');
+        return;
+      }
+
+      drawer.classList.remove('hidden');
+
+      const allList = Object.values(window.contractPool)
+        .filter(c => c && !c._deleted)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      const metaMap = {
+        depositPaid: {
+          title: '계약금 완납 리스트',
+          borderClass: 'border-blue-300',
+          headerBg: 'bg-blue-50/70',
+          badgeClass: 'bg-blue-600 text-white',
+          emptyMsg: '계약금 완납 처리된 계약서가 아직 없습니다.'
+        },
+        balancePaid: {
+          title: '잔금 완납 리스트',
+          borderClass: 'border-emerald-300',
+          headerBg: 'bg-emerald-50/70',
+          badgeClass: 'bg-emerald-600 text-white',
+          emptyMsg: '잔금 완납 처리된 계약서가 아직 없습니다.'
+        },
+        totalPaid: {
+          title: '수금 내역 리스트 (계약금 또는 잔금 완납)',
+          borderClass: 'border-indigo-300',
+          headerBg: 'bg-indigo-50/70',
+          badgeClass: 'bg-indigo-600 text-white',
+          emptyMsg: '입금 완료된 계약 내역이 아직 없습니다.'
+        },
+        unpaid: {
+          title: '잔여 미수금 리스트 (미납 잔액 보유)',
+          borderClass: 'border-rose-300',
+          headerBg: 'bg-rose-50/70',
+          badgeClass: 'bg-rose-600 text-white',
+          emptyMsg: '미수금이 남아 있는 계약서가 없습니다. 모두 완납되었습니다!'
+        }
+      };
+
+      const meta = metaMap[activePaymentPanel];
+      drawer.className = `bg-white rounded-2xl border-2 ${meta.borderClass} shadow-sm overflow-hidden`;
+      header.className = `px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-2 ${meta.headerBg}`;
+      titleEl.textContent = meta.title;
+
+      const matchedItems = [];
+      let sumAmount = 0;
+
+      allList.forEach(c => {
+        const feeTotal = Number(c.feeTotal) || 0;
+        const rawDeposit = (c.depositAmount !== undefined && c.depositAmount !== '' && !isNaN(Number(c.depositAmount)))
+          ? Number(c.depositAmount)
+          : FIXED_DEPOSIT_AMOUNT;
+        const effectiveDeposit = Math.min(feeTotal, Math.max(0, rawDeposit));
+        const effectiveBalance = Math.max(0, feeTotal - effectiveDeposit);
+
+        const isDepositPaid = (c.depositPaid === true || c.depositPaid === "true");
+        const isBalancePaid = (c.balancePaid === true || c.balancePaid === "true");
+
+        let include = false;
+        let displayAmt = 0;
+        let amtLabel = '';
+        let amtColorClass = 'text-slate-900';
+
+        if (activePaymentPanel === 'depositPaid' && isDepositPaid) {
+          include = true;
+          displayAmt = effectiveDeposit;
+          amtLabel = '계약금 완납';
+          amtColorClass = 'text-blue-700';
+        } else if (activePaymentPanel === 'balancePaid' && isBalancePaid) {
+          include = true;
+          displayAmt = effectiveBalance;
+          amtLabel = '잔금 완납';
+          amtColorClass = 'text-emerald-700';
+        } else if (activePaymentPanel === 'totalPaid' && (isDepositPaid || isBalancePaid)) {
+          include = true;
+          displayAmt = (isDepositPaid ? effectiveDeposit : 0) + (isBalancePaid ? effectiveBalance : 0);
+          amtLabel = (isDepositPaid && isBalancePaid) ? '전액 완납' : (isDepositPaid ? '계약금 수금' : '잔금 수금');
+          amtColorClass = 'text-indigo-700';
+        } else if (activePaymentPanel === 'unpaid') {
+          const unpaidAmt = (!isDepositPaid ? effectiveDeposit : 0) + (!isBalancePaid ? effectiveBalance : 0);
+          if (unpaidAmt > 0) {
+            include = true;
+            displayAmt = unpaidAmt;
+            amtLabel = (!isDepositPaid && !isBalancePaid) ? '계약금+잔금 미납' : (!isDepositPaid ? '계약금 미납' : '잔금 미납');
+            amtColorClass = 'text-rose-700';
+          }
+        }
+
+        if (include) {
+          sumAmount += displayAmt;
+          matchedItems.push({ c, displayAmt, amtLabel, amtColorClass, isDepositPaid, isBalancePaid });
+        }
+      });
+
+      badgeEl.className = `px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold shrink-0 ${meta.badgeClass}`;
+      badgeEl.textContent = `${matchedItems.length}건 · ${sumAmount.toLocaleString()}원`;
+
+      if (matchedItems.length === 0) {
+        bodyEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-medium">${meta.emptyMsg}</div>`;
+        return;
+      }
+
+      bodyEl.innerHTML = matchedItems.map(({ c, displayAmt, amtLabel, amtColorClass, isDepositPaid, isBalancePaid }) => `
+        <div class="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 transition">
+          <div class="min-w-0 space-y-0.5">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="font-mono text-[10.5px] font-bold text-slate-500">${c.id}</span>
+              <span class="font-extrabold text-xs sm:text-sm text-slate-900">${c.clientName || '성명 미입력'}</span>
+              <span class="text-[11px] text-slate-500">${c.clientPhone || '-'}</span>
+              ${isDepositPaid ? '<span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">계약금 완납</span>' : '<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-bold">계약금 미납</span>'}
+              ${isBalancePaid ? '<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold">잔금 완납</span>' : '<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-bold">잔금 미납</span>'}
+            </div>
+            <div class="text-[11px] text-slate-600 truncate">
+              <i class="fa-regular fa-calendar text-slate-400 mr-1"></i>${c.weddingDate || '일자 미정'} ${c.weddingTime || ''}
+              <span class="mx-1 text-slate-300">|</span>
+              <i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>${c.weddingHall || '예식장 미입력'}
+            </div>
+          </div>
+          <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+            <div class="text-left sm:text-right">
+              <span class="block text-[10px] font-bold text-slate-500">${amtLabel}</span>
+              <span class="font-black text-sm ${amtColorClass}">${displayAmt.toLocaleString()}원</span>
+            </div>
+            <button type="button" onclick="openContractDetail('${c.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-bold transition">
+              계약서 열기
+            </button>
+          </div>
+        </div>
+      `).join('');
     };
 
     window.changeCalendarMonth = function(offset) {
@@ -2825,6 +3143,75 @@
       showToast(`계약서 [${targetId}]가 모든 기기에서 완전히 삭제되었습니다.`, 'success');
     };
 
+    // 관리자 전용 계약금 수정 모달 제어 (비밀번호 검증 후 금액 변경 및 잔금·정산 즉시 반영)
+    window.openDepositEditModal = function() {
+      if (window.appMode !== 'admin' || !window.currentContract) return;
+      const c = window.currentContract;
+      const curDeposit = (c.depositAmount !== undefined && c.depositAmount !== '' && !isNaN(Number(c.depositAmount)))
+        ? Number(c.depositAmount)
+        : FIXED_DEPOSIT_AMOUNT;
+
+      const infoEl = document.getElementById('depositEditTargetInfo');
+      if (infoEl) {
+        infoEl.textContent = `${c.clientName || c.id} 건 (총 계약금액: ${(Number(c.feeTotal) || 0).toLocaleString()}원)의 계약금을 수정합니다.`;
+      }
+
+      const amtInput = document.getElementById('depositEditAmountInput');
+      if (amtInput) amtInput.value = formatMoneyStr(curDeposit);
+
+      const passInput = document.getElementById('depositEditPassInput');
+      if (passInput) passInput.value = '';
+
+      updateDepositModalPreview();
+      document.getElementById('depositEditModal')?.classList.remove('hidden');
+      setTimeout(() => { amtInput?.focus(); amtInput?.select(); }, 80);
+    };
+
+    window.closeDepositEditModal = function() {
+      document.getElementById('depositEditModal')?.classList.add('hidden');
+    };
+
+    window.setDepositModalPreset = function(amt) {
+      const amtInput = document.getElementById('depositEditAmountInput');
+      if (amtInput) {
+        amtInput.value = formatMoneyStr(amt);
+        updateDepositModalPreview();
+      }
+      document.getElementById('depositEditPassInput')?.focus();
+    };
+
+    window.updateDepositModalPreview = function() {
+      const previewEl = document.getElementById('depositEditBalancePreview');
+      if (!previewEl || !window.currentContract) return;
+      const total = Number(window.currentContract.feeTotal) || 0;
+      const newDeposit = parseMoney(document.getElementById('depositEditAmountInput')?.value);
+      const newBalance = Math.max(0, total - newDeposit);
+      previewEl.textContent = `계약금 ${newDeposit.toLocaleString()}원 → 변경 후 예상 잔금: ${newBalance.toLocaleString()}원`;
+    };
+
+    window.confirmExecuteDepositEdit = async function() {
+      const enteredPass = document.getElementById('depositEditPassInput')?.value || '';
+      if (enteredPass !== MASTER_ADMIN_PASS) {
+        showToast('관리자 비밀번호가 일치하지 않습니다.', 'warning');
+        document.getElementById('depositEditPassInput')?.focus();
+        return;
+      }
+
+      if (!window.currentContract) return;
+      const newDeposit = parseMoney(document.getElementById('depositEditAmountInput')?.value);
+
+      const depositEl = document.getElementById('depositAmount');
+      if (depositEl) depositEl.value = formatMoneyStr(newDeposit);
+
+      window.currentContract.depositAmount = newDeposit;
+      calculateTotalFees();
+      closeDepositEditModal();
+
+      await window.saveContractToCloud(window.currentContract, true);
+      renderDashboardTable();
+      showToast(`계약금이 ${newDeposit.toLocaleString()}원으로 수정 저장되었습니다. (잔금 자동 재계산 완료)`, 'success');
+    };
+
     window.saveAndReturnToList = async function() {
       handleFieldChange(true);
       if (window.currentContract) {
@@ -2899,7 +3286,10 @@
       setVal('feeTravel', formatMoneyStr(c.feeTravel));
       setVal('feeExtra', formatMoneyStr(c.feeExtra));
       setVal('feeDiscount', formatMoneyStr(c.feeDiscount));
-      setVal('depositAmount', formatMoneyStr(FIXED_DEPOSIT_AMOUNT));
+      const savedDeposit = (c.depositAmount !== undefined && c.depositAmount !== '' && !isNaN(Number(c.depositAmount)))
+        ? Number(c.depositAmount)
+        : FIXED_DEPOSIT_AMOUNT;
+      setVal('depositAmount', formatMoneyStr(savedDeposit));
 
       applyClientFieldLocks();
       calculateTotalFees();
@@ -2999,10 +3389,14 @@
       const discount = getNum('feeDiscount');
 
       const total = Math.max(0, basic + travel + extra - discount);
-      const deposit = FIXED_DEPOSIT_AMOUNT;
+      const depositEl = document.getElementById('depositAmount');
+      const deposit = (depositEl && depositEl.value.trim() !== '')
+        ? parseMoney(depositEl.value)
+        : ((window.currentContract && window.currentContract.depositAmount !== undefined && window.currentContract.depositAmount !== '')
+            ? parseMoney(window.currentContract.depositAmount)
+            : FIXED_DEPOSIT_AMOUNT);
       const balance = Math.max(0, total - deposit);
 
-      const depositEl = document.getElementById('depositAmount');
       if (depositEl) depositEl.value = formatMoneyStr(deposit);
 
       if (window.currentContract) {
