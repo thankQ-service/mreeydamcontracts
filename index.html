@@ -1148,18 +1148,6 @@
           </div>
         </div>
 
-        <!-- 규칙 6: 식권 확인 지정 담당자 -->
-        <div class="client-red-box p-3.5 space-y-2">
-          <div class="flex items-center justify-between gap-1">
-            <span class="font-extrabold text-xs text-red-950">6. 식권 지급 확인 지정 담당자</span>
-            <span class="client-guide-badge">선택 입력</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <input type="text" id="ticketApproverName" oninput="handleFieldChange()" onchange="handleFieldChange()" placeholder="식권 확인 담당자 성함" class="p-2.5 border border-slate-300 rounded-lg bg-white">
-            <input type="tel" id="ticketApproverPhone" oninput="formatPhoneNumber(this); handleFieldChange()" onchange="formatPhoneNumber(this); handleFieldChange()" maxlength="13" placeholder="식권 확인 담당자 연락처" class="p-2.5 border border-slate-300 rounded-lg bg-white">
-          </div>
-        </div>
-
         <!-- 축의금 인계자 (수령인) 및 상세 실무 지침 안내 -->
         <div class="client-red-box p-3.5 sm:p-4 space-y-2">
           <div class="flex items-center justify-between gap-1">
@@ -1696,7 +1684,7 @@
           <colgroup><col style="width: 20%;"><col style="width: 30%;"><col style="width: 20%;"><col style="width: 30%;"></colgroup>
           <tr><th>계좌이체 하객 식권</th><td id="pTicketTransfer">-</td><th>식권 최소 금액 기준</th><td id="pTicketMinAmount">-</td></tr>
           <tr><th>추가 요청 지급 기준</th><td id="pTicketExtraRule">-</td><th>봉투당 최대 수량</th><td id="pTicketMaxNotes">-</td></tr>
-          <tr><th>식권 확인 지정자</th><td id="pTicketApproverInfo">-</td><th>축의금 최종 인계자</th><td><b id="pReceiverInfo" class="text-slate-900">-</b></td></tr>
+          <tr><th>축의금 최종 인계자</th><td colspan="3"><b id="pReceiverInfo" class="text-slate-900">-</b></td></tr>
           <tr><th>인계 품목 및 절차</th><td colspan="3" class="text-[6.2pt] text-slate-600 leading-tight">축의금 봉투 및 현금, 하객 명부와 정산 장부, 잔여 식권, 반환 및 현장 결제 내역 등 일체 인계 / 담당자와 지정 수령인이 수량·총액 확인 후 인수인계서 서명</td></tr>
         </table>
       </div>
@@ -3932,9 +3920,6 @@
       setRadio('ticketExtraRule', c.ticketExtraRule);
       setVal('ticketMaxLimitNotes', c.ticketMaxLimitNotes);
 
-      setVal('ticketApproverName', c.ticketApproverName);
-      setVal('ticketApproverPhone', c.ticketApproverPhone);
-
       setVal('receiverName', c.receiverName);
       setVal('receiverRel', c.receiverRel);
       setVal('receiverPhone', c.receiverPhone);
@@ -4018,8 +4003,6 @@
       c.ticketMinAmountVal = getVal('ticketMinAmountVal');
       c.ticketExtraRule = getRadio('ticketExtraRule');
       c.ticketMaxLimitNotes = getVal('ticketMaxLimitNotes');
-      c.ticketApproverName = getVal('ticketApproverName');
-      c.ticketApproverPhone = getVal('ticketApproverPhone');
 
       c.receiverName = getVal('receiverName');
       c.receiverRel = getVal('receiverRel');
@@ -4793,7 +4776,6 @@
       setText('pTicketMinAmount', c.ticketMinAmountVal ? `${c.ticketMinAmountType || ''} (${c.ticketMinAmountVal})` : (c.ticketMinAmountType || '금액 관계없이 지급'));
       setText('pTicketExtraRule', c.ticketExtraRule || '미선택');
       setText('pTicketMaxNotes', c.ticketMaxLimitNotes || '요청사항 없음');
-      setText('pTicketApproverInfo', `${c.ticketApproverName || '미지정'} / ${c.ticketApproverPhone || '-'}`);
       setText('pReceiverInfo', `${c.receiverName || '미지정'} (${c.receiverRel || '-'}) / ${c.receiverPhone || '-'}`);
 
       setText('pFeeBasic', `금 ${(Number(c.feeBasic) || 0).toLocaleString()}원`);
